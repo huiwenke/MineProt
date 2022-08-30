@@ -10,11 +10,6 @@ if [ ! "$(command -v wget)" ]; then
   exit 1
 fi
 
-if [ ! "$(command -v curl)" ]; then
-  echo "Error: please install curl."
-  exit 1
-fi
-
 if [ ! "$(command -v pip)" ]; then
   echo "Error: please install python3-pip."
   exit 1
