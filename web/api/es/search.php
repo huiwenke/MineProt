@@ -1,4 +1,5 @@
 <?php
+header('Content-Type:application/json');
 $Results = array();
 
 $_id = $Request_Term;
@@ -19,15 +20,18 @@ $Query = array(
 $Query_Json = json_encode($Query);
 $Curl_Handle = curl_init("http://elasticsearch:9200/$Dataset/_search");
 curl_setopt($Curl_Handle, CURLOPT_POSTFIELDS, $Query_Json);
-curl_setopt($Curl_Handle, CURLOPT_HTTPHEADER, array(                                                                         
-    "Content-Type: application/json")
+curl_setopt(
+    $Curl_Handle,
+    CURLOPT_HTTPHEADER,
+    array(
+        "Content-Type: application/json"
+    )
 );
 curl_setopt($Curl_Handle, CURLOPT_RETURNTRANSFER, 1);
 $Response_Json = curl_exec($Curl_Handle);
 curl_close($Curl_Handle);
-$Hits = json_decode($Response_Json,true);
-foreach ($Hits["hits"]["hits"] as $Hit)
-{
-    array_push($Results,$Hit["_source"]);
+$Hits = json_decode($Response_Json, true);
+foreach ($Hits["hits"]["hits"] as $Hit) {
+    array_push($Results, $Hit["_source"]);
 }
 echo json_encode($Results);

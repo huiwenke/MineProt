@@ -1,19 +1,18 @@
 import argparse
 import os
 import zipfile
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
+from RandomStr import RandomStr
+from pdb2cif import pdb2cif
 
-parser = argparse.ArgumentParser(description='Rename your proteins for curation.')
+parser = argparse.ArgumentParser(description='Preprocess your ColabFold predictions for curation.')
 parser.add_argument('-n', type=int, default=0, help="0: Use prefix; 1: Use name in .a3m; 2: Auto rename; 3: Customize name.")
 parser.add_argument('-z', help="Unzip results.", action="store_true")
 parser.add_argument('-r', help="Use relaxed results.", action="store_true")
 parser.add_argument('-i', type=str, help="Path to input folder.")
 parser.add_argument('-o', type=str, help="Path to output folder.")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/pdb2alphacif/", help="URL of PDB2CIF API.")
-
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
-from RandomStr import RandomStr
-from pdb2cif import pdb2cif
 
 def CheckFileName(is_relaxed, file_name):
     suffix = os.path.splitext(file_name)[-1]
