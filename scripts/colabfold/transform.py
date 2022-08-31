@@ -1,8 +1,4 @@
 import argparse
-import time
-import hashlib
-import random
-import string
 import os
 import zipfile
 
@@ -14,10 +10,10 @@ parser.add_argument('-i', type=str, help="Path to input folder.")
 parser.add_argument('-o', type=str, help="Path to output folder.")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/pdb2alphacif/", help="URL of PDB2CIF API.")
 
-def RandomStr(num):
-    salt = ''.join(random.sample(string.ascii_letters+string.digits, num))+str(time.time())
-    return hashlib.md5(salt.encode("utf-8")).hexdigest()
-
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
+from RandomStr import RandomStr
+from pdb2cif import pdb2cif
 
 def CheckFileName(is_relaxed, file_name):
     suffix = os.path.splitext(file_name)[-1]
@@ -82,22 +78,5 @@ for file_name in os.listdir(TmpDir):
         NameList.append(ReName(args.n, file_name, TmpDir, OutputDir))
 os.removedirs(TmpDir)
 
-import requests
-import json
-import base64
-
 for prefix in NameList:
-    output_path = os.path.join(OutputDir, prefix)
-    try:
-        request_json = {
-            "name": prefix,
-            "data": ""
-        }
-        headers = {'Content-Type': 'application/json'}
-        with open(output_path+".pdb",'r') as fi, open(output_path+".cif",'w') as fo:
-            request_json["data"] = str(base64.b64encode(fi.read().encode("utf-8")),"utf-8")
-            response = requests.post(url=args.url, headers=headers, data=json.dumps(request_json))
-            fo.write(response.text)
-    except:
-        print("Prediction of "+prefix+" failed. Please check out.")
-        os.system("rm -rf "+output_path+".*")
+    pdb2cif(OutputDir, prefix, args.url)

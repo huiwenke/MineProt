@@ -1,14 +1,15 @@
 version: '3'
 services:
   nginx:
+    container_name: MineNginx
     restart: always
     image: nginx:stable-alpine
     ports:
       - 80:80
     volumes:
       - ./web:/var/www/html
-      - ./config:/etc/nginx/conf.d
       - ./data:/var/www/data
+      - ./config:/etc/nginx/conf.d
     links:
       - es:elasticsearch
       - php:MinePHP
@@ -17,6 +18,9 @@ services:
     build: ./app/php
     volumes:
       - ./web:/var/www/html
+      - ./data:/var/www/data
+    links:
+      - es:elasticsearch
   es:
     build: ./app/elasticsearch
     restart: always
