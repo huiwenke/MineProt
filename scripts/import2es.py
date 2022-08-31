@@ -9,7 +9,7 @@ from annotate import GetUniProt
 
 parser = argparse.ArgumentParser(description='Import your proteins into Elasticsearch.')
 parser.add_argument('-n', type=str, help="Name Elasticsearch index.")
-parser.add_argument('-i', type=str, help="Path to your preprocessed files, including .a3m, .pdb & .json.")
+parser.add_argument('-i', type=str, help="Path to your preprocessed files, including .a3m, .pdb and .json.")
 parser.add_argument('-a', help="Annotate proteins with UniProt API.", action="store_true")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt API.")
 

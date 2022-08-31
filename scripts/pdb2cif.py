@@ -17,4 +17,3 @@ def pdb2cif(data_dir, protein_name, request_url):
             fo.write(response.text)
     except:
         print("Prediction of "+protein_name+" failed. Please check out.")
-        os.system("rm -rf "+output_path+".*")

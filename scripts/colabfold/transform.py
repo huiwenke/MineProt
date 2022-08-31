@@ -14,6 +14,7 @@ parser.add_argument('-i', type=str, help="Path to input folder.")
 parser.add_argument('-o', type=str, help="Path to output folder.")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/pdb2alphacif/", help="URL of PDB2CIF API.")
 
+# Pick out necessary files for curation.
 def CheckFileName(is_relaxed, file_name):
     suffix = os.path.splitext(file_name)[-1]
     if suffix == ".a3m":
@@ -27,7 +28,7 @@ def CheckFileName(is_relaxed, file_name):
         return file_name.count("_unrelaxed_rank_1_")
     return False
 
-
+# Copy files to temporary folder.
 def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
     file_path = os.path.join(input_dir, file_name)
     if is_zip and os.path.splitext(file_name)[-1] == ".zip":
@@ -41,7 +42,7 @@ def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
         if CheckFileName(is_relaxed, file_name):
             os.system("cp "+file_path+" "+output_dir)
 
-
+# Rename files and move them to output folder.
 def ReName(name_mode, file_name, input_dir, output_dir):
     input_path = os.path.join(input_dir, file_name)
     prefix = os.path.splitext(file_name)[0]
