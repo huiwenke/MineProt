@@ -16,4 +16,4 @@ def pdb2cif(data_dir, protein_name, request_url):
             response = requests.post(url=request_url, headers=headers, data=json.dumps(request_json))
             fo.write(response.text)
     except:
-        print("Prediction of "+protein_name+" failed. Please check out.")
+        print("Error: Prediction of "+protein_name+" failed.")
