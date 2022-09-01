@@ -5,7 +5,7 @@ import requests
 import json
 import base64
 sys.path.append(os.path.abspath(os.path.dirname(sys.argv[0])))
-from annotate import GetUniProt
+from annotate import UniProt2MineProt
 
 parser = argparse.ArgumentParser(description='Import your proteins into Elasticsearch.')
 parser.add_argument('-n', type=str, help="Name Elasticsearch index.")
@@ -17,6 +17,9 @@ args = parser.parse_args()
 InputDir = args.i
 if not args.n:
     args.n = os.path.basename(args.i)
+if args.a:
+    print("Annotate proteins using UniProt API...")
+
 for file_name in os.listdir(InputDir):
     headers = {'Content-Type': 'application/json'}
     es_id = str(base64.b64encode(os.path.splitext(file_name)[0].encode("utf-8")),"utf-8")
@@ -40,26 +43,7 @@ for file_name in os.listdir(InputDir):
                 lines = fi.readlines()
                 es_request_json["seq"] = lines[2][1:-1]
                 if args.a:
-                    print("Annotate proteins using UniProt API...")
-                    identifier_list = lines[3::2]
-                    for identifier in identifier_list:
-                        accession = identifier[1:].split()[0]
-                        response = GetUniProt(accession)
-                        if response.status_code == 200:
-                            response_json = json.loads(response.text)
-                            es_request_json["anno"]["homolog"] = response_json["accession"]
-                            try:
-                                es_request_json["anno"]["description"].append(response_json["protein"]["submittedName"][0]["fullName"]["value"])
-                            except:
-                                es_request_json["anno"]["description"].append(response_json["protein"]["recommendedName"]["fullName"]["value"])
-                            for dbReference in response_json["dbReferences"]:
-                                if dbReference["type"] == "GO":
-                                    es_request_json["anno"]["description"].append(dbReference["id"])
-                                    es_request_json["anno"]["description"].append(dbReference["properties"]["term"])
-                                if dbReference["type"] == "InterPro":
-                                    es_request_json["anno"]["description"].append(dbReference["id"])
-                                    es_request_json["anno"]["description"].append(dbReference["properties"]["entry name"])
-                            break
+                    es_request_json["anno"] = UniProt2MineProt(lines[3::2])
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
                 request_url = '/'.join([args.url, args.n, "add", es_id])
