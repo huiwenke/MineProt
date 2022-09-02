@@ -8,7 +8,7 @@ services:
       - 80:80
     volumes:
       - ./web:/var/www/html
-      - ./data:/var/www/data
+      - ./data/repo:/var/www/data
       - ./config:/etc/nginx/conf.d
     links:
       - es:elasticsearch
@@ -18,12 +18,14 @@ services:
     build: ./app/php
     volumes:
       - ./web:/var/www/html
-      - ./data:/var/www/data
+      - ./data/repo:/var/www/data
     links:
       - es:elasticsearch
   es:
     build: ./app/elasticsearch
-    restart: always
+    restart: always    
+    volumes:
+      - ./data/es:/usr/share/elasticsearch/data
     ports:
       - 9233:9200
       - 9300:9300
