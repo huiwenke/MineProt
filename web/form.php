@@ -1,5 +1,5 @@
 <?php
-$Data_Repos = array_diff(scandir("/var/www/data"), array('.', '..'));
+$DATA_REPOS = array_diff(scandir("/var/www/data"), array('.', '..'));
 ?>
 <section id="aside" class="aside" style="display: inline-flex;">
     <div class="child">
@@ -15,23 +15,13 @@ $Data_Repos = array_diff(scandir("/var/www/data"), array('.', '..'));
             </h2>
             <div style="margin-bottom: 16px; margin-top: 8px;"></div>
             <?php
-            foreach ($Data_Repos as $Data_Repo) {
-                echo '
-                <ul>
-                    <li>
-                        <div class="list-item-div">
-                            <input type="checkbox" id="' . $Data_Repo . '" value="' . $Data_Repo . '" name="repo[]" class="a-item-div">
-                            <label for="' . $Data_Repo . '">
-                                <font color="white">' . $Data_Repo . '</font>
-                            </label>
-                        </div>
-                    </li>
-                </ul>
-                ';
+            include "display.php";
+            foreach ($DATA_REPOS as $Data_Repo) {
+                form_repo($Data_Repo);
             }
             ?>
             <div style="margin-bottom: 16px; margin-top: 8px;"></div>
-            <button class="btn" type="submit">Search</button>
+            <button class="btn" type="submit"><strong>Search</strong></button>
         </form>
     </div>
 </section>

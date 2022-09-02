@@ -32,6 +32,6 @@ $Response_Json = curl_exec($Curl_Handle);
 curl_close($Curl_Handle);
 $Hits = json_decode($Response_Json, true);
 foreach ($Hits["hits"]["hits"] as $Hit) {
-    array_push($Results, $Hit["_source"]);
+    array_push($Results, $Hit);
 }
 echo json_encode($Results);

@@ -7,6 +7,8 @@
     <title><?php echo $_GET["search"]; ?></title>
     <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/pdbe-molstar-1.2.1.css">
+    <script type="text/javascript" src="/assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
 </head>
 
 <body>
@@ -18,31 +20,33 @@
         include "form.php";
         if (array_key_exists("repo", $_GET)) {
             $Search_Repos = implode(',', $_GET["repo"]);
-        } else $Search_Repos = implode(',', $Data_Repos);
-        include "search_api.php";
-        $Search_Results = search_api($Search_Repos, $_GET["search"]);
+        } else $Search_Repos = implode(',', $DATA_REPOS);
+        include "api.php";
+        $Search_Results_Json = search_api($Search_Repos, $_GET["search"]);
+        $Search_Results = json_decode($Search_Results_Json, true)
         ?>
         <section class="main">
             <div style="display: block; width: 100%;">
-                <h2 class="main_h2">All activity</h2>
+                <h2 class="main_h2">
+                    <?php
+                    $Search_Result_Num = count($Search_Results);
+                    if ($Search_Result_Num == 0) {
+                        echo " No result";
+                    } else if ($Search_Result_Num >= 100) {
+                        echo " Top 100 results";
+                    } else {
+                        echo $Search_Result_Num . " results";
+                    }
+                    ?>
+                </h2>
                 <HR color=#21262d SIZE=1.5>
                 <br>
-                <div class="card-inner-div">
-                    <div style="display: flex;">
-                        <div style="margin-left: 16px;">
-                            <strong style="color:#c9d1d9; margin-top: 7px;">MP0001</strong>
-                            <div style="color:#c9d1d9; margin-top: 7px;">
-                                Similar to <a class="card-link user-properties-link" href="#">WP_009801651.1</a>: Bone morphogenetic protein 2
-                            </div>
-                            <br>
-                            <span style="color: #8b949e;">
-                                <a href="#" style="margin-right:16px; color: inherit;" class="user-properties-link">x repositories</a>
-                                <a href="#" style="margin-right:16px; color: inherit;" class="user-properties-link">y followers</a>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <br>
+                <?php
+                foreach ($Search_Results as $Search_Result)
+                {
+                    form_search_result($Search_Result);
+                }
+                ?>
             </div>
         </section>
     </main>

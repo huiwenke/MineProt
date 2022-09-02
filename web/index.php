@@ -16,7 +16,7 @@
     <main style="min-height: 100vh;">
         <?php
         include "form.php";
-        if (count($Data_Repos) == 0) {
+        if (count($DATA_REPOS) == 0) {
             include "no_repo.php";
         } else {
             include "welcome.php";

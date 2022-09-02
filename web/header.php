@@ -1,4 +1,4 @@
-<header style="position: relative !important;">
+<header>
 
     <div id="logo">
         <img src="/assets/img/logo.png" height="32" width="32" class="logo" />
