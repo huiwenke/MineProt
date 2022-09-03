@@ -1,6 +1,7 @@
 body{
 	background-color: #010409;
 	margin-top: 64px;
+	margin-left: 300px;
 }
 a{
 	text-decoration: none;
@@ -12,7 +13,6 @@ a{
 
 
 header{
-	top: 0;
 	z-index: 32;
 	display: flex;
 	background-color: #161b22;
@@ -21,6 +21,8 @@ header{
 	line-height: 1.5;
 	color:  rgba(240, 246, 252, 0.7);
 	align-items: center;
+	top: 0;
+	left: 0;
 	position: fixed;
 	width: 100%;
 }
@@ -200,9 +202,11 @@ summary{
 	background-color: #0d1117;
 	border-bottom: 1px solid #30363d !important;
 	border-right: 1px solid #30363d !important;
-	width: 25%;
+	width: 25vw;
 	height: calc(100vh - 64px);
 	overflow-y: scroll;
+	position: fixed;
+	left: 0;
 }
 .aside > .child{
 	position: static;
@@ -212,6 +216,19 @@ summary{
 	padding: 0 32px !important;
 	margin-top: 32px !important;
 	margin-bottom: 32px !important;
+}
+.aside_right{
+	max-width: 300px;
+	border-color: #21262d !important;
+	background-color: #0d1117;
+	border-bottom: 1px solid #30363d !important;
+	border-right: 1px solid #30363d !important;
+	width: 18vw;
+	height: calc(100vh - 64px);
+	overflow-y: scroll;
+	position: fixed;
+	top: 64px;
+	right: 0;
 }
 .h2_aside{
 	display: flex !important;
@@ -318,7 +335,7 @@ ul{
 
 .main{
 	display: inline-flex;
-	width: 62.5%;
+	width: 50vw;
 	padding-right: 32px !important;
 	padding-left: 32px !important;
 	flex: auto;

@@ -6,7 +6,7 @@
 
     <div class="middle_section" id="middle_section">
         <nav>
-            <strong>MineProt</strong>
+            <a class="nav_link" href="index.php"><strong>MineProt</strong></a>
         </nav>
     </div>
 

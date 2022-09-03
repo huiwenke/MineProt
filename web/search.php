@@ -49,6 +49,9 @@
                 ?>
             </div>
         </section>
+        <?php
+        include "legend.php";
+        ?>
     </main>
 </body>
 

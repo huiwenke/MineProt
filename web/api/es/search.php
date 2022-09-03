@@ -5,7 +5,7 @@ $Results = array();
 $_id = $Request_Term;
 $Check_id = json_decode(file_get_contents("http://MineNginx/api/es/$Dataset/get/$_id"), true);
 if ($Check_id["found"]) {
-    array_push($Results, $Check_id["_source"]);
+    array_push($Results, $Check_id);
 }
 
 $Search_Term = base64_decode($Request_Term);
