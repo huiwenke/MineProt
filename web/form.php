@@ -6,7 +6,7 @@ $DATA_REPOS = array_diff(scandir("/var/www/data"), array('.', '..'));
         <form action="search.php" method="get">
             <div style="margin-bottom: 16px; margin-top: 8px;">
                 <label class="wrapper">
-                    <input name="search" class="form-control-header" placeholder="Enter keywords..." required>
+                    <input name="search" class="form-control-header" placeholder="🔍︎ Enter keywords..." required>
                 </label>
             </div>
             <div style="margin-bottom: 16px; margin-top: 8px;"></div>

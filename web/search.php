@@ -42,15 +42,21 @@
                 <HR color=#21262d SIZE=1.5>
                 <br>
                 <?php
-                foreach ($Search_Results as $Search_Result)
-                {
-                    form_search_result($Search_Result);
+                if ($Search_Result_Num > 0) {
+                    include "page.php";
+                    $Page_Info = page_info($Search_Result_Num);
+                    $Search_Results_Displayed = array_slice($Search_Results, $Page_Info["top"], $Page_Info["length"]);
+                    foreach ($Search_Results_Displayed as $Search_Result) {
+                        form_search_result($Search_Result);
+                    }
                 }
                 ?>
             </div>
         </section>
         <?php
-        include "legend.php";
+        if ($Search_Result_Num > 0) {
+            include "legend.php";
+        }
         ?>
     </main>
 </body>
