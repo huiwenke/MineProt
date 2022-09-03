@@ -1,6 +1,6 @@
 body{
 	background-color: #010409;
-	margin: 0;
+	margin-top: 64px;
 }
 a{
 	text-decoration: none;
@@ -12,6 +12,7 @@ a{
 
 
 header{
+	top: 0;
 	z-index: 32;
 	display: flex;
 	background-color: #161b22;
@@ -20,6 +21,8 @@ header{
 	line-height: 1.5;
 	color:  rgba(240, 246, 252, 0.7);
 	align-items: center;
+	position: fixed;
+	width: 100%;
 }
 /* Header Logo CSS */
 .a_logo{
@@ -198,7 +201,7 @@ summary{
 	border-bottom: 1px solid #30363d !important;
 	border-right: 1px solid #30363d !important;
 	width: 25%;
-	height: 100vh;
+	height: calc(100vh - 64px);
 	overflow-y: scroll;
 }
 .aside > .child{
