@@ -22,7 +22,7 @@ $Data_Length = count($Data_PAE);
 </head>
 
 <body>
-    <div id="container" style="height: 400px; max-width: 400px; margin: 0 auto"></div>
+    <div id="container" style="height: 95vh; max-width: 95vh; margin: 0 auto"></div>
     <pre id="csv" style="display: none">Residue_x, Residue_y, PAE
 <?php
 for ($Residue_x = 0; $Residue_x < $Data_Length; $Residue_x++) {
