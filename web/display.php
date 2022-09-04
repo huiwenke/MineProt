@@ -41,6 +41,7 @@ print <<<EOT
         width: 100%;
         height: 50vh;
         position: relative;
+        z-index: 999;
     }
 </style>
 <div class="viewerSection">
