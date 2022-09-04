@@ -68,7 +68,7 @@
             } else header.style.visibility = "hidden";
             setTimeout(() => {
                 MainFunction()
-            }, 1000)
+            }, 100)
         }
         MainFunction();
     </script>
