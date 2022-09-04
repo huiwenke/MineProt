@@ -2,7 +2,7 @@
 
 function form_repo($Data_Repo)
 {
-print <<<EOT
+    print <<<EOT
     <ul>
         <li>
             <div class="list-item-div">
@@ -18,9 +18,9 @@ EOT;
 
 function form_viewer($Search_Result)
 {
-$Search_Result_Viewer = "MP_" . md5($Search_Result["_source"]["name"]);
-$Search_Result_Path = "/release/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
-print <<<EOT
+    $Search_Result_Viewer = "MP_" . md5($Search_Result["_source"]["name"]);
+    $Search_Result_Path = "/release/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
+    print <<<EOT
 <style>
     * {
         margin: 0;
@@ -41,7 +41,7 @@ print <<<EOT
         width: 100%;
         height: 50vh;
         position: relative;
-        z-index: 999;
+        z-index: 31;
     }
 </style>
 <div class="viewerSection">
@@ -77,10 +77,11 @@ EOT;
 
 function form_search_result($Search_Result)
 {
-print <<<EOT
+    $b64_Data_URL = base64_encode("/var/www/data/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".json");
+    print <<<EOT
 <div class="card-inner-div">
-    <div style="display: flex;">
-        <div style="margin-left: 16px;">
+    <div>
+        <div style="margin-left: 16px; width=100%;">
             <strong style="color:#c9d1d9; margin-top: 7px;">{$Search_Result["_source"]["name"]}</strong>
             <div style="color:#c9d1d9; margin-top: 7px;">
                 Similar to 
@@ -90,14 +91,15 @@ print <<<EOT
                 : {$Search_Result["_source"]["anno"]["description"][0]}
             </div>
             <br>
-            <span style="color: #8b949e;">
-			    <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 15%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
-			    <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 15%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
-                <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 30%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
-		    </span>
+            <span>
+		        <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
+		        <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
+                <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
+                <a target="_blank" href="/api/plot/pae.php?data_url={$b64_Data_URL}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
+	        </span>
         </div>
-    </div>    
+    </div>
 EOT;
-form_viewer($Search_Result);
-echo "</div><br>";
+    form_viewer($Search_Result);
+    echo "</div><br>";
 }
