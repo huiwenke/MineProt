@@ -59,6 +59,19 @@
         }
         ?>
     </main>
+    <script>
+        function MainFunction() {
+            var isExpanded = document.getElementsByClassName("msp-layout-expanded");
+            var header = document.getElementsByTagName("header")[0];
+            if (isExpanded.length==0) {
+                header.style.visibility = "visible";
+            } else header.style.visibility = "hidden";
+            setTimeout(() => {
+                MainFunction()
+            }, 1000)
+        }
+        MainFunction();
+    </script>
 </body>
 
 </html>
