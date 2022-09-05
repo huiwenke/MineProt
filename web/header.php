@@ -18,7 +18,7 @@
 
     <div class="parent">
         <div style="display: block;">
-            <a class="nav_link" href="/release/">Browse</a>
+            <a class="nav_link" href="browse.php">Browse</a>
         </div>
     </div>
 

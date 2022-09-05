@@ -340,6 +340,13 @@ ul{
 	padding-left: 32px !important;
 	flex: auto;
 }
+.main_browse{
+	display: inline-flex;
+	width: 70vw;
+	padding-right: 32px !important;
+	padding-left: 32px !important;
+	flex: auto;
+}
 .main_h2{
 	font-weight: 400;
 	font-size: 16px;

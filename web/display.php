@@ -103,3 +103,13 @@ EOT;
     form_viewer($Search_Result);
     echo "</div><br>";
 }
+
+function form_td($Data_Repo, $File)
+{
+    $Name = pathinfo($File)["filename"];
+    echo "<td>" . $Name . "</td>";
+    echo "<td><a href='/release/$Data_Repo/$Name.pdb'>PDB</a> | <a href='/release/$Data_Repo/$Name.cif'>CIF</a></td>";
+    $Scores = json_decode(file_get_contents("/var/www/data/" . $Data_Repo . '/' . $File), true);
+    $Scores_pLDDT = array_sum($Scores["plddt"]) / count($Scores["plddt"]);
+    echo "<td>" . number_format($Scores_pLDDT, 2) . "</td>";
+}
