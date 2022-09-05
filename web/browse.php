@@ -41,6 +41,7 @@
                                 <th>Name</th>
                                 <th>Structure</th>
                                 <th>pLDDT</th>
+                                <th>Annotation</th>
                             </tr>
                         </thead>
                     ";

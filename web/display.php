@@ -101,15 +101,31 @@ function form_search_result($Search_Result)
     </div>
 EOT;
     form_viewer($Search_Result);
-    echo "</div><br>";
+    echo "
+</div>
+<br>";
 }
 
 function form_td($Data_Repo, $File)
 {
     $Name = pathinfo($File)["filename"];
     $b64_Name = base64_encode($Name);
-    echo "<td><a style='color: #161b22;' href='search.php?search=$Name&repo[]=$Data_Repo' target='_blank' class='user-properties-link'>" . $Name . "</a></td>";
-    echo "<td><a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.pdb'>PDB</a> | <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.cif'>CIF</a></td>";
+    echo "
+    <td>
+        <a style='color: #161b22;' class='user-properties-link' href='search.php?search=$Name&repo[]=$Data_Repo' target='_blank'>
+        <strong>" . $Name . "</strong>
+        </a>
+    </td>";
+    echo "
+    <td>
+        <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.pdb'>
+        PDB
+        </a>
+         | 
+        <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.cif'>
+        CIF
+        </a>
+    </td>";
     $Scores = json_decode(file_get_contents("/var/www/data/" . $Data_Repo . '/' . $File), true);
     $Scores_pLDDT = array_sum($Scores["plddt"]) / count($Scores["plddt"]);
     if ($Scores_pLDDT >= 90) {
@@ -120,4 +136,13 @@ function form_td($Data_Repo, $File)
         $pLDDT_Color = "background-color:rgb(255, 219, 19);";
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
     echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
+    $ES_Get = json_decode(file_get_contents("http://MineNginx/api/es/$Data_Repo/get/$b64_Name"), true); 
+    $Homolog = $ES_Get["_source"]["anno"]["homolog"];
+    $Annotation = $ES_Get["_source"]["anno"]["description"][0];
+    echo "
+    <td style='word-wrap: break-word; width: 50%;'>
+        <a title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/uniprotkb?query=$Homolog'>
+        $Annotation
+        </a>
+    </td>";
 }
