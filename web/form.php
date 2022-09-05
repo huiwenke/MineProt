@@ -21,7 +21,7 @@ $DATA_REPOS = array_diff(scandir("/var/www/data"), array('.', '..'));
             }
             ?>
             <div style="margin-bottom: 16px; margin-top: 8px;"></div>
-            <button class="btn" type="submit"><strong>Search</strong></button>
+            <button class="btn" type="submit" style="width: 50%;"><strong>Search</strong></button>
         </form>
     </div>
 </section>
