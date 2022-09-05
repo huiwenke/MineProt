@@ -35,12 +35,14 @@
                 } else {
                     $Files = array_diff(scandir("/var/www/data/" . $_GET["repo"]), array('.', '..'));
                     echo "
-                    <table style='color: #efefef;'>
-                        <tr>
-                            <th width=10%>Name</th>
-                            <th>Structure</th>
-                            <th>pLDDT</th>
-                        </tr>
+                    <table>
+                        <thead>
+                            <tr align='left'>
+                                <th>Name</th>
+                                <th>Structure</th>
+                                <th>pLDDT</th>
+                            </tr>
+                        </thead>
                     ";
                     foreach ($Files as $File) {
                         echo "<tr>";

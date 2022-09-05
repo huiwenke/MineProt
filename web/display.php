@@ -107,9 +107,17 @@ EOT;
 function form_td($Data_Repo, $File)
 {
     $Name = pathinfo($File)["filename"];
-    echo "<td>" . $Name . "</td>";
-    echo "<td><a href='/release/$Data_Repo/$Name.pdb'>PDB</a> | <a href='/release/$Data_Repo/$Name.cif'>CIF</a></td>";
+    $b64_Name = base64_encode($Name);
+    echo "<td><a style='color: #161b22;' href='search.php?search=$Name&repo[]=$Data_Repo' target='_blank' class='user-properties-link'>" . $Name . "</a></td>";
+    echo "<td><a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.pdb'>PDB</a> | <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.cif'>CIF</a></td>";
     $Scores = json_decode(file_get_contents("/var/www/data/" . $Data_Repo . '/' . $File), true);
     $Scores_pLDDT = array_sum($Scores["plddt"]) / count($Scores["plddt"]);
-    echo "<td>" . number_format($Scores_pLDDT, 2) . "</td>";
+    if ($Scores_pLDDT >= 90) {
+        $pLDDT_Color = "background-color:rgb(0, 83, 214);";
+    } else if ($Scores_pLDDT >= 70) {
+        $pLDDT_Color = "background-color:rgb(101, 203, 243);";
+    } else if ($Scores_pLDDT >= 50) {
+        $pLDDT_Color = "background-color:rgb(255, 219, 19);";
+    } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
+    echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
 }
