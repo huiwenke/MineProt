@@ -17,7 +17,7 @@ $Data_Length = count($Data_PAE);
     <script src="/assets/js/highcharts/data.js"></script>
     <script src="/assets/js/highcharts/heatmap.js"></script>
     <script src="/assets/js/highcharts/boost.js"></script>
-    <script src="/assets/js/highcharts/boost-canv.js"></script>
+    <script src="/assets/js/highcharts/boost-canvas.js"></script>
     <script src="/assets/js/highcharts/accessibility.js"></script>
 </head>
 
@@ -27,7 +27,7 @@ $Data_Length = count($Data_PAE);
 <?php
 for ($Residue_x = 0; $Residue_x < $Data_Length; $Residue_x++) {
     for ($Residue_y = 0; $Residue_y < $Data_Length; $Residue_y++) {
-        echo $Residue_x . ',' . $Residue_y . ',' . $Data_PAE[$Residue_x][$Residue_y] . "\n";
+        echo $Residue_x, ',', $Residue_y, ',', $Data_PAE[$Residue_x][$Residue_y], "\n";
     }
 }
 ?></pre>
@@ -69,7 +69,7 @@ for ($Residue_x = 0; $Residue_x < $Data_Length; $Residue_x++) {
                 showLastLabel: false
             },
             series: [{
-                boostThreshold: 100,
+                boostThreshold: 1,
                 borderWidth: 0,
                 colsize: 1,
                 tooltip: {
