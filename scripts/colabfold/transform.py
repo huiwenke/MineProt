@@ -16,24 +16,30 @@ parser.add_argument('-z', help="Unzip results.", action="store_true")
 parser.add_argument('-r', help="Use relaxed results.", action="store_true")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/pdb2alphacif/", help="URL of PDB2CIF API.")
 
-def CheckFileName(is_relaxed, file_name):
+def FixName(is_relaxed, file_name):
     """
     Pick out necessary files for curation.
     :param is_relaxed: Marks if the protein is relaxed, bool
     :param file_name: File name to be checked, str
-    :return: Flag of whether the file name is valid, bool 
+    :return: Flag of whether the file name is valid, str 
     """
     suffix = os.path.splitext(file_name)[-1]
     if suffix == ".a3m":
-        return True
-    if suffix == ".pdb":
-        if is_relaxed:
-            return file_name.count("_relaxed_rank_1_")
-        else:
-            return file_name.count("_unrelaxed_rank_1_")
-    if suffix == ".json":
-        return file_name.count("_unrelaxed_rank_1_")
-    return False
+        return file_name
+    try:
+        if suffix == ".pdb":
+            if is_relaxed:
+                file_name.index("_relaxed_rank_1_")
+                return file_name.split("_relaxed_rank_1_")[0] + suffix
+            else:
+                file_name.index("_unrelaxed_rank_1_")
+                return file_name.split("_unrelaxed_rank_1_")[0] + suffix
+        if suffix == ".json":
+            file_name.index("_unrelaxed_rank_1_")
+            return file_name.split("_unrelaxed_rank_1_")[0] + suffix
+        return ''
+    except:
+        return ''
 
 def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
     """
@@ -47,16 +53,17 @@ def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
     # Check if we need to decompress input file
     if is_zip and os.path.splitext(file_name)[-1] == ".zip":
         zip_file = zipfile.ZipFile(file_path)
-        zip_list = zip_file.namelist()
+        zip_list = zip_file.infolist()
         for zip_f in zip_list:
             # Check if the given file name is valid and decompress valid file to output directory
-            if CheckFileName(is_relaxed, zip_f):
+            if FixName(is_relaxed, zip_f.filename)!='':
+                zip_f.filename = FixName(is_relaxed, zip_f.filename)
                 zip_file.extract(zip_f, output_dir)
         zip_file.close()
     else:
         # Check if the given file name is valid and copy valid file to output directory
-        if CheckFileName(is_relaxed, file_name):
-            output_path = os.path.join(output_dir, file_name)
+        if FixName(is_relaxed, file_name)!='':
+            output_path = os.path.join(output_dir, FixName(is_relaxed, file_name))
             shutil.copyfile(file_path, output_path)
 
 def ReName(name_mode, file_name, input_dir):
@@ -98,7 +105,7 @@ if not args.n:
     args.n = 0
 
 # Create temp directory
-TmpDir = "MP-Temp-" + RandomStr(10)
+TmpDir = "/tmp/MP-Temp-" + RandomStr(10)
 print("Using temporary folder: "+TmpDir)
 os.makedirs(TmpDir)
 
