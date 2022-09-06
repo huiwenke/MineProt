@@ -113,7 +113,7 @@ os.makedirs(TmpDir)
 for file_name in os.listdir(InputDir):
     MakeTmp(args.z, args.r, file_name, InputDir, TmpDir)
 
-# Enumerate A3M files and rename with renaming mode. Then move them to output directory.
+# Enumerate files and rename with renaming mode. Then move them to output directory.
 NameList = []
 TmpList = os.listdir(TmpDir)
 TmpList.sort()
@@ -122,6 +122,7 @@ for file_name in TmpList:
     if os.path.splitext(file_name)[-1] == ".a3m":
         NameList.append(ReName(args.n, file_name, TmpDir))
     output_path = os.path.join(OutputDir, NameList[-1]) + os.path.splitext(file_name)[-1]
+    print("Moving "+file_path+" to "+output_path+"...")
     shutil.move(file_path, output_path)
 
 # Delete temp directory
