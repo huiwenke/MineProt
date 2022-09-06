@@ -8,8 +8,8 @@ sys.path.append(os.path.abspath(os.path.dirname(sys.argv[0])))
 from annotate import UniProt2MineProt
 
 parser = argparse.ArgumentParser(description='Import your proteins into Elasticsearch.')
-parser.add_argument('-n', type=str, help="Name Elasticsearch index.")
-parser.add_argument('-i', type=str, help="Path to your preprocessed files, including .a3m, .pdb and .json.")
+parser.add_argument('-n', type=str, help="Elasticsearch index name.")
+parser.add_argument('-i', type=str, help="Path to your preprocessed A3M files.")
 parser.add_argument('-a', help="Annotate proteins using UniProt API.", action="store_true")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt API.")
@@ -18,7 +18,7 @@ args = parser.parse_args()
 InputDir = args.i
 if not args.n:
     args.n = os.path.basename(args.i)
-print("Exporting proteins to Elasticsearch...")
+print("Importing proteins to Elasticsearch...")
 if args.f:
     request_url = '/'.join([args.url, args.n, "del", ''])
     print("Overwritting "+args.n+"...")
@@ -45,7 +45,7 @@ for file_name in os.listdir(InputDir):
             print("Skipping "+es_request_json["name"]+"...")
             continue
         else:
-            print("Exporting "+es_request_json["name"]+"...")
+            print("Importing "+es_request_json["name"]+"...")
         file_path = os.path.join(InputDir, file_name)
         with open(file_path,'r') as fi:
             try:
