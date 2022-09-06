@@ -106,10 +106,11 @@ EOT;
 <br>";
 }
 
-function form_td($Data_Repo, $File)
+function form_td($Table_tr)
 {
-    $Name = pathinfo($File)["filename"];
-    $b64_Name = base64_encode($Name);
+    echo "<tr>";
+    $Name = $Table_tr["name"];
+    $Data_Repo = $Table_tr["repo"];
     echo "
     <td>
         <a style='color: #161b22;' class='user-properties-link' href='search.php?search=$Name&repo[]=$Data_Repo' target='_blank'>
@@ -126,8 +127,7 @@ function form_td($Data_Repo, $File)
         CIF
         </a>
     </td>";
-    $Scores = json_decode(file_get_contents("/var/www/data/" . $Data_Repo . '/' . $File), true);
-    $Scores_pLDDT = array_sum($Scores["plddt"]) / count($Scores["plddt"]);
+    $Scores_pLDDT = $Table_tr["plddt"];
     if ($Scores_pLDDT >= 90) {
         $pLDDT_Color = "background-color:rgb(0, 83, 214);";
     } else if ($Scores_pLDDT >= 70) {
@@ -136,13 +136,19 @@ function form_td($Data_Repo, $File)
         $pLDDT_Color = "background-color:rgb(255, 219, 19);";
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
     echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
-    $ES_Get = json_decode(file_get_contents("http://MineNginx/api/es/$Data_Repo/get/$b64_Name"), true); 
-    $Homolog = $ES_Get["_source"]["anno"]["homolog"];
-    $Annotation = $ES_Get["_source"]["anno"]["description"][0];
+    echo "
+    <td>
+        <a class='btn' style='background-color: #DC143C;' href='/release/$Data_Repo/$Name.a3m'>
+        A3M
+        </a>
+    </td>";
+    $Homolog = $Table_tr["homolog"];
+    $Annotation = $Table_tr["anno"];
     echo "
     <td style='word-wrap: break-word; width: 50%;'>
-        <a title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/uniprotkb?query=$Homolog'>
+        <a target='_blank' title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/uniprotkb?query=$Homolog'>
         $Annotation
         </a>
     </td>";
+    echo "</tr>";
 }

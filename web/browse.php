@@ -35,22 +35,36 @@
                 } else {
                     $Files = array_diff(scandir("/var/www/data/" . $_GET["repo"]), array('.', '..'));
                     echo "
+                    <form method='post'>
+                        <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>Sort by pLDDT</button>
+                        <button style='background-color: #0969da;' class='btn' name='sort' value='name'>Sort by name</button>
+                    </form>
+                    <br>
                     <table>
                         <thead>
                             <tr align='left'>
                                 <th>Name</th>
                                 <th>Structure</th>
                                 <th>pLDDT</th>
+                                <th>MSA</th>
                                 <th>Annotation</th>
                             </tr>
                         </thead>
                     ";
+                    include "api.php";
+                    $Table = array();
                     foreach ($Files as $File) {
-                        echo "<tr>";
                         if (pathinfo($File)["extension"] == "json") {
-                            form_td($_GET["repo"], $File);
+                            array_push($Table, get_api_tr($_GET["repo"], $File));
                         }
-                        echo "</tr>";
+                    }
+                    if ($_POST["sort"] == "plddt") {
+                        array_multisort(array_column($Table, "plddt"), SORT_DESC, $Table);
+                    } else {
+                        array_multisort(array_column($Table, "name"), $Table);
+                    }
+                    foreach ($Table as $Table_tr) {
+                        form_td($Table_tr);
                     }
                     echo "</table>";
                 }

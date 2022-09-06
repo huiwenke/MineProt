@@ -228,6 +228,7 @@ summary {
 	overflow-y: scroll;
 	position: fixed;
 	left: 0;
+	z-index: 32;
 }
 
 .aside>.child {
@@ -378,7 +379,7 @@ ul {
 
 .main_browse {
 	display: inline-flex;
-	width: 70vw;
+	width: calc(100vw - 332px);
 	padding-right: 32px !important;
 	padding-left: 32px !important;
 	flex: auto;
@@ -464,11 +465,13 @@ table th {
 	border: 1px solid #ccc;
 	padding: 6px 13px;
 	background-color: #f8f8f8;
+	text-align:center;
 }
 
 table td {
 	border: 1px solid #ccc;
 	padding: 6px 13px;
+	text-align:center;
 }
 
 table tr:nth-child(odd) {
