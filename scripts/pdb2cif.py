@@ -4,6 +4,13 @@ import base64
 import os
 
 def pdb2cif(data_dir, protein_name, request_url):
+    """
+    Convert PDB-formatted file to CIF-formatted file.
+    Result CIF file will be output to input directory.
+    :param data_dir: Path to PDB file, str
+    :param protein_name: Protein name of corresponding PDB file, str
+    :param request_url: URL of MineProt PDB-CIF Converting API, str
+    """
     output_path = os.path.join(data_dir, protein_name)
     try:
         request_json = {
