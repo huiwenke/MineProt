@@ -38,6 +38,7 @@
                         ";
                     }
                 } else {
+                    ini_set('memory_limit', '-1');
                     ob_start();
                     $Files = array_diff(scandir("/var/www/data/" . $_GET["repo"]), array('.', '..'));
                     echo "
