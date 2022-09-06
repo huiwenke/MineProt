@@ -22,6 +22,11 @@
                 <h1 style="margin-bottom: 8px; color:#efefef;">Browse <?php echo $_GET["repo"]; ?></h1>
                 <HR color=#21262d SIZE=1.5>
                 <?php
+                $ob_File = "/tmp/MP_BROWSE_" . md5($_GET["repo"] . filemtime("/var/www/data/" . $_GET["repo"]) . $_POST["sort"]);
+                if (file_exists($ob_File))
+                {
+                    include($ob_File);
+                } else
                 if ($_GET["repo"] == '') {
                     foreach ($DATA_REPOS as $Data_Repo) {
                         echo "
@@ -33,11 +38,12 @@
                         ";
                     }
                 } else {
+                    ob_start();
                     $Files = array_diff(scandir("/var/www/data/" . $_GET["repo"]), array('.', '..'));
                     echo "
                     <form method='post'>
                         <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>Sort by pLDDT</button>
-                        <button style='background-color: #0969da;' class='btn' name='sort' value='name'>Sort by name</button>
+                        <button style='background-color: #0969da;' class='btn' name='sort' value=''>Sort by name</button>
                     </form>
                     <br>
                     <table>
@@ -67,6 +73,10 @@
                         form_td($Table_tr);
                     }
                     echo "</table>";
+                    $f_ob_File = fopen($ob_File, 'w');
+                    fwrite($f_ob_File, ob_get_contents());
+                    fclose($f_ob_File);
+                    ob_end_flush();
                 }
                 ?>
             </div>
