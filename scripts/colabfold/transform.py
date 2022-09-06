@@ -98,7 +98,7 @@ if not args.n:
     args.n = 0
 
 # Create temp directory
-TmpDir = "/tmp/MP-Temp-" + RandomStr(10)
+TmpDir = "MP-Temp-" + RandomStr(10)
 print("Using temporary folder: "+TmpDir)
 os.makedirs(TmpDir)
 
