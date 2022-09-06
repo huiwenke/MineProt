@@ -2,12 +2,22 @@ import requests
 import json
 
 def GetUniProt(accession):
+    """
+    Get annotations from UniProt API.
+    :param accession: Candidate UniProt accession, str
+    :return: JSON response from UniProt API, obj
+    """
     headers = {'Content-Type': 'application/json'}
     request_url = "https://www.ebi.ac.uk/proteins/api/proteins/"+accession
     response = requests.get(url=request_url, headers=headers)
     return response
 
 def UniProt2MineProt(identifier_list):
+    """
+    Find the first annotated homolog in candidate list
+    :param identifier_list: Candidate homolog list, list
+    :return: Formatted annotations, dict
+    """
     result_json = {
         "homolog": "",
         "description": []
