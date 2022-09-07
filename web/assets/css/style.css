@@ -481,3 +481,24 @@ table tr:nth-child(odd) {
 table tr:nth-child(even) {
 	background-color: #f8f8f8;
 }
+
+.el-table th,
+.el-table tr,
+.el-table td {
+    background-color: transparent;
+}
+
+.input-import {
+	display: table-cell;
+	width: 100%;
+	font-size: inherit;
+	color: inherit;
+	background: none;
+	border: 1px solid #30363d;
+	line-height: 20px;
+	box-shadow: none;
+	vertical-align: middle;
+	border-radius: 6px;
+	outline: none;
+	overflow: visible;
+}

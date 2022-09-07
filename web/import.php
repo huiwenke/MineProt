@@ -24,40 +24,96 @@
         ?>
         <section class="main">
             <div style="display: block; width: 100%;">
-                <h1 style="margin-bottom: 8px; color:#efefef;">Use MineProt scripts to import</h1>
+                <h1 style="margin-bottom: 8px; color:#efefef;">Generate command for importing</h1>
                 <HR color=#21262d SIZE=1.5>
-                <?php echo code_prepare_scripts(); ?>
-                <h3 style="margin-bottom: 8px; color:#efefef;">Generate code for import</h3>
                 <div class="card-inner-div">
-                    <form method="post">
-                        <div style="color:#c9d1d9; margin-left: 16px; width=100%;">
-                            <div>
+                    <div style="color:#c9d1d9; margin-left: 16px; width: 100%;">
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
                                 <strong>System</strong>
-                                <select style="margin-left: 60px;" id="system" name="system" onchange="selectSystem()">
+                            </div>
+                            <div>
+                                <select id="system" onchange="selectSystem()">
                                     <option value="colabfold">ColabFold</option>
                                     <option value="alphafold">AlphaFold</option>
                                 </select>
                             </div>
-                            <br>
-                            <div>
-                                <strong>Path</strong>
-                                <input style="margin-left: 84px;" name="data_path" placeholder="/path/to/your/results" required="">
-                            </div>
-                            <br>
-                            <div id="colabfold_opt" name="system_opt" style="margin-top: 7px;">
-                                <strong>Parameters</strong>
-                                <input style="margin-left: 32px;" type="checkbox" name="--zip" value="--zip" />--zip
-                                <input type="checkbox" name="--amber" value="--amber" />--amber
-                            </div>
-                            <div id="alphafold_opt" name="system_opt" style="margin-top: 7px; display: none;">
-                                Waiting...
-                            </div>
-                            <br>
-                            <button class="btn" type="submit"><strong>Generate</strong></button>
                         </div>
-                    </form>
+                        <br>
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Repository</strong>
+                            </div>
+                            <div>
+                                <select id="repo_name">
+                                    <?php
+                                    foreach ($DATA_REPOS as $Data_Repo) {
+                                        echo '<option value="' . $Data_Repo . '">' . $Data_Repo . '</option>';
+                                    }
+                                    ?>
+                                    <option value="CREATE_NEW_REPO">Create new repository</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Naming mode</strong>
+                            </div>
+                            <div>
+                                <select id="name_mode">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <br>
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Path to data</strong>
+                            </div>
+                            <div style="width: 50%;">
+                                <input class="input-import" id="data_path" placeholder="/path/to/your/data/for/importing" required="">
+                            </div>
+                        </div>
+                        <br>
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Path to python3</strong>
+                            </div>
+                            <div style="width: 50%;">
+                                <input class="input-import" id="python_path" placeholder="/path/to/your/python3" value="/usr/bin/python3">
+                            </div>
+                        </div>
+                        <br>
+                        <div style="display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Path to scripts</strong>
+                            </div>
+                            <div style="width: 50%;">
+                                <input class="input-import" id="script_path" placeholder="/path/to/your/MineProt/scripts" value="./scripts">
+                            </div>
+                        </div>
+                        <br>
+                        <div id="colabfold_opt" name="system_opt" style="margin-top: 7px; display: flex;">
+                            <div style="width: 33.3%;">
+                                <strong>Parameters</strong>
+                            </div>
+                            <div>
+                                <input type="checkbox" name="colabfold_args" value="--zip" />--zip
+                                <input type="checkbox" name="colabfold_args" value="--relax" />--amber
+                            </div>
+                        </div>
+                        <div id="alphafold_opt" name="system_opt" style="margin-top: 7px; display: none;">
+                            Waiting...
+                        </div>
+                        <br>
+                        <button class="btn" onclick="generateCode()"><strong>Generate</strong></button>
+                    </div>
                 </div>
-                <?php echo generate_code(); ?>
+                <pre style="font-size: 16px; font-weight: 500;"><code class="language-bash" id="code_for_import">#Code for import</code></pre>
             </div>
         </section>
     </main>
@@ -67,9 +123,43 @@
             var Systems = document.getElementsByName("system_opt");
             for (i = 0; i < Systems.length; i++) {
                 if (Systems[i].id == currentSystem.value + "_opt") {
-                    Systems[i].style.display = "";
+                    Systems[i].style.display = "flex";
                 } else Systems[i].style.display = "none";
             }
+        }
+
+        function generateCode() {
+            var currentSystem = document.getElementById("system");
+            var codeForImport = document.getElementById("code_for_import");
+            codeForImport.innerHTML = "";
+            var dataPath = document.getElementById("data_path").value;
+            if (dataPath == "") {
+                codeForImport.innerHTML = "# Where is your data for importing?";
+                return;
+            }
+            var repoName = document.getElementById("repo_name").value;
+            if (repoName == "CREATE_NEW_REPO") {
+                codeForImport.innerHTML = "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
+            }
+            codeForImport.innerHTML += "import.sh " + dataPath + " --repo " + repoName + " \\\n";
+            var nameMode = document.getElementById("name_mode").value;
+            codeForImport.innerHTML += "&& --name-mode " + nameMode + " \\\n";
+            var systemArgs = document.getElementsByName(currentSystem.value + "_args");
+            for (i = 0; i < systemArgs.length; i++) {
+                if (systemArgs[i].checked) {
+                    codeForImport.innerHTML += "&& " + systemArgs[i].value + " \\\n";
+                }
+            }
+            var scriptPath = document.getElementById("script_path").value;
+            if (scriptPath != '') {
+                codeForImport.innerHTML += "&& --scripts-dir " + scriptPath + " \\\n";
+            }
+            var pythonPath = document.getElementById("python_path").value;
+            if (pythonPath != '') {
+                codeForImport.innerHTML += "&& --python " + pythonPath + " \\\n";
+            }
+            var apiURL = window.location.href.replace(window.location.pathname, "");
+            codeForImport.innerHTML += "&& --url " + apiURL;
         }
     </script>
 </body>

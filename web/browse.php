@@ -57,6 +57,7 @@
                                 <th>Annotation</th>
                             </tr>
                         </thead>
+                        <tbody>
                     ";
                     include "api.php";
                     $Table = array();
@@ -73,7 +74,7 @@
                     foreach ($Table as $Table_tr) {
                         form_td($Table_tr);
                     }
-                    echo "</table>";
+                    echo "</tbody></table>";
                     $f_ob_File = fopen($ob_File, 'w');
                     fwrite($f_ob_File, ob_get_contents());
                     fclose($f_ob_File);

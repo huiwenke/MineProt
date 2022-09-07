@@ -124,7 +124,6 @@ function form_td($Table_tr)
         <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.pdb'>
         PDB
         </a>
-         | 
         <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.cif'>
         CIF
         </a>
@@ -153,22 +152,4 @@ function form_td($Table_tr)
         </a>
     </td>";
     echo "</tr>";
-}
-
-function code_prepare_scripts()
-{
-    echo '
-<pre style="font-size: 16px; font-weight: 500;"><code class="language-bash">git clone http://git.bmeonline.cn/218818/mineprot.git
-cd mineprot</code></pre>
-    ';
-}
-
-function code_import_colabfold()
-{
-    $MineProt_URL = "http://" . $_SERVER["HTTP_HOST"];
-    echo '
-<pre style="font-size: 16px; font-weight: 500;"><code class="language-bash">scripts/colabfold/import.sh /path/to/data \
---url ' . $MineProt_URL . ' \
---repo {repo_name}</code></pre>
-    ';
 }
