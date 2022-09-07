@@ -41,7 +41,7 @@ do
             MineProt_Relax="-r"
         ;;
         --url)
-            MineProt_API_URL=$2
+            MineProt_URL=$2
             shift
         ;;
         *)
