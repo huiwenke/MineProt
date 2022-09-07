@@ -57,17 +57,17 @@ done
 echo "Log path: $TmpLog"
 echo `date` > $TmpLog
 
-cmd="$Python_Path $MineProt_Scripts_Path/colabfold/transform.py -i $InputDir -o $TmpDir -n $MineProt_NameMode --url $MineProt_URL/api/pdb2alphacif/ $MineProt_Zip $MineProt_Relax >> $TmpLog"
+cmd="$Python_Path $MineProt_Scripts_Path/colabfold/transform.py -i $InputDir -o $TmpDir -n $MineProt_NameMode --url $MineProt_URL/api/pdb2alphacif/ $MineProt_Zip $MineProt_Relax"
 echo "Running colabfold/transform: $cmd"
-$cmd
+$cmd >> $TmpLog
 
-cmd="$Python_Path $MineProt_Scripts_Path/import2es.py -i $TmpDir -n $MineProt_Repo --url $MineProt_URL/api/es -a >> $TmpLog"
+cmd="$Python_Path $MineProt_Scripts_Path/import2es.py -i $TmpDir -n $MineProt_Repo --url $MineProt_URL/api/es -a"
 echo "Running import2es: $cmd"
-$cmd
+$cmd >> $TmpLog
 
-cmd="$Python_Path $MineProt_Scripts_Path/import2repo.py -i $TmpDir -n $MineProt_Repo --url $MineProt_URL/api/import2repo/ >> $TmpLog"
+cmd="$Python_Path $MineProt_Scripts_Path/import2repo.py -i $TmpDir -n $MineProt_Repo --url $MineProt_URL/api/import2repo/"
 echo "Running import2repo: $cmd"
-$cmd
+$cmd >> $TmpLog
 
 echo "Done."
 echo `date` >> $TmpLog
