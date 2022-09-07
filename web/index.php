@@ -11,15 +11,15 @@
 
 <body>
     <?php
-    include "header.php";
+    include "header.html";
     ?>
     <main style="min-height: 100vh;">
         <?php
         include "form.php";
         if (count($DATA_REPOS) == 0) {
-            include "no_repo.php";
+            include "no_repo.html";
         } else {
-            include "welcome.php";
+            include "welcome.html";
         }
         ?>
     </main>

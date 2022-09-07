@@ -11,7 +11,7 @@
 
 <body>
     <?php
-    include "header.php";
+    include "header.html";
     ?>
     <main style="min-height: 100vh;">
         <?php

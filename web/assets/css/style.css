@@ -228,7 +228,6 @@ summary {
 	overflow-y: scroll;
 	position: fixed;
 	left: 0;
-	z-index: 32;
 }
 
 .aside>.child {

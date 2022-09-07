@@ -78,17 +78,19 @@ EOT;
 function form_search_result($Search_Result)
 {
     $b64_Data_URL = base64_encode("/var/www/data/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".json");
+    if ($Search_Result["_source"]["anno"]["homolog"] == "") {
+        $html_Homolog_Info = "none";
+    } else {
+        $html_Homolog_Info = '
+        <a class="card-link user-properties-link" href="https://www.uniprot.org/uniprotkb?query=' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
+    }
     print <<<EOT
 <div class="card-inner-div">
     <div>
         <div style="margin-left: 16px; width=100%;">
             <strong style="color:#c9d1d9; margin-top: 7px;">{$Search_Result["_source"]["name"]}</strong>
             <div style="color:#c9d1d9; margin-top: 7px;">
-                Similar to 
-                <a class="card-link user-properties-link" href="https://www.uniprot.org/uniprotkb?query={$Search_Result["_source"]["anno"]["homolog"]}">
-                    {$Search_Result["_source"]["anno"]["homolog"]}
-                </a>
-                : {$Search_Result["_source"]["anno"]["description"][0]}
+                Similar to {$html_Homolog_Info}                
             </div>
             <br>
             <span>
@@ -151,4 +153,22 @@ function form_td($Table_tr)
         </a>
     </td>";
     echo "</tr>";
+}
+
+function code_prepare_scripts()
+{
+    echo '
+<pre style="font-size: 16px; font-weight: 500;"><code class="language-bash">git clone http://git.bmeonline.cn/218818/mineprot.git
+cd mineprot</code></pre>
+    ';
+}
+
+function code_import_colabfold()
+{
+    $MineProt_URL = "http://" . $_SERVER["HTTP_HOST"];
+    echo '
+<pre style="font-size: 16px; font-weight: 500;"><code class="language-bash">scripts/colabfold/import.sh /path/to/data \
+--url ' . $MineProt_URL . ' \
+--repo {repo_name}</code></pre>
+    ';
 }

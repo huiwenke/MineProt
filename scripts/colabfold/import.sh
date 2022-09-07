@@ -1,11 +1,4 @@
 #!/bin/bash -e
-# --python
-# --scripts-dir
-# --repo
-# --name-mode
-# --zip
-# --relax
-# --url
 
 Python_Path="python3"
 MineProt_Scripts_Path="scripts"
@@ -18,16 +11,16 @@ MineProt_URL="http://127.0.0.1"
 while [ -n "$1" ]
 do
     case "$1" in
+        --repo)
+            MineProt_Repo=$2
+            shift
+        ;;
         --python)
             Python_Path="$2"
             shift
         ;;
         --scripts-dir)
             MineProt_Scripts_Path=$2
-            shift
-        ;;
-        --repo)
-            MineProt_Repo=$2
             shift
         ;;
         --name-mode)
@@ -44,6 +37,17 @@ do
             MineProt_URL=$2
             shift
         ;;
+        --help)
+            echo "Usage: colabfold/import.sh [options...] <data_dir>"
+            echo "--repo <name>            MineProt repository name (THIS ARGUMENT IS MANDATORY)"
+            echo "--python <dir>           Path to python3 (default: /usr/bin/python3)"
+            echo "--scripts-dir <dir>      Path to MineProt scripts (default: ./scripts)"
+            echo "--name-mode <0|1|2|3>    Naming mode: 0(default): Use prefix; 1: Use name in .a3m; 2: Auto rename; 3: Customize name"
+            echo "--zip                    Unzip results"
+            echo "--relax                  Use relaxed results"
+            echo "--url <url>              MineProt URL (default: http://127.0.0.1)"
+            exit
+        ;;
         *)
             InputDir=$1
             UUID=`cat /proc/sys/kernel/random/uuid`
@@ -53,6 +57,12 @@ do
     esac
     shift
 done
+
+if [ ! -d $InputDir ]; then
+    echo "Error: Invalid inputs."
+    $0 --help
+    exit
+fi
 
 echo "Log path: $TmpLog"
 echo `date` > $TmpLog
