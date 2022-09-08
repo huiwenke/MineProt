@@ -147,19 +147,19 @@
             }
             codeForImport.innerHTML += currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
             var nameMode = document.getElementById("name_mode").value;
-            codeForImport.innerHTML += "&& --name-mode " + nameMode + " \\\n";
+            codeForImport.innerHTML += "--name-mode " + nameMode + " \\\n";
             var systemArgs = document.getElementsByName(currentSystem.value + "_args");
             for (i = 0; i < systemArgs.length; i++) {
                 if (systemArgs[i].checked) {
-                    codeForImport.innerHTML += "&& " + systemArgs[i].value + " \\\n";
+                    codeForImport.innerHTML += systemArgs[i].value + " \\\n";
                 }
             }
             var pythonPath = document.getElementById("python_path").value;
             if (pythonPath != '') {
-                codeForImport.innerHTML += "&& --python " + pythonPath + " \\\n";
+                codeForImport.innerHTML += "--python " + pythonPath + " \\\n";
             }
             var apiURL = window.location.href.replace(window.location.pathname, "");
-            codeForImport.innerHTML += "&& --url " + apiURL;
+            codeForImport.innerHTML += "--url " + apiURL;
         }
     </script>
 </body>
