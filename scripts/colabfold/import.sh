@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-Python_Path="python3"
-MineProt_Scripts_Path="scripts"
+Python_Path="/usr/bin/python3"
+MineProt_Scripts_Path="."
 MineProt_Repo=""
 MineProt_NameMode="0"
 MineProt_Zip=""
@@ -41,7 +41,7 @@ do
             echo "Usage: colabfold/import.sh [options...] <data_dir>"
             echo "--repo <name>            MineProt repository name (THIS ARGUMENT IS MANDATORY)"
             echo "--python <dir>           Path to python3 (default: /usr/bin/python3)"
-            echo "--scripts-dir <dir>      Path to MineProt scripts (default: ./scripts)"
+            echo "--scripts-dir <dir>      Path to MineProt scripts (default: .)"
             echo "--name-mode <0|1|2|3>    Naming mode: 0(default): Use prefix; 1: Use name in .a3m; 2: Auto rename; 3: Customize name"
             echo "--zip                    Unzip results"
             echo "--relax                  Use relaxed results"

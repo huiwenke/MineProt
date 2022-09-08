@@ -62,10 +62,10 @@
                             </div>
                             <div>
                                 <select id="name_mode">
-                                    <option value="0">0</option>
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
+                                    <option value="0">0: Use prefix</option>
+                                    <option value="1">1: Use name in .a3m</option>
+                                    <option value="2">2: Auto rename</option>
+                                    <option value="3">3: Customize name</option>
                                 </select>
                             </div>
                         </div>
@@ -90,10 +90,10 @@
                         <br>
                         <div style="display: flex;">
                             <div style="width: 33.3%;">
-                                <strong>Path to scripts</strong>
+                                <strong>Path to MineProt scripts</strong>
                             </div>
                             <div style="width: 50%;">
-                                <input class="input-import" id="script_path" placeholder="/path/to/your/MineProt/scripts" value="./scripts">
+                                <input class="input-import" id="script_path" placeholder="/path/to/your/MineProt/scripts" value=".">
                             </div>
                         </div>
                         <br>
@@ -141,7 +141,11 @@
             if (repoName == "CREATE_NEW_REPO") {
                 codeForImport.innerHTML = "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
             }
-            codeForImport.innerHTML += "import.sh " + dataPath + " --repo " + repoName + " \\\n";
+            var scriptPath = document.getElementById("script_path").value;
+            if (scriptPath != '') {
+                codeForImport.innerHTML += "cd " + scriptPath + " \n";
+            }
+            codeForImport.innerHTML += currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
             var nameMode = document.getElementById("name_mode").value;
             codeForImport.innerHTML += "&& --name-mode " + nameMode + " \\\n";
             var systemArgs = document.getElementsByName(currentSystem.value + "_args");
@@ -149,10 +153,6 @@
                 if (systemArgs[i].checked) {
                     codeForImport.innerHTML += "&& " + systemArgs[i].value + " \\\n";
                 }
-            }
-            var scriptPath = document.getElementById("script_path").value;
-            if (scriptPath != '') {
-                codeForImport.innerHTML += "&& --scripts-dir " + scriptPath + " \\\n";
             }
             var pythonPath = document.getElementById("python_path").value;
             if (pythonPath != '') {
