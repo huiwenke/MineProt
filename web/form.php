@@ -1,5 +1,5 @@
 <?php
-$DATA_REPOS = array_diff(scandir("/var/www/data"), array('.', '..'));
+$DATA_REPOS = array_diff(scandir(getenv("MP_REPO_PATH")), array('.', '..'));
 ?>
 <section id="aside" class="aside" style="display: inline-flex;">
     <div class="child">

@@ -22,7 +22,7 @@
                 <h1 style="margin-bottom: 8px; color:#efefef;">Browse <?php echo $_GET["repo"]; ?></h1>
                 <HR color=#21262d SIZE=1.5>
                 <?php
-                $ob_File = "/tmp/MP_BROWSE_" . md5($_GET["repo"] . filemtime($_ENV["MP_REPO_PATH"] . $_GET["repo"]) . $_POST["sort"]);
+                $ob_File = "/tmp/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"]) . $_POST["sort"]);
                 if (file_exists($ob_File))
                 {
                     include($ob_File);
@@ -40,7 +40,7 @@
                 } else {
                     ini_set('memory_limit', '-1');
                     ob_start();
-                    $Files = array_diff(scandir($_ENV["MP_REPO_PATH"] . $_GET["repo"]), array('.', '..'));
+                    $Files = array_diff(scandir(getenv("MP_REPO_PATH") . $_GET["repo"]), array('.', '..'));
                     echo "
                     <form method='post'>
                         <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>Sort by pLDDT</button>

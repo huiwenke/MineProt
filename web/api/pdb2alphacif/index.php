@@ -20,8 +20,8 @@ fwrite($PDB_File, $PDB);
 fclose($PDB_File);
 
 $CIF_File_Path = "$TMP_DIR/$Protein_Name.cif";
-putenv("RCSBROOT=" . $_ENV["RCSBROOT"]);
-putenv("PATH=" . $_ENV["PATH"]);
+putenv("RCSBROOT=" . getenv("RCSBROOT"));
+putenv("PATH=" . getenv("PATH"));
 shell_exec("maxit -input $PDB_File_Path -output $CIF_File_Path -o 1");
 $CIF = file_get_contents($CIF_File_Path);
 echo $CIF;

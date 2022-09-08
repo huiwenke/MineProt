@@ -77,7 +77,7 @@ EOT;
 
 function form_search_result($Search_Result)
 {
-    $b64_Data_URL = base64_encode($_ENV["MP_REPO_PATH"] . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".json");
+    $b64_Data_URL = base64_encode(getenv("MP_REPO_PATH") . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".json");
     if ($Search_Result["_source"]["anno"]["homolog"] == "") {
         $html_Homolog_Info = "none";
     } else {
