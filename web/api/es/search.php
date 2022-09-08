@@ -3,7 +3,7 @@ header('Content-Type:application/json');
 $Results = array();
 
 $_id = $Request_Term;
-$Check_id = json_decode(file_get_contents("http://MineNginx/api/es/$Dataset/get/$_id"), true);
+$Check_id = json_decode(file_get_contents($_ENV["MP_LOCALHOST"] . "/api/es/$Dataset/get/$_id"), true);
 if ($Check_id["found"]) {
     array_push($Results, $Check_id);
 }
@@ -18,7 +18,7 @@ $Query = array(
     "size" => 100
 );
 $Query_Json = json_encode($Query);
-$Curl_Handle = curl_init("http://elasticsearch:9200/$Dataset/_search");
+$Curl_Handle = curl_init($_ENV["MP_ELASTICSEARCH"] . "/$Dataset/_search");
 curl_setopt($Curl_Handle, CURLOPT_POSTFIELDS, $Query_Json);
 curl_setopt(
     $Curl_Handle,

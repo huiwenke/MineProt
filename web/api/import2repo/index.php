@@ -13,7 +13,7 @@ Gzipped JSON request:
 $Data = json_decode(gzdecode(file_get_contents("php://input")), true);
 $File_Name = $Data["name"];
 $File_Text = base64_decode($Data["text"]);
-$Repo_Path = "/var/www/data/" . $Data["repo"];
+$Repo_Path = $_ENV["MP_REPO_PATH"] . $Data["repo"];
 if (!file_exists($Repo_Path)) {
     mkdir($Repo_Path);
 }

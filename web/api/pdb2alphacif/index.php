@@ -10,18 +10,18 @@ Response: CIF text
 */
 
 $PDB_Raw_Data = file_get_contents("php://input");
-$Protein_Name = json_decode($PDB_Raw_Data,true)["name"];
-$PDB = base64_decode(json_decode($PDB_Raw_Data,true)["data"]);
+$Protein_Name = json_decode($PDB_Raw_Data, true)["name"];
+$PDB = base64_decode(json_decode($PDB_Raw_Data, true)["data"]);
 $TMP_DIR = "/tmp/" . md5($PDB_Raw_Data);
 shell_exec("mkdir $TMP_DIR");
 $PDB_File_Path = "$TMP_DIR/$Protein_Name.pdb";
-$PDB_File = fopen($PDB_File_Path,'w');
+$PDB_File = fopen($PDB_File_Path, 'w');
 fwrite($PDB_File, $PDB);
 fclose($PDB_File);
 
 $CIF_File_Path = "$TMP_DIR/$Protein_Name.cif";
-putenv('PATH=/app/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin');
-putenv('RCSBROOT=/app');
+putenv("RCSBROOT=" . $_ENV["RCSBROOT"]);
+putenv("PATH=" . $_ENV["PATH"]);
 shell_exec("maxit -input $PDB_File_Path -output $CIF_File_Path -o 1");
 $CIF = file_get_contents($CIF_File_Path);
 echo $CIF;
