@@ -162,10 +162,10 @@
             }
             preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
             preProcessedHTML += "cd " + scriptPath + " \n";
-            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
-            preProcessedHTML += cmdImport2es.join(' ') + '\n';
-            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
-            preProcessedHTML += cmdImport2repo.join(' ') + '\n';
+            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "\\\n"];
+            preProcessedHTML += cmdImport2es.join(' ') + "--url " + apiURL + "/api/es" + '\n';
+            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "\\\n"];
+            preProcessedHTML += cmdImport2repo.join(' ') + "--url " + apiURL + "/api/import2repo/" + '\n';
             codeForImport.innerHTML += preProcessedHTML;
         }
     </script>
