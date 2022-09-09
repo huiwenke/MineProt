@@ -5,10 +5,10 @@ services:
     restart: always
     image: nginx:stable-alpine
     ports:
-      - 80:80
+      - ${MP_PORT}:80
     volumes:
       - ./web:/var/www/html
-      - ./data/repo:/var/www/data
+      - ${MP_DATA}/repo:/var/www/data
       - ./config:/etc/nginx/conf.d
     links:
       - es:elasticsearch
@@ -18,11 +18,11 @@ services:
     build: ./app/php
     volumes:
       - ./web:/var/www/html
-      - ./data/repo:/var/www/data
+      - ${MP_DATA}/repo:/var/www/data
     links:
       - es:elasticsearch
   es:
     build: ./app/elasticsearch
     restart: always    
     volumes:
-      - ./data/es:/usr/share/elasticsearch/data
+      - ${MP_DATA}/es:/usr/share/elasticsearch/data
