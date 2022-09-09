@@ -131,16 +131,13 @@
         function generateCode() {
             var currentSystem = document.getElementById("system");
             var codeForImport = document.getElementById("code_for_import");
-            codeForImport.innerHTML = "";
             var dataPath = document.getElementById("data_path").value;
             if (dataPath == "") {
                 codeForImport.innerHTML = "# Where is your data for importing?";
                 return;
             }
+            codeForImport.innerHTML = "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
             var repoName = document.getElementById("repo_name").value;
-            if (repoName == "CREATE_NEW_REPO") {
-                codeForImport.innerHTML = "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
-            }
             var scriptPath = document.getElementById("script_path").value;
             if (scriptPath != '') {
                 codeForImport.innerHTML += "cd " + scriptPath + " \n";
@@ -159,7 +156,17 @@
                 codeForImport.innerHTML += "--python " + pythonPath + " \\\n";
             }
             var apiURL = window.location.href.replace(window.location.pathname, "");
-            codeForImport.innerHTML += "--url " + apiURL;
+            codeForImport.innerHTML += "--url " + apiURL + '\n';
+            if (repoName == "CREATE_NEW_REPO") {
+                codeForImport.innerHTML += "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
+            }
+            preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
+            preProcessedHTML += "cd " + scriptPath + " \n";
+            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
+            preProcessedHTML += cmdImport2es.join(' ') + '\n';
+            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
+            preProcessedHTML += cmdImport2repo.join(' ') + '\n';
+            codeForImport.innerHTML += preProcessedHTML;
         }
     </script>
 </body>
