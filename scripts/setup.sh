@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 MP_PORT=80
-MP_DATA=data
+MP_DATA=./data
 
 while [ -n "$1" ]
 do
