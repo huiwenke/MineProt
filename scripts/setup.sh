@@ -43,6 +43,11 @@ if [ ! "$(command -v pip3)" ]; then
   exit 1
 fi
 
+if [ ! -f "docker-compose.yml" ]; then
+  echo "Error: Please run this script where MineProt docker-compose.yml is located."
+  exit 1
+fi
+
 pip3 install docker-compose
 
 if [ ! -f "app/php/maxit.tar.gz" ]; then
@@ -61,4 +66,5 @@ tee .env <<EOF
 MP_PORT=$MP_PORT
 MP_DATA=$MP_DATA
 EOF
+
 docker-compose up -d
