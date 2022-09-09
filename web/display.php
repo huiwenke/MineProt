@@ -19,7 +19,7 @@ EOT;
 function form_viewer($Search_Result)
 {
     $Search_Result_Viewer = "MP_" . md5($Search_Result["_source"]["name"]);
-    $Search_Result_Path = "/release/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
+    $Search_Result_Path = "/repo/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
     print <<<EOT
 <style>
     * {
@@ -94,9 +94,9 @@ function form_search_result($Search_Result)
             </div>
             <br>
             <span>
-		        <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
-		        <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
-                <a href="/release/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
+		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
+		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
+                <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
                 <a target="_blank" href="/api/plot/pae.php?data_url={$b64_Data_URL}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
 	        </span>
         </div>
@@ -121,10 +121,10 @@ function form_td($Table_tr)
     </td>";
     echo "
     <td>
-        <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.pdb'>
+        <a class='btn' style='background-color: #800080;' href='/repo/$Data_Repo/$Name.pdb'>
         PDB
         </a>
-        <a class='btn' style='background-color: #800080;' href='/release/$Data_Repo/$Name.cif'>
+        <a class='btn' style='background-color: #800080;' href='/repo/$Data_Repo/$Name.cif'>
         CIF
         </a>
     </td>";
@@ -139,7 +139,7 @@ function form_td($Table_tr)
     echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
     echo "
     <td>
-        <a class='btn' style='background-color: #DC143C;' href='/release/$Data_Repo/$Name.a3m'>
+        <a class='btn' style='background-color: #DC143C;' href='/repo/$Data_Repo/$Name.a3m'>
         A3M
         </a>
     </td>";

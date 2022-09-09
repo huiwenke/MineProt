@@ -22,7 +22,7 @@
         <?php
         include "form.php";
         ?>
-        <section class="main">
+        <section class="main_browse">
             <div style="display: block; width: 100%;">
                 <h1 style="margin-bottom: 8px; color:#efefef;">Generate command for importing</h1>
                 <HR color=#21262d SIZE=1.5>
@@ -162,11 +162,12 @@
             }
             preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
             preProcessedHTML += "cd " + scriptPath + " \n";
-            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "\\\n"];
-            preProcessedHTML += cmdImport2es.join(' ') + "--url " + apiURL + "/api/es" + '\n';
-            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "\\\n"];
-            preProcessedHTML += cmdImport2repo.join(' ') + "--url " + apiURL + "/api/import2repo/" + '\n';
+            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
+            preProcessedHTML += cmdImport2es.join(' ') + '\n';
+            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
+            preProcessedHTML += cmdImport2repo.join(' ') + '\n';
             codeForImport.innerHTML += preProcessedHTML;
+            hljs.highlightAll();
         }
     </script>
 </body>
