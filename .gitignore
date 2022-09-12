@@ -1,6 +1,0 @@
-data
-app/php/maxit.tar.gz
-toolkit/scripts/__pycache__
-.env
-.gitattributes
-.gitignore
