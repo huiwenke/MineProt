@@ -107,7 +107,6 @@
                             </div>
                         </div>
                         <div id="alphafold_opt" name="system_opt" style="margin-top: 7px; display: none;">
-                            Waiting...
                         </div>
                         <br>
                         <button class="btn" onclick="generateCode()"><strong>Generate</strong></button>
@@ -131,13 +130,17 @@
         function generateCode() {
             var currentSystem = document.getElementById("system");
             var codeForImport = document.getElementById("code_for_import");
+            codeForImport.innerHTML = "";
             var dataPath = document.getElementById("data_path").value;
             if (dataPath == "") {
                 codeForImport.innerHTML = "# Where is your data for importing?";
                 return;
             }
-            codeForImport.innerHTML = "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
             var repoName = document.getElementById("repo_name").value;
+            if (repoName == "CREATE_NEW_REPO") {
+                codeForImport.innerHTML += "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
+            }
+            codeForImport.innerHTML += "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
             var scriptPath = document.getElementById("script_path").value;
             if (scriptPath != '') {
                 codeForImport.innerHTML += "cd " + scriptPath + " \n";
@@ -157,9 +160,6 @@
             }
             var apiURL = window.location.href.replace(window.location.pathname, "");
             codeForImport.innerHTML += "--url " + apiURL + '\n';
-            if (repoName == "CREATE_NEW_REPO") {
-                codeForImport.innerHTML += "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
-            }
             preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
             preProcessedHTML += "cd " + scriptPath + " \n";
             cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];

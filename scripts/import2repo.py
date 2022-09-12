@@ -2,6 +2,7 @@ import argparse
 import os
 import requests
 import json
+import hashlib
 import base64
 import gzip
 
@@ -38,13 +39,21 @@ for file_name in os.listdir(InputDir):
         'Content-Type': 'application/json',
         'Accept-encoding': 'gzip'
     }
-    # Open file and encode file data with BASE64
     file_path = os.path.join(InputDir, file_name)
     with open(file_path, 'r') as fi:
-        import_request_json["text"] = str(base64.b64encode(fi.read().encode("utf-8")), "utf-8")
+        file_text = fi.read().encode("utf-8")
+        if not import_request_json["force"]:
+            if requests.get(url=args.url+"check.php", params=import_request_json).text == hashlib.md5(file_text).hexdigest():
+                print("Skipping "+import_request_json["repo"]+'/'+import_request_json["name"])
+                continue
+    # Encode file data with BASE64
+    import_request_json["text"] = str(base64.b64encode(file_text), "utf-8")
     # POST to MineProt Import API
-    response = requests.post(url=args.url, headers=headers, data=gzip.compress(json.dumps(import_request_json).encode())).text
-    print(response+' '+import_request_json["repo"]+'/'+import_request_json["name"])
+    response = requests.post(url=args.url, headers=headers, data=gzip.compress(json.dumps(import_request_json).encode()))
+    if response.status_code == 200:
+        print("Importing "+import_request_json["repo"]+'/'+import_request_json["name"])
+    else:
+        print("Error "+str(response.status_code)+": Failed to import "+import_request_json["repo"]+'/'+import_request_json["name"])
 
 # All done
 print("Done.")

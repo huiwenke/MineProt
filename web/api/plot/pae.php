@@ -62,7 +62,7 @@ for ($Residue_x = 0; $Residue_x < $Data_Length; $Residue_x++) {
             colorAxis: {
                 stops: [
                     [0, '#1F4E79'],
-                    [1, '#DEEBF7']
+                    [1, '#FFF']
                 ],
                 min: 0,
                 max: <?php echo $Max_PAE; ?>,
