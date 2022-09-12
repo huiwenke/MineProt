@@ -12,6 +12,9 @@ def pdb2cif(data_dir, protein_name, request_url):
     :param request_url: URL of MineProt PDB-CIF Converting API, str
     """
     output_path = os.path.join(data_dir, protein_name)
+    if os.path.exists(output_path+".cif"):
+        print("Skipping "+protein_name+"...")
+        return
     try:
         request_json = {
             "name": protein_name,

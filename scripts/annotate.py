@@ -26,6 +26,8 @@ def UniProt2MineProt(identifier_list):
         accession = identifier.split()[0]
         if accession[0]=='>':
             accession = accession[1:]
+        if accession[0:3] in ["sp|", "tr|"]:
+            accession = accession.split('|')[1]
         response = GetUniProt(accession)
         if response.status_code == 200:
             response_json = json.loads(response.text)
