@@ -114,7 +114,7 @@ function form_td($Table_tr)
     $Name = $Table_tr["name"];
     $Data_Repo = $Table_tr["repo"];
     echo "
-    <td>
+    <td style='word-wrap: break-word; word-break: break-all; width: 20%;'>
         <a style='color: #161b22;' class='user-properties-link' href='search.php?search=$Name&repo[]=$Data_Repo' target='_blank'>
         <strong>" . $Name . "</strong>
         </a>
