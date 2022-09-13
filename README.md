@@ -23,7 +23,7 @@ Above all, please get your python3 ready and install dependencies:
 cd toolkit/scripts
 pip3 install -r requirements.txt
 ```
-Then, use scripts in MineProt toolkit to import your data. For example, if you employ *colabfold_search* and *colabfold_batch* with parameters `--zip` `--amber` to generate large scale structure predictions, run the command below to import:
+Then, use scripts in MineProt toolkit to import your data. For example, if you employ `colabfold_search` and `colabfold_batch` with parameters `--zip` `--amber` to generate large scale structure predictions, run the command below to import:
 ```bash
 colabfold/import.sh /path/to/your/results --repo new_repo \
 --name-mode 1 \
@@ -32,8 +32,12 @@ colabfold/import.sh /path/to/your/results --repo new_repo \
 --python /usr/bin/python3 \
 --url http://localhost
 ```
-You will finally find the protein repository *new_repo* at the homepage of your MineProt site, where all proteins have been annotated with UniProt, GO and InterPro, and their structures are visible online. You can easily get their information through the search box in the upper left corner.
+You will finally find the protein repository **new_repo** at the homepage of your MineProt site, where all proteins have been annotated with UniProt, GO and InterPro, and their structures are visible online.
+
+> The **import page** is designed to generate commands for importing, especially useful when you are new to MineProt scripting.
+
+> During the import process, PDB structure files are transformed into CIF format, which can be visualized by [Mol*](https://github.com/molstar/molstar) in the style of AlphaFold DB, while MSAs are used for UniProt annotation and added as keywords in [Elasticsearch](https://github.com/elastic/elasticsearch) index. Model scores such as pLDDT and PAE are stored in JSON format.
 ## Browser Compatibility
-| Chrome | Firefox | Microsoft Edge | Opera | Safari |
-| ------ | ------- | -------------- | ----------------- | ------ |
-| 67.0+  | 52.9+   | 105.0.1343.27   | 90.0.4480.107      | 13.04  |
+| Chrome | Firefox | Edge          | Opera         | Safari |
+| ------ | ------- | ------------- | ------------- | ------ |
+| 67.0+  | 52.9+   | 105.0.1343.27 | 90.0.4480.107 | 13.04  |

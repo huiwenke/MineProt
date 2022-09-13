@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo $_GET["search"]; ?></title>
+    <title>Search | <?php echo $_GET["search"]; ?></title>
     <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/pdbe-molstar-1.2.1.css">
