@@ -38,8 +38,8 @@ if [ ! "$(command -v wget)" ]; then
   exit 1
 fi
 
-if [ ! "$(command -v pip3)" ]; then
-  echo "Error: Please install python3-pip."
+if [ ! "$(command -v docker-compose)" ]; then
+  echo "Error: Please install docker-compose."
   exit 1
 fi
 
@@ -47,8 +47,6 @@ if [ ! -f "docker-compose.yml" ]; then
   echo "Error: Please run this script where MineProt docker-compose.yml is located."
   exit 1
 fi
-
-pip3 install docker-compose
 
 if [ ! -f "app/php/maxit.tar.gz" ]; then
 	wget https://figshare.com/ndownloader/files/36918121 -O app/php/maxit.tar.gz;
