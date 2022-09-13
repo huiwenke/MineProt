@@ -3,8 +3,8 @@ import os
 import zipfile
 import sys
 import shutil
+from tempfile import TemporaryDirectory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
-from rename import RandomStr
 from rename import ReName
 from pdb2cif import pdb2cif
 
@@ -80,7 +80,7 @@ if not args.n:
     args.n = 0
 
 # Create temp directory
-TmpDir = "/tmp/MP-Temp-" + RandomStr(10)
+TmpDir = TemporaryDirectory(prefix="MP-Temp-").name
 print("Using temporary folder: "+TmpDir)
 os.makedirs(TmpDir)
 
