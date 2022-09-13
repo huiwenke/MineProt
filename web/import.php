@@ -140,11 +140,12 @@
             if (repoName == "CREATE_NEW_REPO") {
                 codeForImport.innerHTML += "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
             }
-            codeForImport.innerHTML += "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
             var scriptPath = document.getElementById("script_path").value;
-            if (scriptPath != '') {
-                codeForImport.innerHTML += "cd " + scriptPath + " \n";
+            if (scriptPath == "") {
+                scriptPath = ".";
             }
+            codeForImport.innerHTML += "cd " + scriptPath + " \n\n";
+            codeForImport.innerHTML += "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
             codeForImport.innerHTML += currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
             var nameMode = document.getElementById("name_mode").value;
             codeForImport.innerHTML += "--name-mode " + nameMode + " \\\n";
@@ -161,7 +162,6 @@
             var apiURL = window.location.href.replace(window.location.pathname, "");
             codeForImport.innerHTML += "--url " + apiURL + '\n';
             preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
-            preProcessedHTML += "cd " + scriptPath + " \n";
             cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
             preProcessedHTML += cmdImport2es.join(' ') + '\n';
             cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
