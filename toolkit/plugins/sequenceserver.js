@@ -9,7 +9,7 @@
 
 (function () {
     // Please fill in your MineProt URL here.
-    MainFunction("", 0);
+    MainFunction("please://fill.your.mineprot.url/here", 0);
 })();
 
 function AddSearch(obj, MineProt_URL) {
