@@ -10,13 +10,13 @@ MineProt provides solution for curating high-throughput structuring data from AI
 
 ## Quick start
 ### Deployment
-Linux systems with [docker](https://www.docker.com/) and [docker-compose](https://github.com/docker/compose) are easiest for MineProt deployment:
+Linux systems with [docker](https://www.docker.com/) and [docker-compose](https://github.com/docker/compose) are best for MineProt deployment:
 ```bash
 git clone https://github.com/huiwenke/MineProt.git
 cd MineProt
 toolkit/setup.sh -p 80 -d ./data
 ```
-After a few minutes, you can access your MineProt interface at http://localhost.
+After a few minutes, you can access your MineProt site at http://localhost.
 ### Import data
 Above all, please get your python3 ready and install dependencies:
 ```bash
@@ -34,6 +34,6 @@ colabfold/import.sh /path/to/your/results --repo new_repo \
 ```
 You will finally find the protein repository *new_repo* at the homepage of your MineProt site, where all proteins have been annotated with UniProt, GO and InterPro, and their structures are visible online. You can easily get their information through the search box in the upper left corner.
 ## Browser Compatibility
-| Chrome | Firefox | Microsoft Edge | Internet Explorer | Safari |
+| Chrome | Firefox | Microsoft Edge | Opera | Safari |
 | ------ | ------- | -------------- | ----------------- | ------ |
-| 67.0+  | 52.9.2+   | 105   | **Unsupported**      | 13.04  |
+| 67.0+  | 52.9+   | 105.0.1343.27   | 90.0.4480.107      | 13.04  |
