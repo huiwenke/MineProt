@@ -1,4 +1,11 @@
 <?php
+
+/*
+Generate PAE plot.
+Request: URL of PAE raw data (base64-encoded)
+Response: Highcharts PAE plot
+*/
+
 $Data_URL = base64_decode($_GET["data_url"]);
 $Data_Json = file_get_contents($Data_URL);
 $Data = json_decode($Data_Json, true);

@@ -1,6 +1,7 @@
 <?php
 
 /*
+Upload data to target repository.
 Gzipped JSON request:
     {
         "name": protein name

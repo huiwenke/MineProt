@@ -1,6 +1,7 @@
 <?php
 
 /*
+Transform PDB to CIF.
 JSON request:
     {
         "name": protein name
