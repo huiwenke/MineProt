@@ -22,7 +22,7 @@
                 <h1 style="margin-bottom: 8px; color:#efefef;">Browse <?php echo $_GET["repo"]; ?></h1>
                 <HR color=#21262d SIZE=1.5>
                 <?php
-                $ob_File = "/tmp/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"]) . $_POST["sort"]);
+                $ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_' . $_POST["sort"];
                 if (file_exists($ob_File))
                 {
                     include($ob_File);

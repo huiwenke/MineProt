@@ -13,7 +13,7 @@ Response: CIF text
 $PDB_Raw_Data = file_get_contents("php://input");
 $Protein_Name = json_decode($PDB_Raw_Data, true)["name"];
 $PDB = base64_decode(json_decode($PDB_Raw_Data, true)["data"]);
-$TMP_DIR = "/tmp/" . md5($PDB_Raw_Data);
+$TMP_DIR = sys_get_temp_dir() . '/' . md5($PDB_Raw_Data);
 shell_exec("mkdir $TMP_DIR");
 $PDB_File_Path = "$TMP_DIR/$Protein_Name.pdb";
 $PDB_File = fopen($PDB_File_Path, 'w');
