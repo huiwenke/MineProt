@@ -83,3 +83,9 @@ Elasticsearch 7.12.1
 WebServer basic platform (NGINX, Apache, etc.)
 MAXIT 11.100
 ```
+
+### Toolkit dependencies
+
+This project's inbox scripts depends on `Python 3.6+`. Operations will be more convenient with a `Bash` shell.
+
+Inbox browser plugins requires the [TamperMonkey plugin](https://www.tampermonkey.net/).
