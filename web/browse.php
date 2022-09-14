@@ -22,11 +22,6 @@
                 <h1 style="margin-bottom: 8px; color:#efefef;">Browse <?php echo $_GET["repo"]; ?></h1>
                 <HR color=#21262d SIZE=1.5>
                 <?php
-                $ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_' . $_POST["sort"];
-                if (file_exists($ob_File))
-                {
-                    include($ob_File);
-                } else
                 if ($_GET["repo"] == '') {
                     foreach ($DATA_REPOS as $Data_Repo) {
                         echo "
@@ -38,15 +33,21 @@
                         ";
                     }
                 } else {
-                    ini_set('memory_limit', '-1');
-                    ob_start();
-                    $Files = array_diff(scandir(getenv("MP_REPO_PATH") . $_GET["repo"]), array('.', '..'));
                     echo "
                     <form method='post'>
-                        <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>Sort by pLDDT</button>
-                        <button style='background-color: #0969da;' class='btn' name='sort' value=''>Sort by name</button>
+                        <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>⇅ Sort by pLDDT</button>
+                        <button style='background-color: #0969da;' class='btn' name='sort' value=''>⇅ Sort by name</button>
+                        <button style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick=clearCache('" . $_GET["repo"] . "')>⟳ Refresh</button>
                     </form>
-                    <br>
+                    <br>";
+                    $ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_' . $_POST["sort"];
+                    if (file_exists($ob_File)) {
+                        include($ob_File);
+                    } else {
+                        ini_set('memory_limit', '-1');
+                        ob_start();
+                        $Files = array_diff(scandir(getenv("MP_REPO_PATH") . $_GET["repo"]), array('.', '..'));
+                        echo "
                     <table>
                         <thead>
                             <tr align='left'>
@@ -59,31 +60,40 @@
                         </thead>
                         <tbody>
                     ";
-                    include "api.php";
-                    $Table = array();
-                    foreach ($Files as $File) {
-                        if (pathinfo($File)["extension"] == "json") {
-                            array_push($Table, get_api_tr($_GET["repo"], $File));
+                        include "api.php";
+                        $Table = array();
+                        foreach ($Files as $File) {
+                            if (pathinfo($File)["extension"] == "json") {
+                                array_push($Table, get_api_tr($_GET["repo"], $File));
+                            }
                         }
+                        if ($_POST["sort"] == "plddt") {
+                            array_multisort(array_column($Table, "plddt"), SORT_DESC, $Table);
+                        } else {
+                            array_multisort(array_column($Table, "name"), $Table);
+                        }
+                        foreach ($Table as $Table_tr) {
+                            form_td($Table_tr);
+                        }
+                        echo "</tbody></table>";
+                        $f_ob_File = fopen($ob_File, 'w');
+                        fwrite($f_ob_File, ob_get_contents());
+                        fclose($f_ob_File);
+                        ob_end_flush();
                     }
-                    if ($_POST["sort"] == "plddt") {
-                        array_multisort(array_column($Table, "plddt"), SORT_DESC, $Table);
-                    } else {
-                        array_multisort(array_column($Table, "name"), $Table);
-                    }
-                    foreach ($Table as $Table_tr) {
-                        form_td($Table_tr);
-                    }
-                    echo "</tbody></table>";
-                    $f_ob_File = fopen($ob_File, 'w');
-                    fwrite($f_ob_File, ob_get_contents());
-                    fclose($f_ob_File);
-                    ob_end_flush();
                 }
                 ?>
             </div>
         </section>
     </main>
+    <script>
+        function clearCache(repoName) {
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.open("GET", "/api/cache/clear.php?repo=" + repoName, true);
+            httpRequest.send();
+            window.location.reload();
+        }
+    </script>
 </body>
 
 </html>
