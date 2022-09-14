@@ -4,7 +4,9 @@
 
 ## Making protein server acessible to all!
 
-MineProt provides solution for curating high-throughput structuring data from AI systems such as [AlphaFold](https://github.com/deepmind/alphafold), [ColabFold](https://github.com/sokrypton/ColabFold), etc. By the aid of MineProt toolkit, you can:
+MineProt provides solution for curating high-throughput structuring data from AI systems such as [AlphaFold](https://github.com/deepmind/alphafold), [ColabFold](https://github.com/sokrypton/ColabFold), etc. 
+
+By the aid of MineProt toolkit, you can:
 
 - Deploy your own protein server in simple steps
 - Take advantage of most information provided by AI systems to curate your data
