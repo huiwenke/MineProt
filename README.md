@@ -51,6 +51,16 @@ You will finally find the protein repository **new_repo** at the homepage of you
 
 > During the import process, PDB structure files are transformed into CIF format, which can be visualized by [Mol*](https://github.com/molstar/molstar) in the style of AlphaFold DB, while MSAs are used for UniProt annotation and added as keywords in [Elasticsearch](https://github.com/elastic/elasticsearch) index. Model scores such as pLDDT and PAE are stored in JSON format.
 
+### Experiencing MineProt
+
+MineProt interface provides final users with following functions:
+
+- **Search:** Type, enter, results.
+- **Browse:** Select repo, and all information will be available.
+- **Visualization:** Mol* powered 3D analysis in your browser.
+
+For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
+
 ## Compatibilities & dependencies
 
 ### Browser compatibility
