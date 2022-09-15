@@ -10,7 +10,7 @@ from pdb2cif import pdb2cif
 from rename import ReName
 
 # List arguments
-parser = argparse.ArgumentParser(description='Preprocess your ColabFold predictions for curation: pick out top-1 model and generate .cif for visualization.')
+parser = argparse.ArgumentParser(description='Preprocess your AlphaFold predictions for curation: pick out top-1 model and generate .cif for visualization.')
 parser.add_argument('-i', type=str, help="Path to input folder. THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-o', type=str, help="Path to output folder. THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-n', type=int, default=0, help="Naming mode: 0: Use prefix; 1: Use name in .a3m; 2: Auto rename; 3: Customize name.")
