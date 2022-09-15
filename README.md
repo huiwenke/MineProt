@@ -2,7 +2,7 @@
 
 <div align="center"><img src="./web/assets/img/logo.png" height="50"/></div>
 
-## Making protein server acessible to all!
+## Making protein server accessible to all!
 
 MineProt provides solution for curating high-throughput structuring data from AI systems such as [AlphaFold](https://github.com/deepmind/alphafold), [ColabFold](https://github.com/sokrypton/ColabFold), etc. 
 
