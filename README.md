@@ -1,6 +1,6 @@
 # MineProt
 
-<p align="center"><img src="./web/assets/img/logo.png" height="50"/></p>
+<center><img src="./web/assets/img/logo.png" height="50"/></center>
 
 ## Making protein server acessible to all!
 
@@ -58,10 +58,17 @@ You will finally find the protein repository **demo** at the homepage of your Mi
 MineProt interface provides final users with following functions:
 
 - **Search:** Type, enter, results.
-- **Browse:** Select one repository, and all information will be available.
 - **Visualization:** Mol* powered 3D analysis in your browser.
 
+<center><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_search.png"></center>
+
+- **Browse:** Select one repository, and all information will be available.
+
+<center><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_browse.png"></center>
+
 For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
+
+<center><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></center>
 
 ## Compatibilities & dependencies
 
