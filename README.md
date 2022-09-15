@@ -109,4 +109,4 @@ MAXIT 11.100
 
 This project's inbox scripts depends on `Python 3.6+`. Operations will be more convenient with a `Bash` shell.
 
-Browser plugins requires the [TamperMonkey plugin](https://www.tampermonkey.net/).
+Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
