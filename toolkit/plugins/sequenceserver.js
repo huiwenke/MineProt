@@ -37,6 +37,7 @@ function MainFunction(MineProt_URL, hit_link_num) {
         setTimeout(() => {
             MainFunction(MineProt_URL, hit_link_num)
         }, 500);
+        return;
     }
     var hit_links = document.querySelectorAll("div[class='hit-links']");
     if (hit_links.length == 0 || hit_links.length > hit_link_num) {
@@ -44,6 +45,7 @@ function MainFunction(MineProt_URL, hit_link_num) {
         setTimeout(() => {
             MainFunction(MineProt_URL, hit_link_num)
         }, 500);
+        return;
     }
     else {
         for (var i = 0; i < hit_links.length; i++) {
