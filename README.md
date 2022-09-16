@@ -60,17 +60,18 @@ MineProt interface provides final users with following functions:
 - **Search:** Type, enter, results.
 - **Visualization:** Mol* powered 3D analysis in your browser.
 
-<div align="center"><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_search.png"></div>
+<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_search.png"></div>
 <br>
 
 - **Browse:** Select one repository, and all information will be available.
 
-<div align="center"><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_browse.png"></div>
-<br>
+<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_browse.png"></div>
+
+> To speed up response of the **browse page**, MineProt automatically generates cache for each repository on first access. Clicking the **refresh** button will regenerate the cache.
 
 For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
 
-<div align="center"><img width=50% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></div>
+<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></div>
 
 ## Compatibilities & dependencies
 
@@ -90,11 +91,11 @@ We suggest accessing the web site using devices with resolution higher than `136
 
 Usability from mobile devices with portrait screen is not guaranteed.
 
-### Server platform compatibility
+### Platform compatibility
 
-We recommend Linux systems for deployment, as MAXIT (converter app between PDB and CIF) is not supported on Windows.
+We recommend Linux platform for non-docker deployment, as MAXIT (converter app between PDB and CIF) is not supported on Windows.
 
-In our developing & testing environment, we employed BioLinux 8.0.7 (based on Ubuntu 14.04 LTS) for non-docker deployment, and Ubuntu 18.04 LTS for docker-based deployment.
+In our developing & testing environment, we employed BioLinux 8.0.7 (PHP 5.5.9, Apache 2.4.7) for non-docker deployment, and Ubuntu 18.04 LTS (Docker 20.10.16, docker-compose 1.29.2) for docker-based deployment.
 
 If you want to deploy this project on your server without Docker, please note that this project and its components depend on the following packages and libraries:
 
@@ -104,9 +105,12 @@ Elasticsearch 7.12.1
 WebServer basic platform (NGINX, Apache, etc.)
 MAXIT 11.100
 ```
+See [Deployment manual](https://github.com/huiwenke/MineProt/wiki/Deployment-manual) for more information.
 
 ### Toolkit dependencies
 
 This project's inbox scripts depends on `Python 3.6+`. Operations will be more convenient with a `Bash` shell.
 
 Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
+
+See [Toolkit manual](https://github.com/huiwenke/MineProt/wiki/Toolkit-manual) for more information.
