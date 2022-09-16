@@ -13,7 +13,7 @@ parser.add_argument('-i', type=str, help="Path to your preprocessed A3M files. T
 parser.add_argument('-n', type=str, help="Elasticsearch index name.")
 parser.add_argument('-a', help="Annotate proteins using UniProt API.", action="store_true")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
-parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt API.")
+parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt Elasticsearch API.")
 
 # Now parse user-given arguments
 args = parser.parse_args()

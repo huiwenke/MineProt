@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Import your proteins into reposito
 parser.add_argument('-i', type=str, help="Path to your preprocessed files (A3M, PDB, CIF & JSON). THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-n', type=str, help="MineProt repository name.")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
-parser.add_argument('--url', type=str, default="http://127.0.0.1/api/import2repo/", help="URL of MineProt API.")
+parser.add_argument('--url', type=str, default="http://127.0.0.1/api/import2repo/", help="URL of MineProt import2repo API.")
 
 # Now parse user-given arguments
 args = parser.parse_args()
