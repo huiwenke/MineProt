@@ -1,6 +1,6 @@
 # MineProt
 
-<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_GA.png"/></div>
+<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_GA_2.png"/></div>
 
 ## Making protein server accessible to all!
 
