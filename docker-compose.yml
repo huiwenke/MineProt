@@ -9,7 +9,7 @@ services:
     volumes:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data
-      - ./config:/etc/nginx/conf.d
+      - ./config/nginx:/etc/nginx/conf.d
     links:
       - es:elasticsearch
       - php:MinePHP
@@ -19,6 +19,7 @@ services:
     volumes:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini-production
     links:
       - es:elasticsearch
   es:

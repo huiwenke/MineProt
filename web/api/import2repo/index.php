@@ -11,6 +11,7 @@ Gzipped JSON request:
     }
 */
 
+ini_set('memory_limit', '-1');
 $Data = json_decode(gzdecode(file_get_contents("php://input")), true);
 $File_Name = $Data["name"];
 $File_Text = base64_decode($Data["text"]);
