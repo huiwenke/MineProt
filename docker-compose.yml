@@ -19,7 +19,7 @@ services:
     volumes:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data
-      - ./config/php/php.ini:/usr/local/etc/php/php.ini-production
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
     links:
       - es:elasticsearch
   es:

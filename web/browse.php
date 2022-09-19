@@ -44,7 +44,6 @@
                     if (file_exists($ob_File)) {
                         include($ob_File);
                     } else {
-                        ini_set('memory_limit', '-1');
                         ob_start();
                         $Files = array_diff(scandir(getenv("MP_REPO_PATH") . $_GET["repo"]), array('.', '..'));
                         echo "
