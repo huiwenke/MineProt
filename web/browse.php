@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Browse</title>
-    <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png">
-    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+    <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
 </head>
 
 <body>
@@ -34,7 +34,7 @@
                     }
                 } else {
                     echo "
-                    <form method='post'>
+                    <form method='post' onsubmit='return reSubmit()'>
                         <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>⇅ Sort by pLDDT</button>
                         <button style='background-color: #0969da;' class='btn' name='sort' value=''>⇅ Sort by name</button>
                         <button style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick=clearCache('" . $_GET["repo"] . "')>⟳ Refresh</button>
@@ -86,11 +86,18 @@
         </section>
     </main>
     <script>
+        var ifReSubmit = true;
+
         function clearCache(repoName) {
             var httpRequest = new XMLHttpRequest();
-            httpRequest.open("GET", "/api/cache/clear.php?repo=" + repoName, true);
+            httpRequest.open("GET", "./api/cache/clear.php?repo=" + repoName, true);
             httpRequest.send();
-            window.location.reload();
+            ifReSubmit = false;
+            location.reload()
+        }
+
+        function reSubmit() {
+            return ifReSubmit;
         }
     </script>
 </body>

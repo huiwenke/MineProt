@@ -19,13 +19,13 @@ $Data_Length = count($Data_PAE);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="/assets/js/highcharts/highcharts.js"></script>
-    <script src="/assets/js/highcharts/exporting.js"></script>
-    <script src="/assets/js/highcharts/data.js"></script>
-    <script src="/assets/js/highcharts/heatmap.js"></script>
-    <script src="/assets/js/highcharts/boost.js"></script>
-    <script src="/assets/js/highcharts/boost-canvas.js"></script>
-    <script src="/assets/js/highcharts/accessibility.js"></script>
+    <script src="../../assets/js/highcharts/highcharts.js"></script>
+    <script src="../../assets/js/highcharts/exporting.js"></script>
+    <script src="../../assets/js/highcharts/data.js"></script>
+    <script src="../../assets/js/highcharts/heatmap.js"></script>
+    <script src="../../assets/js/highcharts/boost.js"></script>
+    <script src="../../assets/js/highcharts/boost-canvas.js"></script>
+    <script src="../../assets/js/highcharts/accessibility.js"></script>
 </head>
 
 <body>

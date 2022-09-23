@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Search | <?php echo $_GET["search"]; ?></title>
-    <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png">
-    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/pdbe-molstar-1.2.1.css">
-    <script type="text/javascript" src="/assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
+    <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pdbe-molstar-1.2.1.css">
+    <script type="text/javascript" src="./assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
 </head>
 
 <body>

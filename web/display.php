@@ -97,7 +97,7 @@ function form_search_result($Search_Result)
 		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
 		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
                 <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
-                <a target="_blank" href="/api/plot/pae.php?data_url={$b64_Data_URL}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
+                <a target="_blank" href="./api/plot/pae.php?data_url={$b64_Data_URL}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
 	        </span>
         </div>
     </div>
