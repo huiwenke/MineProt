@@ -1,4 +1,22 @@
 <?php
+function get_api_repo($Data_Repo)
+{
+    $Curl_Handle = curl_init(getenv("MP_LOCALHOST") . "/api/es/$Data_Repo/get/");
+    curl_setopt($Curl_Handle, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt(
+        $Curl_Handle,
+        CURLOPT_HTTPHEADER,
+        array(
+            "Content-Type: application/json"
+        )
+    );
+    $Response_Json = curl_exec($Curl_Handle);
+    curl_close($Curl_Handle);
+    if (strstr($Response_Json, "index_not_found_exception")) {
+        return false;
+    } else return true;
+}
+
 function search_api($Search_Repos, $Search_Term)
 {
     $b64_Search_Term = base64_encode($Search_Term);

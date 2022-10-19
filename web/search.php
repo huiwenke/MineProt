@@ -21,7 +21,6 @@
         if (array_key_exists("repo", $_GET)) {
             $Search_Repos = implode(',', $_GET["repo"]);
         } else $Search_Repos = implode(',', $DATA_REPOS);
-        include "api.php";
         $Search_Results_Json = search_api($Search_Repos, $_GET["search"]);
         $Search_Results = json_decode($Search_Results_Json, true)
         ?>

@@ -1,5 +1,11 @@
 <?php
+include "api.php";
 $DATA_REPOS = array_diff(scandir(getenv("MP_REPO_PATH")), array('.', '..'));
+foreach ($DATA_REPOS as $Data_Repo_k => $Data_Repo) {
+    if (!get_api_repo($Data_Repo)) {
+        unset($DATA_REPOS[$Data_Repo_k]);
+    }
+}
 ?>
 <section id="aside" class="aside" style="display: inline-flex;">
     <div class="child">

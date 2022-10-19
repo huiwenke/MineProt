@@ -59,7 +59,6 @@
                         </thead>
                         <tbody>
                     ";
-                        include "api.php";
                         $Table = array();
                         foreach ($Files as $File) {
                             if (pathinfo($File)["extension"] == "json") {
