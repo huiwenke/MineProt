@@ -384,6 +384,14 @@ ul {
 	flex: auto;
 }
 
+.main_salign {
+	display: inline-flex;
+	width: calc(100vw - 664px);
+	padding-right: 32px !important;
+	padding-left: 32px !important;
+	flex: auto;
+}
+
 .main_h2 {
 	font-weight: 400;
 	font-size: 16px;
