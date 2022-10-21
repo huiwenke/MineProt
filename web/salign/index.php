@@ -23,10 +23,10 @@
     <main style="min-height: 100vh;">
         <section class="main_salign">
             <div style="display: block; width: 100%;">
-                <form>
+                <form action="../api/cache/salign.php" method="post">
                     <br><br>
                     <label class="wrapper">
-                        <textarea name="structure" class="form-control-header" style="height: 25vh;" placeholder="Paste query structure here..."></textarea>
+                        <textarea name="structure" class="form-control-header" style="height: 25vh;" placeholder="Paste query structure (PDB) here..." required=""></textarea>
                     </label>
                     <br>
                     <h2 class="h2_aside">Protein Repositories</h2>
@@ -37,22 +37,26 @@
                         form_repo($Data_Repo);
                     }
                     ?>
-                    <br>
+                    <HR color=#21262d SIZE=1.5><br>
                     <div style="display: flex;">
                         <div style="width: 15%; color: white;">
                             <strong>Key words</strong>
                         </div>
                         <div style="width: 85%; color: white;">
-                            <input name="search" class="input-import" placeholder="🔍︎ Enter keywords...">
+                            <label class="wrapper">
+                                <input name="search" class="form-control-header" placeholder="🔍︎ Enter keywords...">
+                            </label>
                         </div>
                     </div>
                     <br>
                     <div style="display: flex;">
                         <div style="width: 15%; color: white;">
-                            <strong>RMSD</strong>
+                            <strong>Max RMSD</strong>
                         </div>
                         <div style="width: 25%; color: white;">
-                            <input name="rmsd" class="input-import" value=8>
+                            <label class="wrapper">
+                                <input name="rmsd" class="form-control-header" value=8>
+                            </label>
                         </div>
                         <div style="width: 10%;">
                         </div>

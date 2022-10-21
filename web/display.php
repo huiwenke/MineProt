@@ -153,3 +153,90 @@ function form_td($Table_tr)
     </td>";
     echo "</tr>";
 }
+
+function form_saligner($Salign_Result)
+{
+    $Salign_Result_Viewer = "MP_" . md5($Salign_Result["PDB1"]);
+    $Salign_Name = pathinfo($Salign_Result["PDB2"])["filename"];
+    $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
+    $Salign_Result_Path = "/repo/" . $Salign_Repo . '/' . $Salign_Name . ".cif";
+    $Salign_Query_Path = "../api/cache/get.php?data_url=" . base64_encode($Salign_Result["PDB1"]);
+    print <<<EOT
+<style>
+#$Salign_Result_Viewer {
+    float: center;
+    width: 100%;
+    height: 50vh;
+    position: relative;
+    z-index: 31;
+}
+</style>
+<div id="$Salign_Result_Viewer"></div>
+<script>
+    //Create plugin instance
+    var $Salign_Result_Viewer = new PDBeMolstarPlugin();
+
+    //Set options (Checkout available options list in the documentation)
+    var options = {
+        alphafoldView: true,
+        customData: {
+            url: '$Salign_Query_Path',
+            format: "pdb"
+        }
+    }
+
+    var viewerContainer = document.getElementById('$Salign_Result_Viewer');
+
+    $Salign_Result_Viewer.render(viewerContainer, options);
+    $Salign_Result_Viewer.visual.update({alphafoldView: true, customData: {url: '$Salign_Result_Path', format: "cif"}}, false);
+</script>
+EOT;
+}
+
+function form_salign_result($Salign_Result)
+{
+    $Salign_Name = pathinfo($Salign_Result["PDB2"])["filename"];
+    $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
+    print <<<EOT
+    <div class="card-inner-div">
+        <div>
+            <div style="margin-left: 16px; width=100%;">
+                <a target='_blank' class='user-properties-link' style="color:#c9d1d9; margin-top: 7px;" href="../search.php?search={$Salign_Name}&repo[]={$Salign_Repo}">{$Salign_Name}</a>
+                <br><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RMSD</th>
+                            <th>TM1</th>
+                            <th>TM2</th>
+                            <th>IDali</th>
+                            <th>ID1</th>
+                            <th>ID2</th>
+                            <th>Lali</th>
+                            <th>L1</th>
+                            <th>L2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style='width: 20%;'>{$Salign_Result["RMSD"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["TM1"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["TM2"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["IDali"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["ID1"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["ID2"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["Lali"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["L1"]}</td>
+                            <td style='width: 10%;'>{$Salign_Result["L2"]}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+            </div>
+        </div>
+EOT;
+    form_saligner($Salign_Result);
+    echo "
+    </div>
+<br>";
+}
