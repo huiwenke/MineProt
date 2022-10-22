@@ -15,26 +15,30 @@
             </form>
         </div>
         <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px; border-color: #21262d; border-bottom: 1px solid #30363d;">
-            <p style="margin-bottom: 8px; color:#efefef;">pLDDT</p>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(0, 83, 214);"></span>
-                <span>&nbsp;<strong>Very high</strong> (>90)</span>
+                <span class="lang_color" style="background-color:rgb(220, 220, 220);"></span>
+                <span>&nbsp;<strong>Query structure</strong></span>
             </span>
             <br>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(101, 203, 243);"></span>
-                <span>&nbsp;<strong>Confident</strong> (70~90)</span>
-            </span>
-            <br>
-            <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(255, 219, 19);"></span>
-                <span>&nbsp;<strong>Low</strong> (50~70)</span>
-            </span>
-            <br>
-            <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(255, 125, 69);"></span>
-                <span>&nbsp;<strong>Very low</strong> (<50)</span>
+                <span id="hit_color" class="lang_color" style="background-color:rgb(0, 83, 214);"></span>
+                <span>&nbsp;<strong>Hit structure</strong></span>
             </span>
         </div>
     </div>
 </section>
+<script>
+    function ChangeColor() {
+        var hitColor = document.getElementById("hit_color");
+        var plddtColors = ["rgb(0, 83, 214)", "rgb(101, 203, 243)", "rgb(255, 219, 19)", "rgb(255, 125, 69)"];
+        var randomColor = hitColor.style.backgroundColor;
+        while (randomColor == hitColor.style.backgroundColor) {
+            randomColor = plddtColors[Math.floor(Math.random() * plddtColors.length)];
+        }
+        hitColor.style.backgroundColor = randomColor; //alert(randomColor);
+        setTimeout(() => {
+            ChangeColor()
+        }, 1000)
+    }
+    ChangeColor();
+</script>

@@ -64,7 +64,7 @@
                     }
                     ?>
                 </h2>
-                <HR color=#21262d SIZE=1.5>
+                <HR id="hr1" color=#21262d SIZE=1>
                 <br>
                 <?php
                 if ($Salign_Result_Num > 0) {
@@ -79,14 +79,19 @@
                 ?>
             </div>
         </section>
+        <?php
+        if ($Salign_Result_Num > 0) {
+            include "legend.php";
+        }
+        ?>
     </main>
     <script>
         function MainFunction() {
             var isExpanded = document.getElementsByClassName("msp-layout-expanded");
-            var header = document.getElementsByTagName("header")[0];
+            var hr1 = document.getElementById("hr1");
             if (isExpanded.length==0) {
-                header.style.visibility = "visible";
-            } else header.style.visibility = "hidden";
+                hr1.style.visibility = "visible";
+            } else hr1.style.visibility = "hidden";
             var mspSeqs = document.getElementsByClassName("msp-layout-top");
             for (var i=0;i<mspSeqs.length;i++){
                 mspSeqs[i].remove();

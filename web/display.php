@@ -163,6 +163,9 @@ function form_saligner($Salign_Result)
     $Salign_Query_Path = "../api/cache/get.php?data_url=" . base64_encode($Salign_Result["PDB1"]);
     print <<<EOT
 <style>
+.msp-plugin {
+    margin: 0 0 0 0;
+}
 #$Salign_Result_Viewer {
     float: center;
     width: 100%;
@@ -200,10 +203,10 @@ function form_salign_result($Salign_Result)
     print <<<EOT
     <div class="card-inner-div">
         <div>
-            <div style="margin-left: 16px; width=100%;">
-                <a target='_blank' class='user-properties-link' style="color:#c9d1d9; margin-top: 7px;" href="../search.php?search={$Salign_Name}&repo[]={$Salign_Repo}">{$Salign_Name}</a>
+            <div style="width=100%;">
+                <strong><a target='_blank' class='user-properties-link' style="color:#c9d1d9; margin-top: 7px;" href="../search.php?search={$Salign_Name}&repo[]={$Salign_Repo}">{$Salign_Name}</a></strong>
                 <br><br>
-                <table>
+                <table style="font-size:12px;">
                     <thead>
                         <tr>
                             <th>RMSD</th>
@@ -212,22 +215,16 @@ function form_salign_result($Salign_Result)
                             <th>IDali</th>
                             <th>ID1</th>
                             <th>ID2</th>
-                            <th>Lali</th>
-                            <th>L1</th>
-                            <th>L2</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style='width: 20%;'>{$Salign_Result["RMSD"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["TM1"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["TM2"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["IDali"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["ID1"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["ID2"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["Lali"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["L1"]}</td>
-                            <td style='width: 10%;'>{$Salign_Result["L2"]}</td>
+                            <td style='width: 25%;'>{$Salign_Result["RMSD"]}</td>
+                            <td style='width: 15%;'>{$Salign_Result["TM1"]}</td>
+                            <td style='width: 15%;'>{$Salign_Result["TM2"]}</td>
+                            <td style='width: 25%;'>{$Salign_Result["IDali"]}</td>
+                            <td style='width: 15%;'>{$Salign_Result["ID1"]}</td>
+                            <td style='width: 15%;'>{$Salign_Result["ID2"]}</td>
                         </tr>
                     </tbody>
                 </table>
