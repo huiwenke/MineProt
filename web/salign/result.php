@@ -34,7 +34,7 @@
             if ((float)$Items[4] > $Max_RMSD) continue;
             $Items[1] = substr($Items[1], 0, -2);
             $Salign_Result = array(
-                "PDB1" => "MP_SALIGN_" . $_GET["rid"] . "/query_" . pathinfo($Items[1])["filename"] . ".pdb",
+                "PDB1" => "MP_SALIGN_" . $_GET["rid"] . "/query_" . pathinfo($Items[1])["filename"],
                 "PDB2" => $Items[1],
                 "TM1" => (float)$Items[2],
                 "TM2" => (float)$Items[3],

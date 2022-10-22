@@ -160,7 +160,7 @@ function form_saligner($Salign_Result)
     $Salign_Name = pathinfo($Salign_Result["PDB2"])["filename"];
     $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
     $Salign_Result_Path = "/repo/" . $Salign_Repo . '/' . $Salign_Name . ".cif";
-    $Salign_Query_Path = "../api/cache/get.php?data_url=" . base64_encode($Salign_Result["PDB1"]);
+    $Salign_Query_Path = "../api/cache/get.php?data_url=" . base64_encode($Salign_Result["PDB1"] . ".pdb");
     print <<<EOT
 <style>
 .msp-plugin {
@@ -200,31 +200,52 @@ function form_salign_result($Salign_Result)
 {
     $Salign_Name = pathinfo($Salign_Result["PDB2"])["filename"];
     $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
+    $Salign_Result_Data_URLs = array(
+        "pdb" => base64_encode($Salign_Result["PDB1"] . ".pdb"),
+        "hit" => "/repo/" . $Salign_Repo . '/' . $Salign_Name . ".pdb",
+        "pml" => base64_encode($Salign_Result["PDB1"] . ".pml"),
+        "all" => base64_encode($Salign_Result["PDB1"] . "_all.pml"),
+        "all_atm" => base64_encode($Salign_Result["PDB1"] . "_all_atm.pml"),
+        "all_atm_lig" => base64_encode($Salign_Result["PDB1"] . "_all_atm_lig.pml"),
+        "atm" => base64_encode($Salign_Result["PDB1"] . "_atm.pml")
+    );
     print <<<EOT
     <div class="card-inner-div">
         <div>
             <div style="width=100%;">
                 <strong><a target='_blank' class='user-properties-link' style="color:#c9d1d9; margin-top: 7px;" href="../search.php?search={$Salign_Name}&repo[]={$Salign_Repo}">{$Salign_Name}</a></strong>
                 <br><br>
+                <span>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["pdb"]}" style="background-color: rgb(0, 83, 214);" class="btn"><center>query.pdb</center></a>
+                    <a target="_blank" href="{$Salign_Result_Data_URLs["hit"]}" style="background-color: #fd1593;" class="btn"><center>hit.pdb</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["pml"]}" style="background-color: #563d7c;" class="btn"><center>query.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["all"]}" style="background-color: #563d7c;" class="btn"><center>all.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["all_atm"]}" style="background-color: #563d7c;" class="btn"><center>all_atm.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["all_atm_lig"]}" style="background-color: #563d7c;" class="btn"><center>all_atm_lig.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={$Salign_Result_Data_URLs["atm"]}" style="background-color: #563d7c;" class="btn"><center>atm.pml</center></a>
+	            </span>
+                <br><br>
                 <table style="font-size:12px;">
                     <thead>
                         <tr>
-                            <th>RMSD</th>
-                            <th>TM1</th>
-                            <th>TM2</th>
-                            <th>IDali</th>
-                            <th>ID1</th>
-                            <th>ID2</th>
+                            <th style='width: 16.7%;'>RMSD</th>
+                            <th style='width: 16.7%;'>TM1</th>
+                            <th style='width: 16.7%;'>TM2</th>
+                            <th style='width: 16.7%;'>IDali</th>
+                            <th style='width: 16.7%;'>ID1</th>
+                            <th style='width: 16.7%;'>ID2</th>
+                            <th style='width: 16.7%;'>Lali</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style='width: 25%;'>{$Salign_Result["RMSD"]}</td>
-                            <td style='width: 15%;'>{$Salign_Result["TM1"]}</td>
-                            <td style='width: 15%;'>{$Salign_Result["TM2"]}</td>
-                            <td style='width: 25%;'>{$Salign_Result["IDali"]}</td>
-                            <td style='width: 15%;'>{$Salign_Result["ID1"]}</td>
-                            <td style='width: 15%;'>{$Salign_Result["ID2"]}</td>
+                            <td>{$Salign_Result["RMSD"]}</td>
+                            <td>{$Salign_Result["TM1"]}</td>
+                            <td>{$Salign_Result["TM2"]}</td>
+                            <td>{$Salign_Result["IDali"]}</td>
+                            <td>{$Salign_Result["ID1"]}</td>
+                            <td>{$Salign_Result["ID2"]}</td>
+                            <td>{$Salign_Result["Lali"]}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -233,7 +254,8 @@ function form_salign_result($Salign_Result)
         </div>
 EOT;
     form_saligner($Salign_Result);
-    echo "
+    print <<<EOT
     </div>
-<br>";
+<br>
+EOT;
 }
