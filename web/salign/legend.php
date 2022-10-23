@@ -35,7 +35,7 @@
         while (randomColor == hitColor.style.backgroundColor) {
             randomColor = plddtColors[Math.floor(Math.random() * plddtColors.length)];
         }
-        hitColor.style.backgroundColor = randomColor; //alert(randomColor);
+        hitColor.style.backgroundColor = randomColor;
         setTimeout(() => {
             ChangeColor()
         }, 1000)

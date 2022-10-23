@@ -23,6 +23,10 @@
             header("refresh: 10");
             exit;
         }
+        $TMP_STR = str_replace("/", "\\/", $TMP_DIR);
+        shell_exec("sed -i 's/$TMP_STR\///' $TMP_DIR/*.pml");
+        $TMP_STR = str_replace("/", "\\/", getenv("MP_REPO_PATH"));
+        shell_exec("sed -i 's/$TMP_STR.*\///' $TMP_DIR/*.pml");
         if (is_numeric($_GET["rmsd"])) {
             $Max_RMSD = (float)$_GET["rmsd"];
         } else $Max_RMSD = PHP_INT_MAX;

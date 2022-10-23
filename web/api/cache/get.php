@@ -1,5 +1,9 @@
 <?php
 $File_Path = sys_get_temp_dir() . '/' . base64_decode($_GET["data_url"]);
+if (strpos($File_Path, "..")) {
+    echo "?";
+    exit;
+}
 if ($_GET["download"] == "") {
     echo file_get_contents($File_Path);
 } else {

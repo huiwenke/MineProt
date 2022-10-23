@@ -209,6 +209,8 @@ function form_salign_result($Salign_Result)
         "all_atm_lig" => base64_encode($Salign_Result["PDB1"] . "_all_atm_lig.pml"),
         "atm" => base64_encode($Salign_Result["PDB1"] . "_atm.pml")
     );
+    $PDB1_Path = base64_encode(sys_get_temp_dir() . '/' . $Salign_Result["PDB1"] . ".pdb");
+    $PDB2_Path = base64_encode(getenv("MP_REPO_PATH") . $Salign_Repo . '/' . $Salign_Name . ".pdb");
     print <<<EOT
     <div class="card-inner-div">
         <div>
@@ -234,7 +236,7 @@ function form_salign_result($Salign_Result)
                             <th style='width: 16.7%;'>IDali</th>
                             <th style='width: 16.7%;'>ID1</th>
                             <th style='width: 16.7%;'>ID2</th>
-                            <th style='width: 16.7%;'>Lali</th>
+                            <th style='width: 16.7%;'>Detail</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -245,7 +247,7 @@ function form_salign_result($Salign_Result)
                             <td>{$Salign_Result["IDali"]}</td>
                             <td>{$Salign_Result["ID1"]}</td>
                             <td>{$Salign_Result["ID2"]}</td>
-                            <td>{$Salign_Result["Lali"]}</td>
+                            <td><a class='btn' style='background-color: #DC143C;' target="_blank" href="./detail.php?pdb1={$PDB1_Path}&pdb2={$PDB2_Path}">▶</a></td>
                         </tr>
                     </tbody>
                 </table>
