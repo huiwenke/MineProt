@@ -13,12 +13,6 @@
     <?php
     include "header.html";
     include "../api.php";
-    $DATA_REPOS = array_diff(scandir(getenv("MP_REPO_PATH")), array('.', '..'));
-    foreach ($DATA_REPOS as $Data_Repo_k => $Data_Repo) {
-        if (!get_api_repo($Data_Repo)) {
-            unset($DATA_REPOS[$Data_Repo_k]);
-        }
-    }
     ?>
     <main style="min-height: 100vh;">
         <section class="main_salign">

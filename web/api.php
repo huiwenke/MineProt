@@ -45,3 +45,10 @@ function get_api_tr($Data_Repo, $File)
     $Result["anno"] = $ES_Get["_source"]["anno"]["description"][0];
     return $Result;
 }
+
+$DATA_REPOS = array_diff(scandir(getenv("MP_REPO_PATH")), array('.', '..'));
+foreach ($DATA_REPOS as $Data_Repo_k => $Data_Repo) {
+    if (!get_api_repo($Data_Repo)) {
+        unset($DATA_REPOS[$Data_Repo_k]);
+    }
+}
