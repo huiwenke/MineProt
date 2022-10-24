@@ -69,6 +69,10 @@ MineProt interface provides final users with following functions:
 
 > To speed up response of the **browse page**, MineProt automatically generates cache for each repository on first access. Clicking the **refresh** button will regenerate the cache.
 
+- **Salign:** Structure search engine powered by [US-align](https://zhanggroup.org/US-align/).
+
+<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_salign.gif"></div>
+
 For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></div>
