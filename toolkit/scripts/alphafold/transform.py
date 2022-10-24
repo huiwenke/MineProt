@@ -45,7 +45,7 @@ def MakeTmp(dir_name, input_dir, output_dir):
     except:
         print("Warining: Not pTM model. PAE plot will be disabled.")
     with open(output_path+".json", 'w') as fout_json:
-        json.dump(json_data, fout_json, indent=4)
+        json.dump(json_data, fout_json)
     shutil.copyfile(dir_path+"/ranked_0.pdb", output_path+".pdb")
     with open(dir_path+"/msas/bfd_uniclust_hits.a3m", 'r') as fin_a3m, open(output_path+".a3m", 'w') as fout_a3m:
         fout_a3m.write("# Added by MineProt toolkit\n")
