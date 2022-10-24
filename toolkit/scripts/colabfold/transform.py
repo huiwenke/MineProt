@@ -104,7 +104,7 @@ for file_name in TmpList:
                 for pae_j in range(len(json_data["pae"])):
                     json_data["pae"][pae_i][pae_j] = round(json_data["pae"][pae_i][pae_j])
         with open(file_path, 'w') as fout:
-            json.dump(json_data, fout)
+            json.dump(json_data, fout, separators=(',', ':'))
     output_path = os.path.join(OutputDir, NameList[-1]) + os.path.splitext(file_name)[-1]
     print("Moving "+file_path+" to "+output_path+"...")
     shutil.move(file_path, output_path)

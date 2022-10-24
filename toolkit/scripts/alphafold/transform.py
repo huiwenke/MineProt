@@ -36,6 +36,8 @@ def MakeTmp(dir_name, input_dir, output_dir):
     pkl_data = pickle.load(open(pkl_path, 'rb'))
     json_data = {"plddt": pkl_data["plddt"].tolist(), "pae": [], "max_pae": 31.75, "ptm": 0}
     try:
+        for plddt_i in range(len(json_data["plddt"])):
+            json_data["plddt"][plddt_i] = round(json_data["plddt"][plddt_i], 2)
         json_data["pae"] = pkl_data["predicted_aligned_error"].tolist()
         for pae_i in range(len(json_data["pae"])):
             for pae_j in range(len(json_data["pae"])):
@@ -45,7 +47,7 @@ def MakeTmp(dir_name, input_dir, output_dir):
     except:
         print("Warining: Not pTM model. PAE plot will be disabled.")
     with open(output_path+".json", 'w') as fout_json:
-        json.dump(json_data, fout_json)
+        json.dump(json_data, fout_json, separators=(',', ':'))
     shutil.copyfile(dir_path+"/ranked_0.pdb", output_path+".pdb")
     with open(dir_path+"/msas/bfd_uniclust_hits.a3m", 'r') as fin_a3m, open(output_path+".a3m", 'w') as fout_a3m:
         fout_a3m.write("# Added by MineProt toolkit\n")
