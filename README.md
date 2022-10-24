@@ -73,6 +73,7 @@ MineProt interface provides final users with following functions:
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_salign.gif"></div>
 
+<br>
 For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></div>
