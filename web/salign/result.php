@@ -61,8 +61,6 @@
                     $Salign_Result_Num = count($Salign_Results);
                     if ($Salign_Result_Num == 0) {
                         echo " No result";
-                    } else if ($Salign_Result_Num >= 100) {
-                        echo " Top 100 results";
                     } else {
                         echo $Salign_Result_Num . " results";
                     }
