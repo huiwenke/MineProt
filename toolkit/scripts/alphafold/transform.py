@@ -37,12 +37,15 @@ def MakeTmp(dir_name, input_dir, output_dir):
     json_data = {"plddt": pkl_data["plddt"].tolist(), "pae": [], "max_pae": 31.75, "ptm": 0}
     try:
         json_data["pae"] = pkl_data["predicted_aligned_error"].tolist()
+        for pae_i in range(len(json_data["pae"])):
+            for pae_j in range(len(json_data["pae"])):
+                json_data["pae"][pae_i][pae_j] = round(json_data["pae"][pae_i][pae_j])
         json_data["max_pae"] = float(pkl_data["max_predicted_aligned_error"])
         json_data["ptm"] = float(pkl_data["ptm"])
     except:
         print("Warining: Not pTM model. PAE plot will be disabled.")
     with open(output_path+".json", 'w') as fout_json:
-        json.dump(json_data, fout_json)
+        json.dump(json_data, fout_json, indent=4)
     shutil.copyfile(dir_path+"/ranked_0.pdb", output_path+".pdb")
     with open(dir_path+"/msas/bfd_uniclust_hits.a3m", 'r') as fin_a3m, open(output_path+".a3m", 'w') as fout_a3m:
         fout_a3m.write("# Added by MineProt toolkit\n")

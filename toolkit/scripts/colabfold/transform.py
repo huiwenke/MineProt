@@ -3,6 +3,7 @@ import os
 import zipfile
 import sys
 import shutil
+import json
 from tempfile import TemporaryDirectory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
 from rename import ReName
@@ -96,6 +97,14 @@ for file_name in TmpList:
     file_path = os.path.join(TmpDir, file_name)
     if os.path.splitext(file_name)[-1] == ".a3m":
         NameList.append(ReName(args.n, file_name, TmpDir))
+    if os.path.splitext(file_name)[-1] == ".json":
+        with open(file_path, 'r') as fin:
+            json_data = json.load(fin)
+            for pae_i in range(len(json_data["pae"])):
+                for pae_j in range(len(json_data["pae"])):
+                    json_data["pae"][pae_i][pae_j] = round(json_data["pae"][pae_i][pae_j])
+        with open(file_path, 'w') as fout:
+            json.dump(json_data, fout, indent=4)
     output_path = os.path.join(OutputDir, NameList[-1]) + os.path.splitext(file_name)[-1]
     print("Moving "+file_path+" to "+output_path+"...")
     shutil.move(file_path, output_path)

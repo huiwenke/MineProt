@@ -4,7 +4,7 @@
 Upload data to target repository.
 Gzipped JSON request:
     {
-        "name": protein name
+        "name": file name
         "repo": repository name
         "text": base64-encoded file text
         "force": force overwritting or not
