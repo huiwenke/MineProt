@@ -42,16 +42,15 @@ for file_name in os.listdir(InputDir):
     file_path = os.path.join(InputDir, file_name)
     with open(file_path, 'r') as fi:
         file_text = fi.read().encode("utf-8")
-        if not import_request_json["force"]:
-            if requests.get(url=args.url+"check.php", params=import_request_json).text == hashlib.md5(file_text).hexdigest():
-                print("Skipping "+import_request_json["repo"]+'/'+import_request_json["name"])
-                continue
+        if requests.get(url=args.url+"check.php", params=import_request_json).text == hashlib.md5(file_text).hexdigest():
+            print("Skipping "+import_request_json["repo"]+'/'+import_request_json["name"])
+            continue
     # Encode file data with BASE64
     import_request_json["text"] = str(base64.b64encode(file_text), "utf-8")
     # POST to MineProt Import API
     response = requests.post(url=args.url, headers=headers, data=gzip.compress(json.dumps(import_request_json).encode()))
     if response.status_code == 200:
-        print("Importing "+import_request_json["repo"]+'/'+import_request_json["name"])
+        print(response.text+' '+import_request_json["repo"]+'/'+import_request_json["name"])
     else:
         print("Error "+str(response.status_code)+": Failed to import "+import_request_json["repo"]+'/'+import_request_json["name"])
 
