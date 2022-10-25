@@ -61,14 +61,14 @@ for file_name in os.listdir(InputDir):
         else:
             # Execute the import
             print("Importing "+es_request_json["name"]+"...")
-        # Calculate average pLDDT
-        with open(os.path.join(InputDir, es_request_json["name"])+".json", 'r') as f_json:
-            score_plddt = json.load(f_json)["plddt"]
-            es_request_json["score"] = sum(score_plddt)/len(score_plddt)
         # Generate file path and open the file
         file_path = os.path.join(InputDir, file_name)
         with open(file_path,'r') as fi:
             try:
+                # Calculate average pLDDT
+                with open(os.path.join(InputDir, es_request_json["name"])+".json", 'r') as f_json:
+                    score_plddt = json.load(f_json)["plddt"]
+                    es_request_json["score"] = sum(score_plddt)/len(score_plddt)
                 # Read MSA from file
                 lines = fi.readlines()
                 es_request_json["seq"] = lines[2][1:-1]

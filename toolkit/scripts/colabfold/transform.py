@@ -53,15 +53,16 @@ def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
     """
     file_path = os.path.join(input_dir, file_name)
     # Check if we need to decompress input file
-    if is_zip and os.path.splitext(file_name)[-1] == ".zip":
-        zip_file = zipfile.ZipFile(file_path)
-        zip_list = zip_file.infolist()
-        for zip_f in zip_list:
-            # Check if the given file name is valid and decompress valid file to output directory
-            if FixName(is_relaxed, zip_f.filename)!='':
-                zip_f.filename = FixName(is_relaxed, zip_f.filename)
-                zip_file.extract(zip_f, output_dir)
-        zip_file.close()
+    if is_zip:
+        if os.path.splitext(file_name)[-1] == ".zip":
+            zip_file = zipfile.ZipFile(file_path)
+            zip_list = zip_file.infolist()
+            for zip_f in zip_list:
+                # Check if the given file name is valid and decompress valid file to output directory
+                if FixName(is_relaxed, zip_f.filename)!='':
+                    zip_f.filename = FixName(is_relaxed, zip_f.filename)
+                    zip_file.extract(zip_f, output_dir)
+            zip_file.close()
     else:
         # Check if the given file name is valid and copy valid file to output directory
         if FixName(is_relaxed, file_name)!='':
