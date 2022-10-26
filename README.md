@@ -109,6 +109,7 @@ PHP 5.5.9+ with cURL
 Elasticsearch 7.12.1
 WebServer basic platform (NGINX, Apache, etc.)
 MAXIT 11.100
+US-align (Version 20220924)
 ```
 See [Deployment manual](https://github.com/huiwenke/MineProt/wiki/Deployment-manual) for more information.
 
