@@ -15,7 +15,7 @@ $Query = array(
             "anno.description" => $Search_Term
         )
     ),
-    "size" => 100
+    "size" => 200
 );
 $Query_Json = json_encode($Query);
 $Curl_Handle = curl_init(getenv("MP_ELASTICSEARCH") . "/$Dataset/_search");

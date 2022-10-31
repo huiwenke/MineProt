@@ -31,8 +31,8 @@
                     $Search_Result_Num = count($Search_Results);
                     if ($Search_Result_Num == 0) {
                         echo " No result";
-                    } else if ($Search_Result_Num >= 100) {
-                        echo " Top 100 results";
+                    } else if ($Search_Result_Num >= 200) {
+                        echo " Top 200 results";
                     } else {
                         echo $Search_Result_Num . " results";
                     }

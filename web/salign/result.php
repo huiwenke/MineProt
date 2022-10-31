@@ -19,8 +19,8 @@
         <?php
         $TMP_DIR = sys_get_temp_dir() . "/MP_SALIGN_" . $_GET["rid"];
         if (!file_exists("$TMP_DIR/done.txt")) {
-            include "wait.html";
-            header("refresh: 10");
+            include "wait.php";
+            header("refresh: 5");
             exit;
         }
         $TMP_STR = str_replace("/", "\\/", $TMP_DIR);
@@ -50,6 +50,7 @@
                 "L2" => (int)$Items[9],
                 "Lali" => (int)$Items[10],
             );
+            if ($Salign_Result["TM1"] < 0.5 && $Salign_Result["TM2"] < 0.5) continue;
             array_push($Salign_Results, $Salign_Result);
         }
         array_multisort(array_column($Salign_Results, "RMSD"), $Salign_Results);

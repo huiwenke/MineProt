@@ -28,13 +28,13 @@ do
     shift
 done
 
-if [ ! "$(command -v docker)" ]; then
-  echo "Error: Please install docker."
+if [ ! "$(command -v curl)" ]; then
+  echo "Error: Please install curl."
   exit 1
 fi
 
-if [ ! "$(command -v wget)" ]; then
-  echo "Error: Please install wget."
+if [ ! "$(command -v docker)" ]; then
+  echo "Error: Please install docker."
   exit 1
 fi
 
@@ -49,7 +49,7 @@ if [ ! -f "docker-compose.yml" ]; then
 fi
 
 if [ ! -f "app/php/maxit.tar.gz" ]; then
-	wget https://figshare.com/ndownloader/files/36918121 -O app/php/maxit.tar.gz;
+	curl -L https://figshare.com/ndownloader/files/36918121 -o app/php/maxit.tar.gz;
 fi
 
 if [ ! -d $MP_DATA ]; then

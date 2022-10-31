@@ -49,7 +49,7 @@
                         </div>
                         <div style="width: 25%; color: white;">
                             <label class="wrapper">
-                                <input name="rmsd" class="form-control-header" value=8>
+                                <input name="rmsd" class="form-control-header" value=5>
                             </label>
                         </div>
                         <div style="width: 10%;">
