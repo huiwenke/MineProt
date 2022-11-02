@@ -137,12 +137,10 @@ function form_td($Table_tr)
         $pLDDT_Color = "background-color:rgb(255, 219, 19);";
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
     echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
-    echo "
-    <td>
-        <a class='btn' style='background-color: #DC143C;' href='/repo/$Data_Repo/$Name.a3m'>
-        A3M
-        </a>
-    </td>";
+    if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m")){
+        $A3M_Url = "<a class='btn' style='background-color: #DC143C;' href='/repo/$Data_Repo/$Name.a3m'>A3M</a>";
+    } else $A3M_Url = "N/A";
+    echo "<td>$A3M_Url</td>";
     $Homolog = $Table_tr["homolog"];
     $Annotation = $Table_tr["anno"];
     echo "
