@@ -136,7 +136,8 @@ function form_td($Table_tr)
     } else if ($Scores_pLDDT >= 50) {
         $pLDDT_Color = "background-color:rgb(255, 219, 19);";
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
-    echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
+    if ($Scores_pLDDT <= 0) echo "<td>N/A</td>";
+    else echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
     if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m")){
         $A3M_Url = "<a class='btn' style='background-color: #DC143C;' href='/repo/$Data_Repo/$Name.a3m'>A3M</a>";
     } else $A3M_Url = "N/A";

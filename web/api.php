@@ -36,7 +36,7 @@ function search_api($Search_Repos, $Search_Term)
 
 function get_api_tr($Data_Repo, $File)
 {
-    $Result = array("name" => pathinfo($File)["filename"], "repo" => $Data_Repo, "plddt" => 0.0, "anno" => "", "homolog" => "");
+    $Result = array("name" => pathinfo($File)["filename"], "repo" => $Data_Repo, "plddt" => -1.0, "anno" => "", "homolog" => "");
     $b64_Name = base64_encode($Result["name"]);
     $ES_Get = json_decode(file_get_contents(getenv("MP_LOCALHOST") . "/api/es/$Data_Repo/get/$b64_Name"), true);
     $Result["homolog"] = $ES_Get["_source"]["anno"]["homolog"];
