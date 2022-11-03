@@ -1,11 +1,11 @@
 import argparse
 import os
 import sys
-import requests
 import json
 import base64
 sys.path.append(os.path.abspath(os.path.dirname(sys.argv[0])))
 from annotate import UniProt2MineProt
+import api
 
 # List arguments
 parser = argparse.ArgumentParser(description='Import your proteins into Elasticsearch.')
@@ -26,9 +26,8 @@ if not args.n:
 print("Proteins will be imported to "+args.n)
 # If argument -f is specified as TRUE, reset the Elasticsearch index
 if args.f:
-    request_url = '/'.join([args.url, args.n, "del", ''])
     print("WARNING: ALL DATA IN "+args.n+" WILL BE OVERWRITTEN.")
-    requests.post(request_url)
+    api.EsDel(args.url, args.n)
 # If argument -a is specified as TRUE, try to annotate proteins using UniProt API when importing.
 if args.a:
     print("Proteins will be annotated using UniProt API.")
@@ -38,7 +37,6 @@ print("Importing proteins to Elasticsearch...")
 # Enumerate all files in InputDir
 for file_name in os.listdir(InputDir):
     # Generate JSON from A3M file, and then POST to Elasticsearch
-    headers = {'Content-Type': 'application/json'}
     if os.path.splitext(file_name)[-1] == ".a3m":
         es_request_json = {
             "name": "",
@@ -51,8 +49,7 @@ for file_name in os.listdir(InputDir):
         }
         es_request_json["name"] = os.path.splitext(file_name)[0]
         es_id = str(base64.b64encode(os.path.splitext(file_name)[0].encode("utf-8")),"utf-8")
-        request_url = '/'.join([args.url, args.n, "get", es_id])
-        response_json = json.loads(requests.post(url=request_url, headers=headers).text)
+        response_json = json.loads(api.EsGet(args.url, args.n, es_id).text)
         # Check if the current protein is already stored in Elasticsearch
         if "error" not in response_json and response_json["found"]:
             # Simply skip current protein if it has been stored previously
@@ -77,8 +74,7 @@ for file_name in os.listdir(InputDir):
                     es_request_json["anno"] = UniProt2MineProt(lines[3::2])
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
-                request_url = '/'.join([args.url, args.n, "add", es_id])
-                requests.post(url=request_url, headers=headers, data=json.dumps(es_request_json))
+                api.EsAdd(args.url, args.n, es_id, json.dumps(es_request_json))
             except:
                 print("Error: Failed to import "+es_request_json["name"]+".")
 

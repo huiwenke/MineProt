@@ -6,7 +6,7 @@ import json
 import pickle
 from tempfile import TemporaryDirectory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
-from pdb2cif import pdb2cif
+from api import pdb2cif
 from rename import ReName
 
 # List arguments

@@ -9,8 +9,13 @@ def GetUniProt(accession):
     """
     headers = {'Content-Type': 'application/json'}
     request_url = "https://www.ebi.ac.uk/proteins/api/proteins/"+accession
-    response = requests.get(url=request_url, headers=headers)
-    return response
+    retry = 0
+    while retry < 3:
+        try:
+            response = requests.get(url=request_url, headers=headers, timeout=10)
+            return response
+        except:
+            retry += 1
 
 def UniProt2MineProt(identifier_list):
     """

@@ -1,10 +1,12 @@
 import argparse
 import os
-import requests
 import json
 import hashlib
 import base64
 import gzip
+import sys
+sys.path.append(os.path.abspath(os.path.dirname(sys.argv[0])))
+import api
 
 # List arguments
 parser = argparse.ArgumentParser(description='Import your proteins into repository.')
@@ -35,20 +37,16 @@ for file_name in os.listdir(InputDir):
         "force": args.f
     }
     # Compress the JSON with gzip
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept-encoding': 'gzip'
-    }
     file_path = os.path.join(InputDir, file_name)
     with open(file_path, 'r') as fi:
         file_text = fi.read().encode("utf-8")
-        if requests.get(url=args.url+"check.php", params=import_request_json).text == hashlib.md5(file_text).hexdigest():
+        if api.Check(args.url, import_request_json).text == hashlib.md5(file_text).hexdigest():
             print("Skipping "+import_request_json["repo"]+'/'+import_request_json["name"])
             continue
     # Encode file data with BASE64
     import_request_json["text"] = str(base64.b64encode(file_text), "utf-8")
     # POST to MineProt Import API
-    response = requests.post(url=args.url, headers=headers, data=gzip.compress(json.dumps(import_request_json).encode()))
+    response = api.Import(args.url, gzip.compress(json.dumps(import_request_json).encode()))
     if response.status_code == 200:
         print(response.text+' '+import_request_json["repo"]+'/'+import_request_json["name"])
     else:

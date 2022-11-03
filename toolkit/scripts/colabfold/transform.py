@@ -7,7 +7,7 @@ import json
 from tempfile import TemporaryDirectory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), "..")))
 from rename import ReName
-from pdb2cif import pdb2cif
+from api import pdb2cif
 
 # List arguments
 parser = argparse.ArgumentParser(description='Preprocess your ColabFold predictions for curation: pick out top-1 model and generate .cif for visualization.')
