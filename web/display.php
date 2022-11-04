@@ -86,7 +86,7 @@ function form_search_result($Search_Result)
         $html_Homolog_Info = "none";
     } else {
         $html_Homolog_Info = '
-        <a class="card-link user-properties-link" href="https://www.uniprot.org/uniprotkb?query=' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
+        <a class="card-link user-properties-link" href="https://www.uniprot.org/' . $Search_Result["_source"]["anno"]["database"] . '?query=' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
     }
     print <<<EOT
 <div class="card-inner-div">
@@ -147,10 +147,11 @@ function form_td($Table_tr)
     } else $A3M_Url = "N/A";
     echo "<td>$A3M_Url</td>";
     $Homolog = $Table_tr["homolog"];
+    $Database = $Table_tr["database"];
     $Annotation = $Table_tr["anno"];
     echo "
     <td style='word-wrap: break-word; width: 50%;'>
-        <a target='_blank' title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/uniprotkb?query=$Homolog'>
+        <a target='_blank' title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/$Database?query=$Homolog'>
         $Annotation
         </a>
     </td>";

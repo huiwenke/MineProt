@@ -40,6 +40,7 @@ function get_api_tr($Data_Repo, $File)
     $b64_Name = base64_encode($Result["name"]);
     $ES_Get = json_decode(file_get_contents(getenv("MP_LOCALHOST") . "/api/es/$Data_Repo/get/$b64_Name"), true);
     $Result["homolog"] = $ES_Get["_source"]["anno"]["homolog"];
+    $Result["database"] = $ES_Get["_source"]["anno"]["database"];
     $Result["anno"] = $ES_Get["_source"]["anno"]["description"][0];
     $Result["plddt"] = $ES_Get["_source"]["score"];
     return $Result;

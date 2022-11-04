@@ -44,6 +44,7 @@ for file_name in os.listdir(InputDir):
             "score": -1.0,
             "anno": {
                 "homolog": "",
+                "database": "",
                 "description": []
             }
         }
