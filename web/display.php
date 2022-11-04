@@ -2,11 +2,15 @@
 
 function form_repo($Data_Repo)
 {
+    $html_Checked = "";
+    if (array_key_exists("search", $_GET)){
+        if (!array_key_exists("repo", $_GET) || in_array($Data_Repo, $_GET["repo"])) $html_Checked = " checked";
+    } else if(array_key_exists("repo", $_GET) && $Data_Repo==$_GET["repo"]) $html_Checked = " checked";
     print <<<EOT
     <ul>
         <li>
             <div class="list-item-div">
-                <input type="checkbox" id="$Data_Repo" value="$Data_Repo" name="repo[]" class="a-item-div">
+                <input type="checkbox" id="$Data_Repo" value="$Data_Repo" name="repo[]" class="a-item-div"$html_Checked>
                 <label for="$Data_Repo">
                     <font color="white">$Data_Repo</font>
                 </label>

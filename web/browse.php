@@ -61,7 +61,7 @@
                     ";
                         $Table = array();
                         foreach ($Files as $File) {
-                            if (pathinfo($File)["extension"] == "json") {
+                            if (pathinfo($File)["extension"] == "pdb") {
                                 array_push($Table, get_api_tr($_GET["repo"], $File));
                             }
                         }
