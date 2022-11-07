@@ -136,9 +136,10 @@
                 codeForImport.innerHTML = "# Where is your data for importing?";
                 return;
             }
-            var repoName = document.getElementById("repo_name").value;
-            if (repoName == "CREATE_NEW_REPO") {
-                codeForImport.innerHTML += "# Don't forget to replace CREATE_NEW_REPO with your new repo name.\n"
+            var repoName = document.getElementById("repo_name").value.toLowerCase();
+            if (repoName == "create_new_repo") {
+                codeForImport.innerHTML += "# Don't forget to replace create_new_repo with your new repo name.\n";
+                codeForImport.innerHTML += "# Please note that repo name should be in lower case.\n\n";
             }
             var scriptPath = document.getElementById("script_path").value;
             if (scriptPath == "") {
