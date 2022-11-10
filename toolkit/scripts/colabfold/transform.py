@@ -113,7 +113,7 @@ for file_name in TmpList:
 # Delete temp directory
 shutil.rmtree(TmpDir)
 
-# Convert PDF to CIF
+# Convert PDB to CIF
 print("Generating CIF files...")
 for prefix in NameList:
     pdb2cif(OutputDir, prefix, args.url)
