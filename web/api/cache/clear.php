@@ -1,12 +1,16 @@
 <?php
 
-function cache_clear($File)
+function cache_clear($File_Path, $Repo, $Force)
 {
-    if (file_exists($File)) {
-        unlink($File);
+    if (strstr($File_Path, "MP_BROWSE_$Repo")){
+        $md5_Repo_Time = md5(filemtime(getenv("MP_REPO_PATH") . $Repo));
+        if (strstr($File_Path, $md5_Repo_Time)&&(!$Force)) return;
+        unlink($File_Path);
     }
 }
 
-$ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_';
-cache_clear($ob_File);
-cache_clear($ob_File . "plddt");
+$Files = array_diff(scandir(sys_get_temp_dir()), array('.', '..'));
+foreach ($Files as $File){
+    $File_Path = sys_get_temp_dir() . '/' . $File;
+    cache_clear($File_Path, $_GET["repo"], $_GET["force"]);
+}

@@ -41,5 +41,6 @@ fwrite($Shell_Script, "touch $TMP_DIR/done.txt");
 fclose($Shell_Script);
 putenv("PATH=" . getenv("PATH"));
 shell_exec("/bin/bash $Shell_Script_Path > $TMP_DIR/query.out &");
+echo $Result_ID;
 header("location: ../../salign/result.php?rid=$Result_ID&rmsd=$RMSD");
 exit;

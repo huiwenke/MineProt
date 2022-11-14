@@ -40,7 +40,7 @@
                         <button style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick=clearCache('" . $_GET["repo"] . "')>⟳ Refresh</button>
                     </form>
                     <br>";
-                    $ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . md5($_GET["repo"] . filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_' . $_POST["sort"];
+                    $ob_File = sys_get_temp_dir() . "/MP_BROWSE_" . $_GET["repo"] . '_' . md5(filemtime(getenv("MP_REPO_PATH") . $_GET["repo"])) . '_' . $_POST["sort"];
                     if (file_exists($ob_File)) {
                         include($ob_File);
                     } else {
@@ -89,7 +89,7 @@
 
         function clearCache(repoName) {
             var httpRequest = new XMLHttpRequest();
-            httpRequest.open("GET", "./api/cache/clear.php?repo=" + repoName, true);
+            httpRequest.open("GET", "./api/cache/clear.php?force=true&repo=" + repoName, true);
             httpRequest.send();
             ifReSubmit = false;
             location.reload()
