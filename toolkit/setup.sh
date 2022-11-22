@@ -27,7 +27,7 @@ do
             exit
         ;;
         *)
-            echo "Invalid paramter. try '-h' for more information."
+            echo "Invalid parameter. try '-h' for more information."
             exit
         ;;
     esac
