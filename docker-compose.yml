@@ -10,19 +10,21 @@ services:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data
       - ./config/nginx:/etc/nginx/conf.d
-    links:
-      - es:elasticsearch
-      - php:MinePHP
+    depends_on:
+      - es
+      - php
   php:
+    container_name: MinePHP
     restart: always
     build: ./app/php
     volumes:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data
       - ./config/php/php.ini:/usr/local/etc/php/php.ini
-    links:
-      - es:elasticsearch
+    depends_on:
+      - es
   es:
+    container_name: elasticsearch
     build: ./app/elasticsearch
     restart: always    
     volumes:

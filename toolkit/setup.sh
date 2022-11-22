@@ -2,6 +2,7 @@
 
 MP_PORT=80
 MP_DATA=./data
+MP_CE=docker
 
 while [ -n "$1" ]
 do
@@ -14,10 +15,15 @@ do
             MP_PORT=$2
             shift
         ;;
+        -c)
+            MP_CE=$2
+            shift
+        ;;
         -h)
             echo "Usage: setup.sh [options...]"
             echo "-d <dir>        MineProt data directory (default: ./data)"
             echo "-p <port>       MineProt port (default: 80)"
+            echo "-c <CE>         Container Engine (default: docker)"
             exit
         ;;
         *)
@@ -33,13 +39,13 @@ if [ ! "$(command -v curl)" ]; then
   exit 1
 fi
 
-if [ ! "$(command -v docker)" ]; then
-  echo "Error: Please install docker."
+if [ ! "$(command -v $MP_CE)" ]; then
+  echo "Error: Please install $MP_CE."
   exit 1
 fi
 
-if [ ! "$(command -v docker-compose)" ]; then
-  echo "Error: Please install docker-compose."
+if [ ! "$(command -v $MP_CE-compose)" ]; then
+  echo "Error: Please install $MP_CE-compose."
   exit 1
 fi
 
@@ -63,6 +69,7 @@ fi
 tee .env <<EOF
 MP_PORT=$MP_PORT
 MP_DATA=$MP_DATA
+MP_CE=$MP_CE
 EOF
 
-docker-compose up -d
+$MP_CE-compose up -d
