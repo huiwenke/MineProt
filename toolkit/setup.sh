@@ -40,7 +40,7 @@ if [ ! "$(command -v curl)" ]; then
 fi
 
 if [ ! "$(command -v $MP_CE)" ]; then
-  echo "Error: Please install $MP_CE."
+  echo "Error: Please install $MP_CE and necessary plugins."
   exit 1
 fi
 
