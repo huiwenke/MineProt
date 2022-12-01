@@ -37,6 +37,10 @@ foreach ($PDB_List as $PDB_Path)
     $Shell_CMD = "USalign $Query_PDB_Path $PDB_Path -outfmt 2 -o $Result_Prefix\n";
     fwrite($Shell_Script, $Shell_CMD);
 }
+$TMP_STR = str_replace("/", "\\/", $TMP_DIR);
+fwrite($Shell_Script, "sed -i 's/$TMP_STR\///' $TMP_DIR/*.pml\n");
+$TMP_STR = str_replace("/", "\\/", getenv("MP_REPO_PATH"));
+fwrite($Shell_Script, "sed -i 's/$TMP_STR.*\///' $TMP_DIR/*.pml\n");
 fwrite($Shell_Script, "touch $TMP_DIR/done.txt");
 fclose($Shell_Script);
 putenv("PATH=" . getenv("PATH"));
