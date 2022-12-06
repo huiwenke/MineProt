@@ -33,10 +33,11 @@ def GetUniParc(upi):
         except:
             retry += 1
 
-def UniProt2MineProt(identifier_list):
+def UniProt2MineProt(identifier_list, max_msa):
     """
     Find the first annotated homolog in candidate list
     :param identifier_list: Candidate homolog list, list
+    :param max_msa: Max number of candidate msas to use for annotation, int
     :return: Formatted annotations, dict
     """
     result_json = {
@@ -44,7 +45,11 @@ def UniProt2MineProt(identifier_list):
         "database": "",
         "description": []
     }
+    identifier_num = max_msa
     for identifier in identifier_list:
+        identifier_num -= 1
+        if identifier_num<0:
+            break
         accession = identifier.split()[0]
         if accession[0]=='>':
             accession = accession[1:]

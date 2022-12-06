@@ -13,10 +13,12 @@ parser.add_argument('-i', type=str, help="Path to your preprocessed A3M files. T
 parser.add_argument('-n', type=str, help="Elasticsearch index name.")
 parser.add_argument('-a', help="Annotate proteins using UniProt API.", action="store_true")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
+parser.add_argument('--max-msa', dest="max_msa", type=str, default=10, help="Max number of msas to use for annotation.")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt Elasticsearch API.")
 
 # Now parse user-given arguments
 args = parser.parse_args()
+Max_MSA = args.max_msa
 # Mandatory argument -i, configures input directory
 InputDir = args.i
 print("Will import proteins stored in "+InputDir)
@@ -72,7 +74,7 @@ for file_name in os.listdir(InputDir):
                 es_request_json["seq"] = lines[2][1:-1]
                 # Check if we need to annotate proteins and annotate
                 if args.a:
-                    es_request_json["anno"] = UniProt2MineProt(lines[3::2])
+                    es_request_json["anno"] = UniProt2MineProt(lines[3::2], Max_MSA)
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
                 api.EsAdd(args.url, args.n, es_id, json.dumps(es_request_json))
