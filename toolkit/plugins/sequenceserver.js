@@ -15,6 +15,9 @@
 function AddSearch(obj, MineProt_URL) {
     var data_hit_def = obj.parentNode.parentNode.attributes[2].value;
     var search_url = MineProt_URL + "/search.php?search=" + encodeURIComponent(data_hit_def);
+    if (search_url.includes("%7Crepo%3D")) {
+        search_url = search_url.replace("%7Crepo%3D", "&repo[]=");
+    }
     var spanNode = document.createElement('span');
     spanNode.className = "line";
     spanNode.innerHTML = "|";
