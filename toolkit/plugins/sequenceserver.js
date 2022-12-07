@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MineProt Sequenceserver TamperMonkey Plugin
 // @namespace    https://github.com/huiwenke/MineProt
-// @version      0.1
+// @version      0.2
 // @description  link sequenceserver hits to MineProt search interface. Please install this script in TamperMonkey plugin (you can get it from https://www.tampermonkey.net/ or your browser's plugin store)
 // @author       Yunchi Zhu
 // @include      <Please fill in your Sequenceserver URL here>
