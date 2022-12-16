@@ -120,3 +120,15 @@ This project's inbox scripts depends on `Python 3.6+`. Operations will be more c
 Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
 
 See [Toolkit manual](https://github.com/huiwenke/MineProt/wiki/Toolkit-manual) for more information.
+
+## Citing this project
+```bibtex
+@misc{zhu2022mineprot,
+      title={MineProt: modern application for custom protein curation}, 
+      author={Yunchi Zhu and Chengda Tong and Zuohan Zhao and Zuhong Lu},
+      year={2022},
+      eprint={2212.07809},
+      archivePrefix={arXiv},
+      primaryClass={q-bio.QM}
+}
+```

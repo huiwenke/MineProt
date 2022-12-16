@@ -7,6 +7,8 @@
     <title>MineProt</title>
     <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
     <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/github-dark.min.css">
+    <script src="./assets/js/highlight.min.js"></script>
 </head>
 
 <body>
