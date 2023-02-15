@@ -39,7 +39,7 @@ print("Importing proteins to Elasticsearch...")
 # Enumerate all files in InputDir
 for file_name in os.listdir(InputDir):
     # Generate JSON from A3M file, and then POST to Elasticsearch
-    if os.path.splitext(file_name)[-1] == ".a3m":
+    if os.path.splitext(file_name)[-1] == ".pdb":
         es_request_json = {
             "name": "",
             "seq": "",
@@ -61,25 +61,25 @@ for file_name in os.listdir(InputDir):
         else:
             # Execute the import
             print("Importing "+es_request_json["name"]+"...")
-        # Generate file path and open the file
-        file_path = os.path.join(InputDir, file_name)
-        with open(file_path,'r') as fi:
-            try:
-                # Calculate average pLDDT
-                with open(os.path.join(InputDir, es_request_json["name"])+".json", 'r') as f_json:
-                    score_plddt = json.load(f_json)["plddt"]
-                    es_request_json["score"] = sum(score_plddt)/len(score_plddt)
-                # Read MSA from file
-                lines = fi.readlines()
-                es_request_json["seq"] = lines[2][1:-1]
-                # Check if we need to annotate proteins and annotate
-                if args.a:
+        try:
+            # Calculate average pLDDT
+            with open(os.path.join(InputDir, es_request_json["name"])+".json", 'r') as f_json:
+                score_plddt = json.load(f_json)["plddt"]
+                es_request_json["score"] = sum(score_plddt)/len(score_plddt)
+            if args.a:
+                # Generate file path and open the file
+                file_path = os.path.join(InputDir, es_request_json["name"])+".a3m"
+                with open(file_path,'r') as fi:
+                    # Read MSA from file
+                    lines = fi.readlines()
+                    es_request_json["seq"] = lines[2][1:-1]
+                    # Check if we need to annotate proteins and annotate
                     es_request_json["anno"] = UniProt2MineProt(lines[3::2], Max_MSA)
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
-                api.EsAdd(args.url, args.n, es_id, json.dumps(es_request_json))
-            except:
-                print("Error: Failed to import "+es_request_json["name"]+".")
+            api.EsAdd(args.url, args.n, es_id, json.dumps(es_request_json))
+        except:
+            print("Error: Failed to import "+es_request_json["name"]+".")
 
 # All done
 print("Done.")

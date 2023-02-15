@@ -59,17 +59,17 @@
         ?>
     </main>
     <script>
-        function MainFunction() {
+        function MolstarLayoutCheck() {
             var isExpanded = document.getElementsByClassName("msp-layout-expanded");
             var header = document.getElementsByTagName("header")[0];
             if (isExpanded.length==0) {
                 header.style.visibility = "visible";
             } else header.style.visibility = "hidden";
             setTimeout(() => {
-                MainFunction()
+                MolstarLayoutCheck()
             }, 100)
         }
-        MainFunction();
+        MolstarLayoutCheck();
     </script>
 </body>
 

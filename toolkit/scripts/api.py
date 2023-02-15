@@ -21,9 +21,11 @@ def pdb2cif(data_dir, protein_name, request_url):
             "data": ""
         }
         headers = {'Content-Type': 'application/json'}
-        with open(output_path+".pdb",'r') as fi, open(output_path+".cif",'w') as fo:
+        with open(output_path+".pdb",'r') as fi:
             request_json["data"] = str(base64.b64encode(fi.read().encode("utf-8")),"utf-8")
             response = requests.post(url=request_url, headers=headers, data=json.dumps(request_json))
+        response.text.index("_entity_poly.pdbx_seq_one_letter_code_can")
+        with open(output_path+".cif",'w') as fo:
             fo.write(response.text)
     except:
         print("Error: Prediction of "+protein_name+" failed.")
