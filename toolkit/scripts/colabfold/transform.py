@@ -25,20 +25,35 @@ def FixName(is_relaxed, file_name):
     :param file_name: File name to be checked, str
     :return: Flag of whether the file name is valid, str 
     """
+    relaxed_id = ["_relaxed_rank_001_", "_relaxed_rank_1_"]
+    unrelaxed_id = ["_unrelaxed_rank_001_", "_unrelaxed_rank_1_"]
+    scores_id = ["_scores_rank_001_", "_unrelaxed_rank_1_"]
     suffix = os.path.splitext(file_name)[-1]
     if suffix == ".a3m":
         return file_name
     try:
         if suffix == ".pdb":
             if is_relaxed:
-                file_name.index("_relaxed_rank_1_")
-                return file_name.split("_relaxed_rank_1_")[0] + suffix
+                for id in relaxed_id:
+                    try:
+                        file_name.index(id)
+                        return file_name.split(id)[0] + suffix
+                    except:
+                        continue
             else:
-                file_name.index("_unrelaxed_rank_1_")
-                return file_name.split("_unrelaxed_rank_1_")[0] + suffix
+                for id in unrelaxed_id:
+                    try:
+                        file_name.index(id)
+                        return file_name.split(id)[0] + suffix
+                    except:
+                        continue
         if suffix == ".json":
-            file_name.index("_unrelaxed_rank_1_")
-            return file_name.split("_unrelaxed_rank_1_")[0] + suffix
+            for id in scores_id:
+                try:
+                    file_name.index(id)
+                    return file_name.split(id)[0] + suffix
+                except:
+                    continue
         return ''
     except:
         return ''
