@@ -55,6 +55,8 @@ def UniProt2MineProt(identifier_list, max_msa):
             accession = accession[1:]
         if accession[0:3] in ["sp|", "tr|"]:
             accession = accession.split('|')[1]
+        if "UniRef100_" in accession:
+            accession = accession.split('_')[1]
         response = GetUniProtKB(accession)
         if response.status_code == 200:
             response_json = json.loads(response.text)
