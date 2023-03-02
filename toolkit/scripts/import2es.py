@@ -3,8 +3,10 @@ import os
 import sys
 import json
 import base64
+import threading
 sys.path.append(os.path.abspath(os.path.dirname(sys.argv[0])))
 from annotate import UniProt2MineProt
+from pdb2seq import pdb2seq
 import api
 
 # List arguments
@@ -13,7 +15,8 @@ parser.add_argument('-i', type=str, help="Path to your preprocessed A3M files. T
 parser.add_argument('-n', type=str, help="Elasticsearch index name.")
 parser.add_argument('-a', help="Annotate proteins using UniProt API.", action="store_true")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
-parser.add_argument('--max-msa', dest="max_msa", type=str, default=10, help="Max number of msas to use for annotation.")
+parser.add_argument('-t', type=int, default=1, help="Threads to use.")
+parser.add_argument('--max-msa', dest="max_msa", type=int, default=10, help="Max number of msas to use for annotation.")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/es", help="URL of MineProt Elasticsearch API.")
 
 # Now parse user-given arguments
@@ -34,33 +37,28 @@ if args.f:
 if args.a:
     print("Proteins will be annotated using UniProt API.")
 
-# Start importing
-print("Importing proteins to Elasticsearch...")
-# Enumerate all files in InputDir
-for file_name in os.listdir(InputDir):
-    # Generate JSON from A3M file, and then POST to Elasticsearch
-    if os.path.splitext(file_name)[-1] == ".pdb":
-        es_request_json = {
-            "name": "",
-            "seq": "",
-            "score": -1.0,
-            "anno": {
-                "homolog": "",
-                "database": "",
-                "description": []
-            }
+def worker(semaphore, file_name):
+    es_request_json = {
+        "name": "",
+        "seq": "",
+        "score": -1.0,
+        "anno": {
+            "homolog": "",
+            "database": "",
+            "description": []
         }
-        es_request_json["name"] = os.path.splitext(file_name)[0]
-        es_id = str(base64.b64encode(os.path.splitext(file_name)[0].encode("utf-8")),"utf-8")
-        response_json = json.loads(api.EsGet(args.url, args.n, es_id).text)
-        # Check if the current protein is already stored in Elasticsearch
-        if "error" not in response_json and response_json["found"]:
-            # Simply skip current protein if it has been stored previously
-            print("Skipping "+es_request_json["name"]+"...")
-            continue
-        else:
-            # Execute the import
-            print("Importing "+es_request_json["name"]+"...")
+    }
+    es_request_json["name"] = os.path.splitext(file_name)[0]
+    es_request_json["seq"] = pdb2seq(os.path.join(InputDir, file_name))
+    es_id = str(base64.b64encode(os.path.splitext(file_name)[0].encode("utf-8")),"utf-8")
+    response_json = json.loads(api.EsGet(args.url, args.n, es_id).text)
+    # Check if the current protein is already stored in Elasticsearch
+    if "error" not in response_json and response_json["found"]:
+        # Simply skip current protein if it has been stored previously
+        print("Skipping "+es_request_json["name"]+"...")
+    else:
+        # Execute the import
+        print("Importing "+es_request_json["name"]+"...")
         try:
             # Calculate average pLDDT
             with open(os.path.join(InputDir, es_request_json["name"])+".json", 'r') as f_json:
@@ -72,14 +70,30 @@ for file_name in os.listdir(InputDir):
                 with open(file_path,'r') as fi:
                     # Read MSA from file
                     lines = fi.readlines()
-                    es_request_json["seq"] = lines[2][1:-1]
                     # Check if we need to annotate proteins and annotate
                     es_request_json["anno"] = UniProt2MineProt(lines[3::2], Max_MSA)
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
+            if es_request_json["name"] not in es_request_json["anno"]["description"]:
+                es_request_json["anno"]["description"].append(es_request_json["name"])
             api.EsAdd(args.url, args.n, es_id, json.dumps(es_request_json))
         except:
             print("Error: Failed to import "+es_request_json["name"]+".")
+    semaphore.release()
+
+semaphore = threading.Semaphore(args.t)
+threads = []
+# Start importing
+print("Importing proteins to Elasticsearch...")
+# Enumerate all files in InputDir
+for file_name in os.listdir(InputDir):
+    if os.path.splitext(file_name)[-1] == ".pdb":
+        semaphore.acquire()
+        t = threading.Thread(target=worker, args=(semaphore, file_name))
+        threads.append(t)
+        t.start()
+for t in threads:
+    t.join()
 
 # All done
 print("Done.")

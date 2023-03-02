@@ -17,7 +17,7 @@
     <main style="min-height: 100vh;">
         <section class="main_salign">
             <div style="display: block; width: 100%;">
-                <form action="../api/cache/salign.php" method="post">
+                <form action="../api/salign/index.php" method="post">
                     <br><br>
                     <label class="wrapper">
                         <textarea name="structure" class="form-control-header" style="height: 25vh;" placeholder="Paste query structure (PDB) here..." required=""></textarea>
