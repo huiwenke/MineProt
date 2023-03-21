@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description='Prepare metadata for 3D-Beacons cl
 parser.add_argument('-i', type=str, help="Path to your MineProt repo. THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-o', type=str, help="Path to your data directory for 3D-Beacons. THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-t', type=int, default=1, help="Threads to use.")
-parser.add_argument('--max-msa', dest="max_msa", type=int, default=30, help="Max number of msas to use for mapping.")
+parser.add_argument('--max-msa', dest="max_msa", type=int, default=50, help="Max number of msas to use for mapping.")
 
 # Now parse user-given arguments
 args = parser.parse_args()
@@ -22,6 +22,7 @@ Max_MSA = args.max_msa
 InputDir = args.i
 print("Will use proteins stored in "+InputDir)
 # Mandatory argument -o, configures output directory
+# mkdir -p ./data/{pdb,cif,metadata,index}
 OutputDir = args.o
 if not os.path.exists(OutputDir):
     os.makedirs(OutputDir)
@@ -42,16 +43,21 @@ def worker(semaphore, file_name):
     file_path = os.path.join(InputDir, file_name)
     createdDate = time.strftime("%Y-%m-%d", time.localtime(os.path.getctime(file_path)))
     output_path = os.path.join(DirPDB, file_name)
-    shutil.copyfile(file_path, output_path)
     protein = os.path.splitext(file_name)[0]
     with open(os.path.join(InputDir, protein)+".json", 'r') as fin_json:
         score_plddt = json.load(fin_json)["plddt"]
         confidenceAvgLocalScore = sum(score_plddt)/len(score_plddt)
-    with open(os.path.join(InputDir, protein)+".a3m", 'r') as f_a3m, open(os.path.join(DirMetadata, protein)+".json", 'w') as fout_json:
+    with open(os.path.join(InputDir, protein)+".a3m", 'r') as f_a3m:
         lines = f_a3m.readlines()
         seq = lines[2][:-1]
-        meta_json = Make3bMeta(seq, confidenceAvgLocalScore, createdDate, lines[3::2], Max_MSA)
-        json.dump(meta_json, fout_json)
+        metadata_json = Make3bMeta(seq, confidenceAvgLocalScore, createdDate, lines[3::2], Max_MSA)
+        if metadata_json["mappingAccession"] != "":
+            print(protein+": "+metadata_json["mappingAccession"])
+            shutil.copyfile(file_path, output_path)
+            with open(os.path.join(DirMetadata, protein)+".json", 'w') as fout_json:
+                json.dump(metadata_json, fout_json)
+        else:
+            print("Error: Failed to find mappingAccession for "+protein+".")
     semaphore.release()
 
 semaphore = threading.Semaphore(args.t)

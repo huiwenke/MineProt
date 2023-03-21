@@ -172,6 +172,8 @@ def Make3bMeta(seq, confidenceAvgLocalScore, createdDate, identifier_list, max_m
         response = GetUniProtKB(accession)
         if response.status_code == 200:
             response_json = json.loads(response.text)
+            if "gene" not in response_json:
+                continue
             align_json = Align(Seq(response_json["sequence"]["sequence"]), Seq(seq))
             result_json["mappingAccession"] = accession
             result_json["start"] = align_json["start"]
