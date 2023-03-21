@@ -155,7 +155,7 @@ def Make3bMeta(seq, confidenceAvgLocalScore, createdDate, identifier_list, max_m
         "mappingAccessionType": "uniprot",
         "start": 0,
         "end": 0,
-        "modelCategory": "TEMPLATE-BASED",
+        "modelCategory": "Ab initio",
         "modelType": "single",
         "confidenceType": "pLDDT",
         "confidenceAvgLocalScore": confidenceAvgLocalScore,
