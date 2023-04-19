@@ -58,6 +58,10 @@ if [ ! -f "app/php/maxit.tar.gz" ]; then
 	curl -L https://figshare.com/ndownloader/files/36918121 -o app/php/maxit.tar.gz;
 fi
 
+if [ ! -f "app/php/foldcomp.tar.gz" ]; then
+	curl -L https://mmseqs.com/foldcomp/foldcomp-linux-x86_64.tar.gz -o app/php/foldcomp.tar.gz;
+fi
+
 if [ ! -d $MP_DATA ]; then
 	mkdir $MP_DATA
 fi

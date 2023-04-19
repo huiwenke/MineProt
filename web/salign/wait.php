@@ -1,6 +1,6 @@
 <?php
 $Current_USalign_Num = shell_exec("ls $TMP_DIR/*_all_atm_lig.pml | wc -l");
-$Total_USalign_Num = shell_exec("cat $TMP_DIR/query.sh | wc -l");
+$Total_USalign_Num = (int)shell_exec("cat $TMP_DIR/query.sh | wc -l") - 2;
 ?>
 <section class="main_salign">
     <div style="display: block; width: 100%;">

@@ -23,7 +23,7 @@ EOT;
 function form_viewer($Search_Result)
 {
     $Search_Result_Viewer = "MP_" . md5($Search_Result["_source"]["name"]);
-    $Search_Result_Path = "/repo/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
+    $Search_Result_Path = "./api/file/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".cif";
     print <<<EOT
 <style>
     * {
@@ -97,10 +97,10 @@ function form_search_result($Search_Result)
                 Similar to {$html_Homolog_Info}                
             </div>
             <br>
-            <span name="search_result_link" id="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif">
-		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
-		        <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
-                <a href="/repo/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
+            <span name="search_result_link" id="./api/file/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif">
+		        <a href="./api/file/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
+		        <a href="./api/file/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
+                <a href="./api/file/{$Search_Result["_index"]}/{$Search_Result["_source"]["name"]}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
                 <a target="_blank" href="./api/plot/pae.php?data_url={$b64_Data_URL}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
 	        </span>
         </div>
@@ -125,10 +125,10 @@ function form_td($Table_tr)
     </td>";
     echo "
     <td>
-        <a class='btn' style='background-color: #800080;' href='/repo/$Data_Repo/$Name.pdb'>
+        <a class='btn' style='background-color: #800080;' href='./api/file/$Data_Repo/$Name.pdb'>
         PDB
         </a>
-        <a class='btn' style='background-color: #800080;' href='/repo/$Data_Repo/$Name.cif'>
+        <a class='btn' style='background-color: #800080;' href='./api/file/$Data_Repo/$Name.cif'>
         CIF
         </a>
     </td>";
@@ -142,8 +142,8 @@ function form_td($Table_tr)
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
     if ($Scores_pLDDT <= 0) echo "<td>N/A</td>";
     else echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
-    if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m")){
-        $A3M_Url = "<a class='btn' style='background-color: #DC143C;' href='/repo/$Data_Repo/$Name.a3m'>A3M</a>";
+    if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m") || file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m.gz")){
+        $A3M_Url = "<a class='btn' style='background-color: #DC143C;' href='./api/file/$Data_Repo/$Name.a3m'>A3M</a>";
     } else $A3M_Url = "N/A";
     echo "<td>$A3M_Url</td>";
     $Homolog = $Table_tr["homolog"];
@@ -163,7 +163,7 @@ function form_saligner($Salign_Result)
     $Salign_Result_Viewer = "MP_" . md5($Salign_Result["PDB1"]);
     $Salign_Name = pathinfo($Salign_Result["PDB2"])["filename"];
     $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
-    $Salign_Result_Path = "/repo/" . $Salign_Repo . '/' . $Salign_Name . ".cif";
+    $Salign_Result_Path = "../api/file/" . $Salign_Repo . '/' . $Salign_Name . ".cif";
     $Salign_Query_Path = "../api/cache/get.php?data_url=" . base64_encode($Salign_Result["PDB1"] . ".pdb");
     print <<<EOT
 <style>
@@ -206,7 +206,7 @@ function form_salign_result($Salign_Result)
     $Salign_Repo = pathinfo(dirname($Salign_Result["PDB2"]))["filename"];
     $Salign_Result_Data_URLs = array(
         "pdb" => base64_encode($Salign_Result["PDB1"] . ".pdb"),
-        "hit" => "/repo/" . $Salign_Repo . '/' . $Salign_Name . ".pdb",
+        "hit" => "../api/file/" . $Salign_Repo . '/' . $Salign_Name . ".pdb",
         "pml" => base64_encode($Salign_Result["PDB1"] . ".pml"),
         "all" => base64_encode($Salign_Result["PDB1"] . "_all.pml"),
         "all_atm" => base64_encode($Salign_Result["PDB1"] . "_all_atm.pml"),

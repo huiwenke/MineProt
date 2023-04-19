@@ -61,8 +61,12 @@
                     ";
                         $Table = array();
                         foreach ($Files as $File) {
-                            if (pathinfo($File)["extension"] == "pdb") {
-                                array_push($Table, get_api_tr($_GET["repo"], $File));
+                            if (pathinfo($File)["extension"] == "gz") {
+                                $File = str_replace(".gz", "", $File);
+                            }
+                            if (pathinfo($File)["extension"]=="pdb" || pathinfo($File)["extension"]=="fcz") {
+                                $File_Name = pathinfo($File)["filename"];
+                                array_push($Table, get_api_tr($_GET["repo"], $File_Name));
                             }
                         }
                         if ($_POST["sort"] == "plddt") {
