@@ -8,6 +8,7 @@ Gzipped JSON request:
         "repo": repository name
         "text": base64-encoded file text
         "force": force overwritting or not
+        "gzip": compress files or not
     }
 */
 
@@ -23,5 +24,9 @@ if (file_exists($File_Path) && !$Data["force"]) {
     echo "Skipping";
 } else {
     echo "Importing";
-    file_put_contents($File_Path, $File_Text);
+    if (!$Data["gzip"]) {
+        file_put_contents($File_Path, $File_Text);
+    } else {
+        file_put_contents($File_Path . ".gz", gzencode($File_Text));
+    }
 }

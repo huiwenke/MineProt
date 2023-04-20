@@ -12,7 +12,9 @@ import api
 parser = argparse.ArgumentParser(description='Import your proteins into repository.')
 parser.add_argument('-i', type=str, help="Path to your preprocessed files (A3M, PDB, CIF & JSON). THIS ARGUMENT IS MANDATORY.")
 parser.add_argument('-n', type=str, help="MineProt repository name.")
+parser.add_argument('-m', type=int, default=0, help="Upload mode: 0: all files; 1: without A3M; 2: only PDB & JSON; 3: only PDB.")
 parser.add_argument('-f', help="Force overwrite.", action="store_true")
+parser.add_argument('-z', help="Compress files.", action="store_true")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/import2repo/", help="URL of MineProt import2repo API.")
 
 # Now parse user-given arguments
@@ -23,20 +25,23 @@ print("Will import proteins stored in "+InputDir)
 # If MineProt repository path is not specified, use InputDir instead
 if not args.n:
     args.n = os.path.basename(args.i)
-
+Suffix = ["a3m", ".cif", ".json", ".pdb"]
+Suffix = Suffix[args.m:]
 # Start importing
 print("Importing proteins to MineProt repository "+args.n+"...")
 
 # Enumerate all files in InputDir
 for file_name in os.listdir(InputDir):
+    if os.path.splitext(file_name)[-1] not in Suffix:
+        continue
     # Generate JSON from files, and then POST to MineProt Import API
     import_request_json = {
         "name": file_name,
         "repo": args.n,
         "text": "",
-        "force": args.f
+        "force": args.f,
+        "gzip": args.z
     }
-    # Compress the JSON with gzip
     file_path = os.path.join(InputDir, file_name)
     with open(file_path, 'r') as fi:
         file_text = fi.read().encode("utf-8")
