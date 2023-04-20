@@ -46,7 +46,7 @@
                 "L2" => (int)$Items[9],
                 "Lali" => (int)$Items[10],
             );
-            if (max($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.5 && min($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.17) continue;
+            if (max($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.5 && min($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.334) continue;
             array_push($Salign_Results, $Salign_Result);
         }
         array_multisort(array_column($Salign_Results, "RMSD"), $Salign_Results);

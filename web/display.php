@@ -214,7 +214,7 @@ function form_salign_result($Salign_Result)
         "atm" => base64_encode($Salign_Result["PDB1"] . "_atm.pml")
     );
     $PDB1_Path = base64_encode(sys_get_temp_dir() . '/' . $Salign_Result["PDB1"] . ".pdb");
-    $PDB2_Path = base64_encode(getenv("MP_REPO_PATH") . $Salign_Repo . '/' . $Salign_Name . ".pdb");
+    $PDB2_Path = base64_encode($Salign_Result["PDB2"]);
     print <<<EOT
     <div class="card-inner-div">
         <div>
