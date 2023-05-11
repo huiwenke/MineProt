@@ -17,6 +17,7 @@ services:
     container_name: MinePHP
     restart: always
     build: ./app/php
+    #shm_size: 2gb
     volumes:
       - ./web:/var/www/html
       - ${MP_DATA}/repo:/var/www/data

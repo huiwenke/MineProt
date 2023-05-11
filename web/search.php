@@ -62,7 +62,7 @@
         function MolstarLayoutCheck() {
             var isExpanded = document.getElementsByClassName("msp-layout-expanded");
             var header = document.getElementsByTagName("header")[0];
-            if (isExpanded.length==0) {
+            if (isExpanded.length == 0) {
                 header.style.visibility = "visible";
             } else header.style.visibility = "hidden";
             setTimeout(() => {
@@ -71,6 +71,7 @@
         }
         MolstarLayoutCheck();
     </script>
+    <div id="search_api_json" style="display:none"><?php echo "|JSON|" . base64_encode($Search_Results_Json) . "|JSON|";?></div>
 </body>
 
 </html>

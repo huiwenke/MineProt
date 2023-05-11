@@ -25,6 +25,12 @@
                 <span>&nbsp;<strong>Hit structure</strong></span>
             </span>
         </div>
+        <h2 class="h2_aside">Download</h2>
+        <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px; border-color: #21262d; border-bottom: 1px solid #30363d;">
+            <a target="_blank" href=<?php echo "../api/cache/get.php?download=true&data_url=" . base64_encode($Salign_Result["TOTAL"]);?> style="background-color: #563d7c;" class="btn">
+                <center>result.tar.gz</center>
+            </a>
+        </div>
     </div>
 </section>
 <script>

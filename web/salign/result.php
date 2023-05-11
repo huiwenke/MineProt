@@ -18,7 +18,7 @@
     <main style="min-height: 100vh;">
         <?php
         $TMP_DIR = sys_get_temp_dir() . "/MP_SALIGN_" . $_GET["rid"];
-        if (!file_exists("$TMP_DIR/done.txt")) {
+        if (!file_exists("$TMP_DIR/result.tar.gz")) {
             include "wait.php";
             header("refresh: 5");
             exit;
@@ -45,6 +45,7 @@
                 "L1" => (int)$Items[8],
                 "L2" => (int)$Items[9],
                 "Lali" => (int)$Items[10],
+                "TOTAL" => "MP_SALIGN_" . $_GET["rid"] . "/result.tar.gz",
             );
             if (max($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.5 && min($Salign_Result["TM1"], $Salign_Result["TM2"]) < 0.334) continue;
             array_push($Salign_Results, $Salign_Result);
