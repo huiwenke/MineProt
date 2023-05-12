@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import base64
+import gzip
 
 # List arguments
 parser = argparse.ArgumentParser(description='Export data from MineProt Search Page.')
@@ -17,8 +18,8 @@ if not os.path.exists(OutputDir):
 
 Search_URL = args.url[0]
 MineProt_URL = Search_URL.split("/search.php")[0]
-reponse = requests.get(Search_URL)
-Search_Results = json.loads(base64.b64decode(reponse.text.split("|JSON|")[1]))
+response = requests.get(Search_URL)
+Search_Results = json.loads(base64.b64decode(response.text.split("|JSON|")[1]))
 with open(os.path.join(OutputDir, "result.json"), 'w') as fout_json:
     fout_json.write(json.dumps(Search_Results))
 for search_result in Search_Results:
@@ -28,11 +29,11 @@ for search_result in Search_Results:
         os.makedirs(repo_path)
     protein = search_result["_source"]["name"]
     for suffix in [".pdb",".cif",".json",".a3m"]:
-        reponse = requests.get(MineProt_URL+"/repo/"+repo+'/'+protein+suffix)
-        if reponse.status_code == 200:
+        response = requests.get(MineProt_URL+"/repo/"+repo+'/'+protein+suffix)
+        if response.status_code == 200:
             with open(os.path.join(repo_path, protein+suffix), 'w') as fo:
-                fo.write(reponse.text)
-        reponse = requests.get(MineProt_URL+"/repo/"+repo+'/'+protein+suffix+'.gz')
-        if reponse.status_code == 200:
-            with open(os.path.join(repo_path, protein+suffix), 'wb') as fo:
-                fo.write(reponse.text)
+                fo.write(response.text)
+        response = requests.get(MineProt_URL+"/repo/"+repo+'/'+protein+suffix+".gz")
+        if response.status_code == 200:
+            with open(os.path.join(repo_path, protein+suffix), 'w') as fo:
+                fo.write(gzip.decompress(response.content).decode())
