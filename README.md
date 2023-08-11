@@ -123,12 +123,13 @@ See [Toolkit manual](https://github.com/huiwenke/MineProt/wiki/Toolkit-manual) f
 
 ## Citing this project
 ```bibtex
-@misc{zhu2022mineprot,
-      title={MineProt: modern application for custom protein curation}, 
-      author={Yunchi Zhu and Chengda Tong and Zuohan Zhao and Zuhong Lu},
-      year={2022},
-      eprint={2212.07809},
-      archivePrefix={arXiv},
-      primaryClass={q-bio.QM}
+@article{10.1093/database/baad059,
+    title={MineProt: a stand-alone server for structural proteome curation},
+    author={Zhu, Yunchi and Tong, Chengda and Zhao, Zuohan and Lu, Zuhong},
+    journal={Database},
+    volume={2023},
+    pages={baad059},
+    year={2023},
+    publisher={Oxford University Press}
 }
 ```
