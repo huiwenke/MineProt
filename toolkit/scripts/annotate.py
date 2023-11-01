@@ -52,6 +52,8 @@ def FixAccession(identifier):
         accession = accession[1:]
     if accession[0:3] in ["sp|", "tr|"]:
         accession = accession.split("|")[1]
+    if accession[0:3] in ["AF-"]:
+        accession = accession.split("-")[1]
     if "UniRef100_" in accession:
         accession = accession.split("_")[1]
     return accession
