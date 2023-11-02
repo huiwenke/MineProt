@@ -41,6 +41,23 @@ def GetUniParc(upi):
             retry += 1
 
 
+def GetAFDB(accession):
+    """
+    Get annotations from AFDB API.
+    :param accession: Candidate UniProt accession, str
+    :return: JSON response from AFDB API, obj
+    """
+    headers = {"Accept": "application/json"}
+    request_url = "https://alphafold.com/api/prediction/" + accession
+    retry = 0
+    while retry < 3:
+        try:
+            response = requests.get(url=request_url, headers=headers, timeout=10)
+            return response
+        except:
+            retry += 1
+
+
 def FixAccession(identifier):
     """
     Fix A3M identifier to legal accession
@@ -120,6 +137,26 @@ def UniProt2MineProt(identifier_list, max_msa):
                 break
             except:
                 continue
+    return result_json
+
+
+def AFDB2MineProt(identifier_list):
+    """
+    Find the first annotated homolog in candidate list
+    :param identifier_list: Candidate homolog list, list
+    :param max_msa: Max number of candidate msas to use for annotation, int
+    :return: Formatted annotations, dict
+    """
+    result_json = {"homolog": "", "database": "", "description": []}
+    for identifier in identifier_list:
+        accession = FixAccession(identifier)
+        response = GetAFDB(accession)
+        if response.status_code == 200:
+            response_json = json.loads(response.text)
+            result_json["homolog"] = response_json[0]["uniprotAccession"]
+            result_json["description"].append(response_json[0]["uniprotDescription"])
+            result_json["database"] = "afdb"
+            break
     return result_json
 
 
