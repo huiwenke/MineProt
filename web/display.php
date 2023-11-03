@@ -3,9 +3,9 @@
 function form_repo($Data_Repo)
 {
     $html_Checked = "";
-    if (array_key_exists("search", $_GET)){
+    if (array_key_exists("search", $_GET)) {
         if (!array_key_exists("repo", $_GET) || in_array($Data_Repo, $_GET["repo"])) $html_Checked = " checked";
-    } else if(array_key_exists("repo", $_GET) && $Data_Repo==$_GET["repo"]) $html_Checked = " checked";
+    } else if (array_key_exists("repo", $_GET) && $Data_Repo == $_GET["repo"]) $html_Checked = " checked";
     print <<<EOT
     <ul>
         <li>
@@ -84,6 +84,9 @@ function form_search_result($Search_Result)
     $b64_Data_URL = base64_encode(getenv("MP_LOCALHOST") . "/api/file/" . $Search_Result["_index"] . '/' . $Search_Result["_source"]["name"] . ".json");
     if ($Search_Result["_source"]["anno"]["homolog"] == "") {
         $html_Homolog_Info = "none";
+    } else if ($Search_Result["_source"]["anno"]["database"] == "afdb") {
+        $html_Homolog_Info = '
+        <a class="card-link user-properties-link" href="https://alphafold.com/search/text/' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
     } else {
         $html_Homolog_Info = '
         <a class="card-link user-properties-link" href="https://www.uniprot.org/' . $Search_Result["_source"]["anno"]["database"] . '?query=' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
@@ -142,16 +145,18 @@ function form_td($Table_tr)
     } else $pLDDT_Color = "background-color:rgb(255, 125, 69);";
     if ($Scores_pLDDT <= 0) echo "<td>N/A</td>";
     else echo "<td style='color:white; $pLDDT_Color'>" . number_format($Scores_pLDDT, 2) . "</td>";
-    if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m") || file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m.gz")){
+    if (file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m") || file_exists(getenv("MP_REPO_PATH") . $Data_Repo . '/' . $Name . ".a3m.gz")) {
         $A3M_Url = "<a class='btn' style='background-color: #DC143C;' href='./api/file/$Data_Repo/$Name.a3m'>A3M</a>";
     } else $A3M_Url = "N/A";
     echo "<td>$A3M_Url</td>";
     $Homolog = $Table_tr["homolog"];
     $Database = $Table_tr["database"];
     $Annotation = $Table_tr["anno"];
+    if ($Database == "afdb") $Homo_Url = "https://alphafold.com/search/text/" . $Homolog;
+    else $Homo_Url = "https://www.uniprot.org/$Database?query=$Homolog";
     echo "
     <td style='word-wrap: break-word; width: 50%;'>
-        <a target='_blank' title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='https://www.uniprot.org/$Database?query=$Homolog'>
+        <a target='_blank' title='Similar to $Homolog' style='color: #161b22;' class='user-properties-link' href='$Homo_Url'>
         $Annotation
         </a>
     </td>";
