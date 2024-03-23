@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         MineProt Foldseek Plugin
+// @name         Foldseek to MineProt Plugin
 // @namespace    https://github.com/huiwenke/MineProt
 // @version      0.1
 // @description  Link Foldseek hits to MineProt search interface.

@@ -1,47 +1,55 @@
 // ==UserScript==
-// @name         MineProt AlphaFill Plugin
+// @name         MineProt to Foldseek Plugin
 // @namespace    https://github.com/huiwenke/MineProt
 // @version      0.2
-// @description  Generate buttons for directly sending cif files from MineProt search interface to AlphaFill.
+// @description  Generate buttons for directly sending pdb files from MineProt search interface to Foldseek.
 // @author       Yunchi Zhu
 // @include      <Please fill in your MineProt URL here>
 // ==/UserScript==
 
 (function () {
-    // You can replace the URL with your local AlphaFill webapp.
-    MineProt2AlphaFill("https://alphafill.eu");
+    // You can replace the URL with your local Foldseek webapp.
+    MineProt2Foldseek("https://search.foldseek.com");
 })();
 
-function MineProt2AlphaFill(AlphaFillURL) {
+function MineProt2Foldseek(FoldseekURL) {
     var overview = document.getElementsByClassName("aside_right");
     if (overview.length < 1) {
         setTimeout(() => {
-            MineProt2AlphaFill(AlphaFillURL)
+            MineProt2Foldseek(FoldseekURL)
         }, 500);
         return;
     }
     else {
         var searchResultLinks = document.getElementsByName("search_result_link");
         for (var i = 0; i < searchResultLinks.length; i++) {
-            AddFill(searchResultLinks[i], AlphaFillURL);
+            AddSeek(searchResultLinks[i], FoldseekURL);
         }
     }
 }
 
-function AddFill(obj, AlphaFillURL) {
+function AddSeek(obj, FoldseekURL) {
     var buttonNode = document.createElement('button');
     buttonNode.className = "btn";
-    buttonNode.style = "background-color: #ff9933; color: #3366cc;";
+    buttonNode.style = "background-color: #fff; color: #1e1e1e;";
     buttonNode.onclick = function () {
-        var fileURL = window.location.protocol + "//" + window.location.host + obj.id + ".cif";
+        var fileURL = window.location.protocol + "//" + window.location.host + obj.id + ".pdb";
         urlToFileObject(fileURL, function (file) {
             const fd = new FormData();
 
-            fd.append("structure", file);
+            fd.append("q", file);
+            fd.append("mode", "3diaa");
+            fd.append("database[]", "afdb50");
+            fd.append("database[]", "afdb-swissprot");
+            fd.append("database[]", "afdb-proteome");
+            fd.append("database[]", "cath50");
+            fd.append("database[]", "mgnify_esm30");
+            fd.append("database[]", "pdb100");
+            fd.append("database[]", "gmgcl_id");
 
             var resultOK = false;
 
-            fetch(AlphaFillURL + "/v1/aff", {
+            fetch(FoldseekURL + "/api/ticket", {
                 'Accept': 'application/json',
                 'method': "POST",
                 'body': fd
@@ -50,7 +58,7 @@ function AddFill(obj, AlphaFillURL) {
                 return r.json()
             }).then(r => {
                 if (resultOK) {
-                    window.location = AlphaFillURL + `/model?id=${r.id}`;
+                    window.location = FoldseekURL + `/result/${r.id}/0`;
                 }
                 else if (typeof (r.error) === "string") {
                     alert(r.error);
@@ -63,7 +71,7 @@ function AddFill(obj, AlphaFillURL) {
             });
         });
     }
-    buttonNode.innerHTML = "<strong>αfill</strong>";
+    buttonNode.innerHTML = "<strong>Foldseek</strong>";
     obj.appendChild(buttonNode);
 }
 
