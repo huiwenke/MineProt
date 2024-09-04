@@ -26,7 +26,7 @@ function AddSearch(aNode, MineProt_URL) {
 }
 
 function MainFunction(MineProt_URL, hit_link_num) {
-    var overview = document.getElementsByClassName("v-tabs-slider-wrapper");
+    var overview = document.getElementsByClassName("v-table result-table");
     if (overview.length < 1) {
         setTimeout(() => {
             MainFunction(MineProt_URL, hit_link_num)
