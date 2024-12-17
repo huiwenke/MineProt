@@ -30,7 +30,7 @@ do
             shift
         ;;
         --help)
-            echo "Usage: alphafold/import.sh [options...] <data_dir>"
+            echo "Usage: alphafold2/import.sh [options...] <data_dir>"
             echo "--repo <name>            MineProt repository name (THIS ARGUMENT IS MANDATORY)"
             echo "--python <dir>           Path to python3 (default: /usr/bin/python3)"
             echo "--scripts-dir <dir>      Path to MineProt scripts (default: .)"
@@ -57,8 +57,8 @@ fi
 echo "Log path: $TmpLog"
 echo `date` > $TmpLog
 
-cmd="$Python_Path $MineProt_Scripts_Path/alphafold/transform.py -i $InputDir -o $TmpDir -n $MineProt_NameMode --url $MineProt_URL/api/pdb2alphacif/"
-echo "Running alphafold/transform: $cmd"
+cmd="$Python_Path $MineProt_Scripts_Path/alphafold2/transform.py -i $InputDir -o $TmpDir -n $MineProt_NameMode --url $MineProt_URL/api/pdb2alphacif/"
+echo "Running alphafold2/transform: $cmd"
 $cmd >> $TmpLog
 
 cmd="$Python_Path $MineProt_Scripts_Path/import2es.py -i $TmpDir -n $MineProt_Repo --url $MineProt_URL/api/es -a"

@@ -35,7 +35,8 @@
                             <div>
                                 <select id="system" onchange="selectSystem()">
                                     <option value="colabfold">ColabFold</option>
-                                    <option value="alphafold">AlphaFold</option>
+                                    <option value="alphafold2">AlphaFold2</option>
+                                    <option value="alphafold3">AlphaFold3</option>
                                 </select>
                             </div>
                         </div>
@@ -106,7 +107,9 @@
                                 <input type="checkbox" name="colabfold_args" value="--relax" />--amber
                             </div>
                         </div>
-                        <div id="alphafold_opt" name="system_opt" style="margin-top: 7px; display: none;">
+                        <div id="alphafold2_opt" name="system_opt" style="margin-top: 7px; display: none;">
+                        </div>
+                        <div id="alphafold3_opt" name="system_opt" style="margin-top: 7px; display: none;">
                         </div>
                         <br>
                         <button class="btn" onclick="generateCode()"><strong>Generate</strong></button>
