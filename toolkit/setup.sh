@@ -44,11 +44,6 @@ if [ ! "$(command -v $MP_CE)" ]; then
   exit 1
 fi
 
-if [ ! "$(command -v $MP_CE-compose)" ]; then
-  echo "Error: Please install $MP_CE-compose."
-  exit 1
-fi
-
 if [ ! -f "docker-compose.yml" ]; then
   echo "Error: Please run this script where MineProt docker-compose.yml is located."
   exit 1
@@ -76,4 +71,4 @@ MP_DATA=$MP_DATA
 MP_CE=$MP_CE
 EOF
 
-$MP_CE-compose up -d
+$MP_CE compose up -d || $MP_CE-compose up -d

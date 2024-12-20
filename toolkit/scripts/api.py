@@ -28,7 +28,7 @@ def pdb2cif(data_dir, protein_name, request_url):
         with open(output_path+".cif",'w') as fo:
             fo.write(response.text)
     except:
-        print("Error: Prediction of "+protein_name+" failed.")
+        print("Warning: conversion of "+protein_name+" failed.")
 
 def EsAdd(url, repo, id, data):
     headers = {'Content-Type': 'application/json'}

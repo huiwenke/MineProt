@@ -16,6 +16,7 @@ parser.add_argument('-o', type=str, help="Path to output folder. THIS ARGUMENT I
 parser.add_argument('-n', type=int, default=0, help="Naming mode: 0: Use prefix; 1: Use name in .a3m; 2: Auto rename; 3: Customize name.")
 parser.add_argument('-z', help="Unzip results.", action="store_true")
 parser.add_argument('-r', help="Use relaxed results.", action="store_true")
+parser.add_argument('-f', help="Force overwrite.", action="store_true")
 parser.add_argument('--url', type=str, default="http://127.0.0.1/api/pdb2alphacif/", help="URL of PDB2CIF API.")
 
 def FixName(is_relaxed, file_name):
@@ -58,13 +59,14 @@ def FixName(is_relaxed, file_name):
     except:
         return ''
 
-def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
+def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir, existing_files):
     """
     Copy files to temporary folder.
     :param is_zip: Marks if the file should be decompressed, bool
     :param is_relaxed: Marks if the protein is relaxed, bool
     :param input_dir: Copy source directory, str
     :param output_dir: Copy destination directory, str
+    :param existing_files: Existing file list for skipping, list
     """
     file_path = os.path.join(input_dir, file_name)
     # Check if we need to decompress input file
@@ -76,11 +78,12 @@ def MakeTmp(is_zip, is_relaxed, file_name, input_dir, output_dir):
                 # Check if the given file name is valid and decompress valid file to output directory
                 if FixName(is_relaxed, zip_f.filename)!='':
                     zip_f.filename = FixName(is_relaxed, zip_f.filename)
-                    zip_file.extract(zip_f, output_dir)
+                    if zip_f.filename not in existing_files:
+                        zip_file.extract(zip_f, output_dir)
             zip_file.close()
     else:
         # Check if the given file name is valid and copy valid file to output directory
-        if FixName(is_relaxed, file_name)!='':
+        if FixName(is_relaxed, file_name)!='' and FixName(is_relaxed, file_name) not in existing_files:
             output_path = os.path.join(output_dir, FixName(is_relaxed, file_name))
             shutil.copyfile(file_path, output_path)
 
@@ -95,6 +98,9 @@ if not os.path.exists(OutputDir):
 if not args.n:
     print("Naming mode parameter -n is unset, using default value (0: Use prefix).")
     args.n = 0
+ExistingFiles = []
+if not args.f:
+    ExistingFiles = os.listdir(OutputDir)
 
 # Create temp directory
 TmpDir = TemporaryDirectory(prefix="MP-Temp-").name
@@ -103,7 +109,7 @@ os.makedirs(TmpDir)
 
 # Copy source file(s) to temp directory
 for file_name in os.listdir(InputDir):
-    MakeTmp(args.z, args.r, file_name, InputDir, TmpDir)
+    MakeTmp(args.z, args.r, file_name, InputDir, TmpDir, ExistingFiles)
 
 # Enumerate files and rename with renaming mode. Then move them to output directory.
 NameList = []
