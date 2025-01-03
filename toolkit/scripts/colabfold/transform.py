@@ -112,13 +112,14 @@ for file_name in os.listdir(InputDir):
     MakeTmp(args.z, args.r, file_name, InputDir, TmpDir, ExistingFiles)
 
 # Enumerate files and rename with renaming mode. Then move them to output directory.
-NameList = []
+NameList = set()
 TmpList = os.listdir(TmpDir)
 TmpList.sort()
 for file_name in TmpList:
     file_path = os.path.join(TmpDir, file_name)
-    if os.path.splitext(file_name)[-1] == ".a3m":
-        NameList.append(ReName(args.n, file_name, TmpDir))
+    new_file_name = ReName(args.n, file_name, TmpDir)
+    if new_file_name not in NameList:
+        NameList.add(new_file_name)
     if os.path.splitext(file_name)[-1] == ".json":
         with open(file_path, 'r') as fin:
             json_data = json.load(fin)
@@ -127,7 +128,7 @@ for file_name in TmpList:
                     json_data["pae"][pae_i][pae_j] = round(json_data["pae"][pae_i][pae_j])
         with open(file_path, 'w') as fout:
             json.dump(json_data, fout, separators=(',', ':'))
-    output_path = os.path.join(OutputDir, NameList[-1]) + os.path.splitext(file_name)[-1]
+    output_path = os.path.join(OutputDir, new_file_name) + os.path.splitext(file_name)[-1]
     print("Moving "+file_path+" to "+output_path+"...")
     shutil.move(file_path, output_path)
 
