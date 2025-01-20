@@ -53,7 +53,7 @@ def MakeTmp(dir_name, input_dir, output_dir):
     for a3m_path_id in a3m_path_ids:
         try:
             with open(dir_path+'/'+a3m_path_id, 'r') as fin_a3m, open(output_path+".a3m", 'w') as fout_a3m:
-                fout_a3m.write("# Added by MineProt toolkit\n")
+                #fout_a3m.write("# Added by MineProt toolkit\n")
                 fout_a3m.write(fin_a3m.read())
             return
         except:

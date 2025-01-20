@@ -23,6 +23,14 @@
         } else $Search_Repos = implode(',', $DATA_REPOS);
         $Search_Results_Json = search_api($Search_Repos, $_GET["search"]);
         $Search_Results = json_decode($Search_Results_Json, true);
+        foreach ($Search_Results as $i => $Search_Result) {
+            if ($Search_Result['_source']['name'] == $_GET["search"]) {
+                $temp = $Search_Results[0];
+                $Search_Results[0] = $Search_Results[$i];
+                $Search_Results[$i] = $temp;
+                break;
+            }
+        }
         ?>
         <section class="main">
             <div style="display: block; width: 100%;">

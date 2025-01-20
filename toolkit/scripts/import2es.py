@@ -71,7 +71,8 @@ def worker(semaphore, file_name):
                     # Read MSA from file
                     lines = fi.readlines()
                     # Check if we need to annotate proteins and annotate
-                    es_request_json["anno"] = UniProt2MineProt(lines[3::2], Max_MSA)
+                    identifier_list = [item for item in lines if item.startswith('>')]
+                    es_request_json["anno"] = UniProt2MineProt(identifier_list[1:], Max_MSA)
                     if es_request_json["anno"]["homolog"]=="":
                         print("Warning: Failed to find annotation for "+es_request_json["name"]+".")
             if es_request_json["name"] not in es_request_json["anno"]["description"]:
