@@ -86,7 +86,7 @@ function form_search_result($Search_Result)
         $html_Homolog_Info = "none";
     } else if ($Search_Result["_source"]["anno"]["database"] == "afdb") {
         $html_Homolog_Info = '
-        <a class="card-link user-properties-link" href="https://alphafold.com/search/text/' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
+        <a class="card-link user-properties-link" href="https://alphafold.com/entry/' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
     } else {
         $html_Homolog_Info = '
         <a class="card-link user-properties-link" href="https://www.uniprot.org/' . $Search_Result["_source"]["anno"]["database"] . '?query=' . $Search_Result["_source"]["anno"]["homolog"] . '">' . $Search_Result["_source"]["anno"]["homolog"] . '</a>: ' . $Search_Result["_source"]["anno"]["description"][0];
@@ -152,7 +152,7 @@ function form_td($Table_tr)
     $Homolog = $Table_tr["homolog"];
     $Database = $Table_tr["database"];
     $Annotation = $Table_tr["anno"];
-    if ($Database == "afdb") $Homo_Url = "https://alphafold.com/search/text/" . $Homolog;
+    if ($Database == "afdb") $Homo_Url = "https://alphafold.com/entry/" . $Homolog;
     else $Homo_Url = "https://www.uniprot.org/$Database?query=$Homolog";
     echo "
     <td style='word-wrap: break-word; width: 50%;'>
