@@ -36,18 +36,16 @@ def main():
     # Shuffle files
     random.shuffle(files)
 
-    # Distribute files
+    # Calculate distribution parameters
     average = file_count // num_bins
     extra = file_count % num_bins
 
-    index = 0
-    for file in files:
-        folder = index // average
-        if folder >= num_bins:
-            folder = num_bins - 1
-
-        if index < extra:
+    # Distribute files
+    for index, file in enumerate(files):
+        if index < (average + 1) * extra:
             folder = index // (average + 1)
+        else:
+            folder = extra + (index - (average + 1) * extra) // average
 
         target_path = os.path.join(target_dir, str(folder))
         source_path = os.path.join(source_dir, file)
@@ -56,8 +54,6 @@ def main():
             shutil.copy(source_path, target_path)
         else:
             print(f"Warning: File '{file}' not found.")
-
-        index += 1
 
     print(f"Distribution complete. Total files: {file_count}")
 
