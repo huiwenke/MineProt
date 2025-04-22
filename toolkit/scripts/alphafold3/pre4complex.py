@@ -59,9 +59,10 @@ def generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds):
     }
     
     for i, protein in enumerate(proteins):
-        sequence = fasta_sequences.get(protein, "")
+        sequence = ""
         a3m_path = ""
-        if not sequence and a3m_dir:
+        
+        if a3m_dir:
             for ext in [".a3m", ".a3m.gz", ".a3m.xz", ".a3m.bz2"]:
                 potential_path = os.path.join(a3m_dir, protein + ext)
                 if os.path.exists(potential_path):
@@ -69,15 +70,22 @@ def generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds):
                     a3m_path = potential_path
                     break
         
-        json_data["sequences"].append({
-            "protein": {
-                "id": chr(65 + i),
-                "sequence": sequence,
+        if not sequence and fasta_sequences:
+            sequence = fasta_sequences.get(protein, "")
+        
+        protein_entry = {
+            "id": chr(65 + i),
+            "sequence": sequence
+        }
+        
+        if a3m_path:
+            protein_entry.update({
                 "unpairedMsaPath": a3m_path,
                 "pairedMsa": "",
                 "templates": []
-            }
-        })
+            })
+        
+        json_data["sequences"].append({"protein": protein_entry})
     
     output_path = os.path.join(output_dir, f"{name}.json")
     with open(output_path, 'w') as f:
@@ -113,6 +121,6 @@ def main():
     
     for thread in threads:
         thread.join()
-    
+
 if __name__ == "__main__":
     main()
