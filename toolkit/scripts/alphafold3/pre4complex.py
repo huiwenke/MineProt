@@ -48,7 +48,7 @@ def parse_list_file(list_file):
     with open(list_file, 'r') as f:
         return [line.strip().split() for line in f]
 
-def generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds):
+def generate_json(proteins, fasta_sequences, a3m_dirs, output_dir, num_seeds):
     name = "_x_".join(proteins)
     json_data = {
         "name": name,
@@ -61,15 +61,19 @@ def generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds):
     for i, protein in enumerate(proteins):
         sequence = ""
         a3m_path = ""
-        
-        if a3m_dir:
-            for ext in [".a3m", ".a3m.gz", ".a3m.xz", ".a3m.bz2"]:
-                potential_path = os.path.join(a3m_dir, protein + ext)
-                if os.path.exists(potential_path):
-                    sequence = read_a3m_sequence(potential_path)
-                    a3m_path = potential_path
+        # search through provided a3m directories in order
+        if a3m_dirs:
+            for a3m_dir in a3m_dirs:
+                for ext in [".a3m", ".a3m.gz", ".a3m.xz", ".a3m.bz2"]:
+                    potential_path = os.path.join(a3m_dir, protein + ext)
+                    if os.path.exists(potential_path):
+                        sequence = read_a3m_sequence(potential_path)
+                        a3m_path = potential_path
+                        break
+                if a3m_path:
                     break
         
+        # if no msa found, fallback to fasta sequences
         if not sequence and fasta_sequences:
             sequence = fasta_sequences.get(protein, "")
         
@@ -91,22 +95,29 @@ def generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds):
     with open(output_path, 'w') as f:
         json.dump(json_data, f, indent=4)
 
-def worker(protein_groups, fasta_sequences, a3m_dir, output_dir, num_seeds):
+def worker(protein_groups, fasta_sequences, a3m_dirs, output_dir, num_seeds):
     for proteins in protein_groups:
-        generate_json(proteins, fasta_sequences, a3m_dir, output_dir, num_seeds)
+        generate_json(proteins, fasta_sequences, a3m_dirs, output_dir, num_seeds)
 
 def main():
     parser = argparse.ArgumentParser(description="Generate JSON files for protein interactions.")
     parser.add_argument("--list", required=True, help="Path to the interaction protein list file")
-    parser.add_argument("--fasta", help="Path to the FASTA file")
-    parser.add_argument("--a3m", help="Path to the A3M directory")
+    parser.add_argument("--fasta", nargs='+', help="One or more paths to FASTA files, searched in order until a valid one is found")
+    parser.add_argument("--a3m", nargs='+', help="One or more directories containing A3M files, searched in order")
     parser.add_argument("-o", required=True, help="Output directory")
     parser.add_argument("-t", type=int, default=1, help="Number of threads (default: 1)")
     parser.add_argument("-n", type=int, default=1, help="Number of random seeds (default: 1)")
     
     args = parser.parse_args()
     os.makedirs(args.o, exist_ok=True)
-    fasta_sequences = read_fasta(args.fasta) if args.fasta else {}
+    # find the first existing FASTA file
+    fasta_sequences = {}
+    if args.fasta:
+        for fasta_path in args.fasta:
+            if os.path.exists(fasta_path):
+                fasta_sequences = read_fasta(fasta_path)
+                break
+    
     protein_groups = parse_list_file(args.list)
     
     num_threads = min(args.t, len(protein_groups))
@@ -115,7 +126,10 @@ def main():
     
     for i in range(num_threads):
         chunk = protein_groups[i * chunk_size:(i + 1) * chunk_size]
-        thread = threading.Thread(target=worker, args=(chunk, fasta_sequences, args.a3m, args.o, args.n))
+        thread = threading.Thread(
+            target=worker,
+            args=(chunk, fasta_sequences, args.a3m or [], args.o, args.n)
+        )
         threads.append(thread)
         thread.start()
     
