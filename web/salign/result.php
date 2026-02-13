@@ -23,15 +23,15 @@
             header("refresh: 5");
             exit;
         }
-        if (is_numeric($_GET["rmsd"])) {
-            $Max_RMSD = (float)$_GET["rmsd"];
-        } else $Max_RMSD = PHP_INT_MAX;
+        if (is_numeric($_GET["tmscore"])) {
+            $Min_TM_SCORE = (float)$_GET["tmscore"];
+        } else $Min_TM_SCORE = PHP_INT_MAX;
         $Salign_Results = array();
         $Lines = file("$TMP_DIR/query.out");
         foreach ($Lines as $Line) {
             if ($Line[0] == '#') continue;
             $Items = explode("\t", $Line);
-            if ((float)$Items[4] > $Max_RMSD) continue;
+            if (max((float)$Items[2], (float)$Items[3]) < $Min_TM_SCORE) continue;
             $Items[1] = substr($Items[1], 0, -2);
             $Salign_Result = array(
                 "PDB1" => "MP_SALIGN_" . $_GET["rid"] . "/query_" . pathinfo($Items[1])["filename"],

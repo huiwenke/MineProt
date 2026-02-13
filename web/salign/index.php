@@ -45,11 +45,11 @@
                     <br>
                     <div style="display: flex;">
                         <div style="width: 15%; color: white;">
-                            <strong>Max RMSD</strong>
+                            <strong>TM-score threshold</strong>
                         </div>
                         <div style="width: 25%; color: white;">
                             <label class="wrapper">
-                                <input name="rmsd" class="form-control-header" value=5>
+                                <input name="tmscore" class="form-control-header" value=0.5>
                             </label>
                         </div>
                         <div style="width: 10%;">

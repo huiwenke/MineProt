@@ -2,7 +2,7 @@
 include "../../api.php";
 
 $Result_ID = uniqid();
-$RMSD = $_POST["rmsd"];
+$TM_SCORE = $_POST["tmscore"];
 $TMP_DIR = sys_get_temp_dir() . "/MP_SALIGN_" . $Result_ID;
 mkdir($TMP_DIR);
 
@@ -41,7 +41,7 @@ $Shell_Script_Path = $TMP_DIR . "/query.sh";
 $Shell_Script = fopen($Shell_Script_Path, 'w');
 foreach ($PDB_List as $PDB_Path) {
     $Result_Prefix = $TMP_DIR . "/query_" . pathinfo($PDB_Path)["filename"];
-    $Shell_CMD = "USalign $Query_PDB_Path $PDB_Path -outfmt 2 -o $Result_Prefix\n";
+    $Shell_CMD = "USalign $Query_PDB_Path $PDB_Path -mm 7 -outfmt 2 -o $Result_Prefix\n";
     fwrite($Shell_Script, $Shell_CMD);
 }
 $TMP_STR = str_replace("/", "\\/", $TMP_DIR);
@@ -54,5 +54,5 @@ fclose($Shell_Script);
 putenv("PATH=" . getenv("PATH"));
 shell_exec("/bin/bash $Shell_Script_Path > $TMP_DIR/query.out &");
 echo $Result_ID;
-header("location: ../../salign/result.php?rid=$Result_ID&rmsd=$RMSD");
+header("location: ../../salign/result.php?rid=$Result_ID&tmscore=$TM_SCORE");
 exit;

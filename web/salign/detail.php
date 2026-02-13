@@ -2,7 +2,7 @@
 putenv("PATH=" . getenv("PATH"));
 $PDB1_Path = base64_decode($_GET["pdb1"]);
 $PDB2_Path = base64_decode($_GET["pdb2"]);
-$Details = shell_exec("USalign $PDB1_Path $PDB2_Path");
+$Details = shell_exec("USalign $PDB1_Path $PDB2_Path -mm 7");
 ?>
 <!DOCTYPE html>
 <html>
