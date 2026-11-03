@@ -360,6 +360,10 @@ async def submit_salign(request: Request):
     structure = str(form.get("structure", ""))
     if not structure.strip():
         raise ValueError("Query structure required")
+    hinge_input = str(form.get("hinge", "0"))
+    if hinge_input not in tuple(str(value) for value in range(10)):
+        raise ValueError("Hinge must be an integer between 0 and 9")
+    hinge = int(hinge_input)
     threshold = float(form.get("tmscore", 0.5))
     if not math.isfinite(threshold) or not 0 <= threshold <= 1:
         raise ValueError("TM-score threshold must be between 0 and 1")
@@ -375,7 +379,7 @@ async def submit_salign(request: Request):
     for target in targets:
         component(target["repo"])
         component(target["name"])
-    rid = await run_in_threadpool(jobs.submit, structure, targets)
+    rid = await run_in_threadpool(jobs.submit, structure, targets, hinge)
     return RedirectResponse("/salign/result.php?" + urlencode({"rid": rid, "tmscore": threshold}), status_code=302)
 
 
@@ -420,11 +424,12 @@ def salign_detail(request: Request, pdb1: str, pdb2: str):
     if not query.is_file() or not query.name.startswith("query_"):
         raise FileNotFoundError(query.name)
     repo, name = target.parent.name, target.stem
+    hinge = jobs.job_hinge(query.parent.parent)
     with tempfile.TemporaryDirectory(prefix="MP_SALIGN_DETAIL_") as temporary:
         restored = Path(temporary) / "hit.pdb"
         restored.write_bytes(read_file(repo, name + ".pdb"))
         result = subprocess.run([settings.USALIGN, str(query), str(restored), "-mm", "7", "-afp",
-                                 "-hinge", "9", "-fast"], capture_output=True, text=True,
+                                 "-hinge", str(hinge), "-fast"], capture_output=True, text=True,
                                 check=True, timeout=settings.JOB_TIMEOUT)
     return render(request, "salign/detail.html", {"Details": result.stdout})
 

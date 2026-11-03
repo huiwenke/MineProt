@@ -14,6 +14,7 @@ from pathlib import Path
 
 from . import settings
 from .storage import atomic_write, component, inside, read_file
+from .structures import cif_to_pdb
 
 
 def job_path(rid: str) -> Path:
@@ -26,12 +27,28 @@ def state(directory: Path, value: str) -> None:
     atomic_write(directory / "status.txt", value.encode())
 
 
-def submit(structure: str, targets: list[dict]) -> str:
+def job_hinge(directory: Path) -> int:
+    options = directory / "options.json"
+    # Jobs created before this option was exposed always used 9.
+    return json.loads(options.read_text())["hinge"] if options.is_file() else 9
+
+
+def submit(structure: str, targets: list[dict], hinge: int = 0) -> str:
+    if type(hinge) is not int or not 0 <= hinge <= 9:
+        raise ValueError("Hinge must be an integer between 0 and 9")
+    structure = structure.lstrip("\ufeff \t\r\n")
+    if any(line.strip().lower().startswith(("data_", "_atom_site."))
+           for line in structure.splitlines()):
+        try:
+            structure = cif_to_pdb(structure.encode())
+        except (RuntimeError, ValueError) as exc:
+            raise ValueError(f"Invalid CIF query structure: {exc}") from exc
     rid = uuid.uuid4().hex
     directory = job_path(rid)
     directory.mkdir(parents=True)
     atomic_write(directory / "query.pdb", structure.encode())
     atomic_write(directory / "targets.json", json.dumps(targets).encode())
+    atomic_write(directory / "options.json", json.dumps({"hinge": hinge}).encode())
     atomic_write(directory / "total.txt", str(len(targets)).encode())
     atomic_write(directory / "progress.txt", b"0")
     state(directory, "queued")
@@ -66,6 +83,7 @@ def worker(rid: str) -> None:
                 time.sleep(1)
         state(directory, "running")
         targets = json.loads((directory / "targets.json").read_text())
+        hinge = job_hinge(directory)
         failed = 0
         with (directory / "query.out").open("w") as output:
             for index, target in enumerate(targets, 1):
@@ -78,7 +96,7 @@ def worker(rid: str) -> None:
                     atomic_write(target_path, read_file(repo, name + ".pdb"))
                     result = subprocess.run([
                         settings.USALIGN, str(directory / "query.pdb"), str(target_path),
-                        "-mm", "7", "-afp", "-hinge", "9", "-fast", "-outfmt", "2",
+                        "-mm", "7", "-afp", "-hinge", str(hinge), "-fast", "-outfmt", "2",
                         "-o", str(prefix)], capture_output=True, text=True,
                         timeout=settings.JOB_TIMEOUT, check=True)
                     output.write(result.stdout)
