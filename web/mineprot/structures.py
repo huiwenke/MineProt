@@ -9,6 +9,54 @@ import re
 import gemmi
 
 
+_L_AMINO_ACIDS = frozenset(
+    "ALA ARG ASN ASP CYS GLN GLU HIS ILE LEU LYS MET PHE PRO SER THR TRP TYR VAL".split())
+
+
+def _repair_component_types(block):
+    """Fill missing standard residue types without reclassifying ligands."""
+    components = block.get_mmcif_category("_chem_comp.")
+    ids = components.get("id", [])
+    if not ids:
+        return
+    types = components.get("type", [None] * len(ids))
+    changed = False
+    for i, component in enumerate(ids):
+        if types[i] not in (None, False, "", ".", "?"):
+            continue
+        component = component.upper()
+        if component in _L_AMINO_ACIDS:
+            types[i] = "L-peptide linking"
+        elif component == "GLY":
+            types[i] = "peptide linking"
+        elif component in ("A", "C", "G", "U", "I"):
+            types[i] = "RNA linking"
+        elif component in ("DA", "DC", "DG", "DT", "DI", "DU"):
+            types[i] = "DNA linking"
+        else:
+            continue
+        changed = True
+    if changed:
+        components["type"] = types
+        block.set_mmcif_category("_chem_comp.", components)
+
+
+def _remove_local_database_marker(block):
+    """Undo our old marker: Mol* mistakes its presence for a PDB archive."""
+    databases = block.get_mmcif_category("_database_2.")
+    ids = databases.get("database_id", [])
+    keep = [i for i, value in enumerate(ids) if value != "MineProt"]
+    if len(keep) == len(ids):
+        return
+    # Erase the category entirely when no genuine database records remain.
+    if keep:
+        block.set_mmcif_category("_database_2.", {
+            key: [values[i] for i in keep] for key, values in databases.items()
+        })
+    else:
+        block.find_mmcif_category("_database_2.").erase()
+
+
 def pdb_to_alphacif(data: bytes, name: str = "model") -> str:
     structure = gemmi.read_pdb_string(data.decode("utf-8"))
     if not len(structure) or not any(len(chain) for chain in structure[0]):
@@ -28,11 +76,9 @@ def pdb_to_alphacif(data: bytes, name: str = "model") -> str:
     structure.assign_label_seq_id()
     document = structure.make_mmcif_document()
     block = document.sole_block()
-    # PDBe Mol* 1.2.1 only enables its confidence provider for a CIF carrying
-    # database_2.database_id (or a PDB-looking entry ID). Use the actual local
-    # database name rather than pretending that predictions came from the PDB.
-    block.set_pair("_database_2.database_id", "MineProt")
-    block.set_pair("_database_2.database_code", gemmi.cif.quote(name))
+    # alphafoldView explicitly attaches the confidence theme. No database_2
+    # marker is needed; adding one disables Mol*'s automatic DSSP selection.
+    _repair_component_types(block)
     # The legacy toolkit explicitly checks for this canonical sequence field.
     # Write it even when an upstream writer omits it from an otherwise valid CIF.
     polymers = block.get_mmcif_category("_entity_poly.")
@@ -106,11 +152,10 @@ def viewer_cif(data: bytes) -> bytes:
     """
     document = gemmi.cif.read_string(data.decode("utf-8"))
     block = document.sole_block()
+    _repair_component_types(block)
+    _remove_local_database_marker(block)
     if not len(block.find_values("_ma_qa_metric_local.metric_value")):
-        return data
-    if not len(block.find_values("_database_2.database_id")):
-        block.set_pair("_database_2.database_id", "MineProt")
-        block.set_pair("_database_2.database_code", gemmi.cif.quote(block.name))
+        return document.as_string().encode()
     polymer_ids = list(block.find_values("_entity_poly.entity_id"))
     if len(set(polymer_ids)) != 1:
         return document.as_string().encode()

@@ -92,7 +92,8 @@ if [ ! -s app/php/foldcomp.tar.gz ]; then
     fi
     archive=$(mktemp app/php/foldcomp.tar.gz.XXXXXX)
     trap 'rm -f -- "$archive"' EXIT
-    curl --fail --location --retry 3 https://mmseqs.com/foldcomp/foldcomp-linux-x86_64.tar.gz -o "$archive"
+    echo 'Downloading Foldcomp...'
+    curl --fail --location --retry 3 --connect-timeout 30 --max-time 600 https://mmseqs.com/foldcomp/foldcomp-linux-x86_64.tar.gz -o "$archive"
     mv -- "$archive" app/php/foldcomp.tar.gz
     trap - EXIT
 fi
@@ -140,5 +141,67 @@ MP_UID=$(id -u)
 MP_GID=$(id -g)
 ENV
 
-# No fallback on an actual build/start failure: preserve its original error.
-"${compose[@]}" up -d --build --remove-orphans
+# Detached mode applies to container execution, not image building or waiting
+# for depends_on health checks. Keep these phases visible and fail in place.
+echo 'Building images (this step runs in the foreground)...'
+if [[ $("$MP_CE" --version) == *podman* ]]; then
+    # Compose providers differ in their pull flags and may force registry
+    # access. Resolve local aliases first and build directly with Podman.
+    build_podman_image() {
+        local base_name=$1 dockerfile=$2 context=$3 target=$4
+        local base_image="docker.io/library/$base_name" candidate
+        local pull_policy=missing
+        for candidate in "docker.io/library/$base_name" "localhost/$base_name" "$base_name"; do
+            if "$MP_CE" image inspect "$candidate" >/dev/null 2>&1; then
+                base_image=$candidate
+                pull_policy=never
+                break
+            fi
+        done
+        if [ "$pull_policy" = never ]; then
+            echo "Using local base image: $base_image (pull disabled)"
+        else
+            echo "Base image not found in current Podman storage: $base_image; downloading..."
+        fi
+        "$MP_CE" build --format=docker --pull="$pull_policy" \
+            --build-arg "MP_BASE_IMAGE=$base_image" \
+            -f "$dockerfile" -t "$target" "$context" </dev/null
+    }
+    build_podman_image elasticsearch:7.12.1 app/elasticsearch/Dockerfile app/elasticsearch localhost/mineprot_es:latest
+    build_podman_image python:3.12-slim-bookworm app/python/Dockerfile . localhost/mineprot_web:latest
+else
+    "${compose[@]}" build </dev/null
+fi
+# Start dependencies explicitly so a Compose provider cannot wait indefinitely
+# inside its service_healthy handling without printing useful diagnostics.
+startup_failed() {
+    echo "Error: $1 did not become ready within 180 seconds." >&2
+    "$MP_CE" ps -a >&2 || true
+    "$MP_CE" logs --tail 100 "$1" >&2 || true
+    exit 1
+}
+echo 'Starting Elasticsearch in detached mode...'
+"${compose[@]}" up -d --no-build es </dev/null
+echo 'Waiting up to 180 seconds for Elasticsearch (yellow/green)...'
+startup_deadline=$((SECONDS + 180))
+until es_status=$("$MP_CE" exec elasticsearch curl --fail --silent --max-time 5 \
+        'http://127.0.0.1:9200/_cat/health?h=status' 2>/dev/null) \
+        && [[ "$es_status" == green || "$es_status" == yellow ]]; do
+    if [ "$SECONDS" -ge "$startup_deadline" ]; then
+        startup_failed elasticsearch
+    fi
+    sleep 2
+done
+echo "Elasticsearch ready ($es_status). Starting Web in detached mode..."
+"${compose[@]}" up -d --no-build --no-deps --remove-orphans web </dev/null
+echo 'Waiting up to 180 seconds for Web...'
+startup_deadline=$((SECONDS + 180))
+until "$MP_CE" exec MineWeb python -c \
+        "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)" \
+        >/dev/null 2>&1; do
+    if [ "$SECONDS" -ge "$startup_deadline" ]; then
+        startup_failed MineWeb
+    fi
+    sleep 2
+done
+echo "Setup finished. Service logs: ${compose[*]} logs -f"

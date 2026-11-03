@@ -1,5 +1,6 @@
 services:
   web:
+    image: localhost/mineprot_web:latest
     container_name: MineWeb
     restart: always
     init: true
@@ -23,6 +24,7 @@ services:
       es:
         condition: service_healthy
   es:
+    image: localhost/mineprot_es:latest
     container_name: elasticsearch
     build: ./app/elasticsearch
     restart: always

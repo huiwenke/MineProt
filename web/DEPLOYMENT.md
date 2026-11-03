@@ -9,6 +9,20 @@ and `config/nginx` are inactive and are retained for reference.
 From the project root, run `toolkit/setup.sh -p 80 -d ./data`.
 The script builds and starts `web` and `es`; it does not delete existing data.
 The bundled Foldcomp and US-align executables require Linux x86-64.
+Image building runs in the foreground. Setup starts Elasticsearch in detached
+mode and explicitly waits up to 180 seconds for yellow/green cluster health,
+then starts Web without a second Compose dependency wait and checks `/healthz`
+for up to 180 seconds. On timeout it prints container status and the affected
+container's last 100 log lines and exits with an error. Containers are left
+available for diagnosis. Setup does not follow logs after a successful start.
+Base image names include their registry to avoid Podman short-name prompts.
+For Podman, setup builds directly with the engine to avoid Compose provider
+pull-policy differences. It checks Docker Hub, localhost and short-name local
+aliases for each base image, then uses `--pull=never` when one exists. Only
+missing base images are downloaded. Podman builds use Docker image format so
+image HEALTHCHECK instructions are retained. Compose uses explicit output names.
+Local images must belong to the same engine, connection and user running setup;
+Docker images and rootful Podman images are not visible to rootless Podman.
 
 Application sources and assets are copied into the image. After editing them,
 rebuild with `docker compose up -d --build`. The setup command also rebuilds.
@@ -56,7 +70,7 @@ completed results remain downloadable. Submit a new query to retry a failed job.
 ## Structure compatibility
 
 `/api/pdb2alphacif/` uses Gemmi and adds missing observed polymer sequences,
-ModelCIF pLDDT categories and the database identifier required by the bundled
+ModelCIF pLDDT categories and missing standard chemical component types for
 PDBe Mol* 1.2.1. AF2 PDB B-factors are interpreted as pLDDT specifically by this
 AF2 endpoint; experimental structures should be supplied as CIF instead.
 
@@ -71,6 +85,13 @@ The old viewer hardcodes entity 1, so multiple distinct polymer entities are
 not guaranteed to receive complete confidence coloring without a frontend
 change. Their entity relationships are preserved. This migration does not
 upgrade the viewer. Existing CIF quality categories are retained.
+
+The viewing endpoint also repairs missing standard residue types in existing
+CIFs and removes the erroneous `MineProt` database marker added by earlier
+conversions, preserving real database records. That marker makes this viewer
+assume a PDB archive model and skip automatic secondary structure calculation.
+The explicit AF confidence theme does not require it. Secondary structure is
+computed by the existing browser plugin; no external DSSP program is required.
 
 The PAE endpoint resolves legacy repository JSON URLs locally. It does not
 fetch arbitrary external URLs. Downloads are confined to repository/cache roots.

@@ -1,4 +1,5 @@
-FROM elasticsearch:7.12.1
+ARG MP_BASE_IMAGE=docker.io/library/elasticsearch:7.12.1
+FROM ${MP_BASE_IMAGE}
 
 ENV VER=7.12.1
 ENV discovery.type=single-node

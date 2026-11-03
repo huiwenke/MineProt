@@ -1,4 +1,5 @@
-FROM python:3.12-slim-bookworm
+ARG MP_BASE_IMAGE=docker.io/library/python:3.12-slim-bookworm
+FROM ${MP_BASE_IMAGE}
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
