@@ -7,6 +7,16 @@ and `config/nginx` are inactive and are retained for reference.
 ## Docker
 
 From the project root, run `toolkit/setup.sh -p 80 -d ./data`.
+Cache defaults to `/tmp/mineprot` inside the Web container. To use shared
+memory, add `-s 1024` for a 1024 MiB `/dev/shm` mount and cache at
+`/dev/shm/mineprot`. `-s 0` switches back to `/tmp`. The setting is retained
+in `.env` as `MP_CACHE_SHM_MB`; command-line options override it.
+Before building, setup rejects invalid sizes or requests exceeding the local
+host's `/dev/shm` total/free capacity, available RAM, or cgroup memory limit.
+These checks target a local container engine. The shared-memory size is a
+filesystem ceiling, not reserved RAM; later memory pressure or a full cache
+can still cause a task to fail. Cache contents in shared memory are lost when
+the container is stopped; neither cache mode is preserved on recreation.
 The script builds and starts `web` and `es`; it does not delete existing data.
 The bundled Foldcomp and US-align executables require Linux x86-64.
 Image building runs in the foreground. Setup starts Elasticsearch in detached
@@ -28,7 +38,7 @@ Application sources and assets are copied into the image. After editing them,
 rebuild with `docker compose up -d --build`. The setup command also rebuilds.
 Old nginx/php containers are removed by Compose's `--remove-orphans` option.
 The original US-align archive is retained, including local changes, under
-`app/php/`; that directory name does not imply a runtime PHP dependency.
+`app/bin/`; that directory name does not imply a runtime PHP dependency.
 
 The setup script verifies `app/python/tools.sha256` before building. If a
 Foldcomp download no longer matches the pinned local archive, setup stops.
@@ -40,7 +50,8 @@ Data directories:
 
 - `repo/`: existing repository data, unchanged format.
 - `es/`: existing Elasticsearch 7.12.1 data, unchanged version and IK plugin.
-- `cache/`: new Python browse caches and Salign tasks, preserved on restart.
+- Cache: Python browse caches and Salign tasks in the container's `/tmp` or
+  `/dev/shm`; the old host `cache/` directory is no longer mounted or required.
 
 The setup script runs the Web container with the invoking user's UID/GID.
 Existing repository files must be readable, and writable for imports. It does
@@ -73,6 +84,9 @@ completed results remain downloadable. Submit a new query to retry a failed job.
 ModelCIF pLDDT categories and missing standard chemical component types for
 PDBe Mol* 1.2.1. AF2 PDB B-factors are interpreted as pLDDT specifically by this
 AF2 endpoint; experimental structures should be supplied as CIF instead.
+Generated CIFs and CIF viewing responses omit hydrogen atoms, including D/T
+isotopes, together with their anisotropic records and atom-type entries.
+Existing repository files are not rewritten.
 
 The original author numbering is retained in stored files and conversion
 responses. `/api/file/...cif` returns a viewing copy for single-polymer-entity
@@ -92,6 +106,11 @@ conversions, preserving real database records. That marker makes this viewer
 assume a PDB archive model and skip automatic secondary structure calculation.
 The explicit AF confidence theme does not require it. Secondary structure is
 computed by the existing browser plugin; no external DSSP program is required.
+For viewing copies containing only standard amino acid components with ordinary
+peptide linking types, the chemical component table is omitted so Mol* uses its
+complete built-in definitions. A partial Gemmi table otherwise disables that
+fallback, and missing standard-residue flags add ball-and-stick geometry over
+the cartoon. Tables containing custom components are retained.
 
 The PAE endpoint resolves legacy repository JSON URLs locally. It does not
 fetch arbitrary external URLs. Downloads are confined to repository/cache roots.

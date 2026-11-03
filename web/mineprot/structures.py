@@ -13,6 +13,40 @@ _L_AMINO_ACIDS = frozenset(
     "ALA ARG ASN ASP CYS GLN GLU HIS ILE LEU LYS MET PHE PRO SER THR TRP TYR VAL".split())
 
 
+def _remove_hydrogens(block):
+    """Remove hydrogen coordinates (including isotopes) and related atom rows."""
+    sites = block.get_mmcif_category("_atom_site.")
+    elements = sites.get("type_symbol", [])
+    removed = {i for i, element in enumerate(elements)
+               if isinstance(element, str) and element.strip().upper() in ("H", "D", "T")}
+    if not removed:
+        return
+    atom_ids = sites.get("id", [])
+    removed_ids = {atom_ids[i] for i in removed if i < len(atom_ids)}
+    for category, rows, keep in (
+        ("_atom_site.", sites, [i for i in range(len(elements)) if i not in removed]),
+        ("_atom_site_anisotrop.", block.get_mmcif_category("_atom_site_anisotrop."), None),
+        ("_atom_type.", block.get_mmcif_category("_atom_type."), None),
+    ):
+        if not rows:
+            continue
+        if category == "_atom_site_anisotrop.":
+            keep = [i for i, value in enumerate(rows.get("id", [])) if value not in removed_ids]
+            if "id" not in rows:
+                continue
+        elif category == "_atom_type.":
+            keep = [i for i, value in enumerate(rows.get("symbol", []))
+                    if not isinstance(value, str) or value.strip().upper() not in ("H", "D", "T")]
+            if "symbol" not in rows:
+                continue
+        if keep:
+            block.set_mmcif_category(category, {
+                key: [values[i] for i in keep] for key, values in rows.items()
+            })
+        else:
+            block.find_mmcif_category(category).erase()
+
+
 def _repair_component_types(block):
     """Fill missing standard residue types without reclassifying ligands."""
     components = block.get_mmcif_category("_chem_comp.")
@@ -57,6 +91,27 @@ def _remove_local_database_marker(block):
         block.find_mmcif_category("_database_2.").erase()
 
 
+def _use_viewer_standard_components(block):
+    """Use Mol*'s complete built-in definitions for ordinary amino acids.
+
+    A partial chem_comp table disables its default chemical component map.
+    In particular, missing mon_nstd_flag marks every residue non-standard
+    and adds ball-and-stick geometry on top of the polymer cartoon.
+    This is only for the viewing copy; retain tables containing custom
+    components or unusual linking types.
+    """
+    components = block.get_mmcif_category("_chem_comp.")
+    ids = components.get("id", [])
+    types = components.get("type", [])
+    if not ids or len(types) != len(ids):
+        return
+    standard = _L_AMINO_ACIDS | {"GLY"}
+    if all(isinstance(name, str) and name.upper() in standard
+           and isinstance(kind, str) and kind.lower() in ("l-peptide linking", "peptide linking")
+           for name, kind in zip(ids, types)):
+        block.find_mmcif_category("_chem_comp.").erase()
+
+
 def pdb_to_alphacif(data: bytes, name: str = "model") -> str:
     structure = gemmi.read_pdb_string(data.decode("utf-8"))
     if not len(structure) or not any(len(chain) for chain in structure[0]):
@@ -76,6 +131,7 @@ def pdb_to_alphacif(data: bytes, name: str = "model") -> str:
     structure.assign_label_seq_id()
     document = structure.make_mmcif_document()
     block = document.sole_block()
+    _remove_hydrogens(block)
     # alphafoldView explicitly attaches the confidence theme. No database_2
     # marker is needed; adding one disables Mol*'s automatic DSSP selection.
     _repair_component_types(block)
@@ -144,16 +200,18 @@ def cif_to_pdb(data: bytes) -> str:
 
 
 def viewer_cif(data: bytes) -> bytes:
-    """Adapt only single-entity predicted CIFs for the unchanged old viewer.
+    """Remove hydrogens and adapt CIFs for the unchanged old viewer.
 
     Raw /repo downloads and conversion results keep author numbering. Multiple
     polymer entities cannot be made fully colorable by the old reader without
-    changing its JavaScript, so those files are returned intact.
+    changing its JavaScript, so their author numbering is retained.
     """
     document = gemmi.cif.read_string(data.decode("utf-8"))
     block = document.sole_block()
+    _remove_hydrogens(block)
     _repair_component_types(block)
     _remove_local_database_marker(block)
+    _use_viewer_standard_components(block)
     if not len(block.find_values("_ma_qa_metric_local.metric_value")):
         return document.as_string().encode()
     polymer_ids = list(block.find_values("_entity_poly.entity_id"))

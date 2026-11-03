@@ -7,8 +7,8 @@
 !app/python
 !app/python/Dockerfile
 !app/python/tools.sha256
-!app/php
-!app/php/foldcomp.tar.gz
-!app/php/usalign.tar.xz
+!app/bin
+!app/bin/foldcomp.tar.gz
+!app/bin/usalign.tar.xz
 web/**/__pycache__
 web/**/*.pyc

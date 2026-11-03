@@ -4,6 +4,7 @@ set -euo pipefail
 MP_PORT=80
 MP_DATA=./data
 MP_CE=docker
+MP_CACHE_SHM_MB=0
 
 # Load only the supported setup options as data, without executing .env.
 # Priority: explicit command-line options > existing .env > defaults above.
@@ -11,7 +12,7 @@ if [ -f .env ]; then
     single_quoted="^'([^']*)'[[:space:]]*(#.*)?$"
     double_quoted='^"([^"]*)"[[:space:]]*(#.*)?$'
     while IFS= read -r line || [ -n "$line" ]; do
-        if [[ "$line" =~ ^[[:space:]]*(MP_PORT|MP_DATA|MP_CE)[[:space:]]*=(.*)$ ]]; then
+        if [[ "$line" =~ ^[[:space:]]*(MP_PORT|MP_DATA|MP_CE|MP_CACHE_SHM_MB)[[:space:]]*=(.*)$ ]]; then
             key=${BASH_REMATCH[1]}
             value=${BASH_REMATCH[2]}
             value=${value#"${value%%[![:space:]]*}"}
@@ -29,20 +30,23 @@ if [ -f .env ]; then
                 MP_PORT) MP_PORT=$value ;;
                 MP_DATA) MP_DATA=$value ;;
                 MP_CE) MP_CE=$value ;;
+                MP_CACHE_SHM_MB) MP_CACHE_SHM_MB=$value ;;
             esac
         fi
     done < .env
 fi
 
 usage() {
-    echo "Usage: toolkit/setup.sh [-d data-directory] [-p port] [-c container-engine]"
+    echo "Usage: toolkit/setup.sh [-d data-directory] [-p port] [-c container-engine] [-s shm-MiB]"
+    echo "-s: cache in /dev/shm with this size in MiB; 0 (default) uses /tmp."
     echo "Unspecified options use .env values, then defaults: port 80, ./data, docker."
 }
-while getopts ':d:p:c:h' option; do
+while getopts ':d:p:c:s:h' option; do
     case "$option" in
         d) MP_DATA=$OPTARG ;;
         p) MP_PORT=$OPTARG ;;
         c) MP_CE=$OPTARG ;;
+        s) MP_CACHE_SHM_MB=$OPTARG ;;
         h) usage; exit 0 ;;
         *) usage >&2; exit 1 ;;
     esac
@@ -51,6 +55,45 @@ shift $((OPTIND - 1))
 if [ "$#" -ne 0 ] || ! [[ "$MP_PORT" =~ ^[0-9]+$ ]] || [ "$MP_PORT" -lt 1 ] || [ "$MP_PORT" -gt 65535 ]; then
     echo 'Error: provide a port between 1 and 65535.' >&2
     exit 1
+fi
+if ! [[ "$MP_CACHE_SHM_MB" =~ ^(0|[1-9][0-9]{0,6})$ ]]; then
+    echo 'Error: -s must be an integer number of MiB (0 uses /tmp).' >&2
+    exit 1
+fi
+MP_CACHE_PATH=/tmp/mineprot
+MP_SHM_SIZE_MB=64
+if [ "$MP_CACHE_SHM_MB" -gt 0 ]; then
+    # Do not enlarge shared memory beyond the host mount, currently available
+    # memory, or the invoking environment's cgroup memory limit.
+    if [ ! -d /dev/shm ] || [ ! -r /proc/meminfo ]; then
+        echo 'Error: cannot determine system shared-memory limits.' >&2
+        exit 1
+    fi
+    shm_limit_mb=$(df -Pk /dev/shm | awk 'END {printf "%.0f", int($2 / 1024)}')
+    shm_available_mb=$(df -Pk /dev/shm | awk 'END {printf "%.0f", int($4 / 1024)}')
+    memory_limit_mb=$(awk '/^MemAvailable:/ {printf "%.0f", int($2 / 1024)}' /proc/meminfo)
+    if ! [[ "$shm_limit_mb" =~ ^[0-9]+$ && "$shm_available_mb" =~ ^[0-9]+$ && "$memory_limit_mb" =~ ^[0-9]+$ ]]; then
+        echo 'Error: unable to read /dev/shm capacity or available system memory.' >&2
+        exit 1
+    fi
+    cache_limit_mb=$shm_limit_mb
+    [ "$shm_available_mb" -ge "$cache_limit_mb" ] || cache_limit_mb=$shm_available_mb
+    [ "$memory_limit_mb" -ge "$cache_limit_mb" ] || cache_limit_mb=$memory_limit_mb
+    for limit_file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+        if [ -r "$limit_file" ]; then
+            read -r memory_bytes < "$limit_file"
+            if [[ "$memory_bytes" =~ ^[0-9]+$ ]]; then
+                cgroup_limit_mb=$((memory_bytes / 1048576))
+                [ "$cgroup_limit_mb" -ge "$cache_limit_mb" ] || cache_limit_mb=$cgroup_limit_mb
+            fi
+        fi
+    done
+    if [ "$MP_CACHE_SHM_MB" -gt "$cache_limit_mb" ]; then
+        echo "Error: requested /dev/shm cache ${MP_CACHE_SHM_MB} MiB exceeds system limit ${cache_limit_mb} MiB (mount ${shm_limit_mb} MiB, available memory ${memory_limit_mb} MiB, including cgroup limit)." >&2
+        exit 1
+    fi
+    MP_CACHE_PATH=/dev/shm/mineprot
+    MP_SHM_SIZE_MB=$MP_CACHE_SHM_MB
 fi
 if ! command -v "$MP_CE" >/dev/null; then
     echo "Error: Please install $MP_CE." >&2
@@ -85,20 +128,20 @@ case "$server_arch" in
     amd64|x86_64) ;;
     *) echo "Error: bundled Foldcomp/US-align require a Linux x86-64 daemon (found $server_arch)." >&2; exit 1 ;;
 esac
-if [ ! -s app/php/foldcomp.tar.gz ]; then
+if [ ! -s app/bin/foldcomp.tar.gz ]; then
     if ! command -v curl >/dev/null; then
         echo 'Error: curl is required to download Foldcomp.' >&2
         exit 1
     fi
-    archive=$(mktemp app/php/foldcomp.tar.gz.XXXXXX)
+    archive=$(mktemp app/bin/foldcomp.tar.gz.XXXXXX)
     trap 'rm -f -- "$archive"' EXIT
     echo 'Downloading Foldcomp...'
     curl --fail --location --retry 3 --connect-timeout 30 --max-time 600 https://mmseqs.com/foldcomp/foldcomp-linux-x86_64.tar.gz -o "$archive"
-    mv -- "$archive" app/php/foldcomp.tar.gz
+    mv -- "$archive" app/bin/foldcomp.tar.gz
     trap - EXIT
 fi
-if [ ! -s app/php/usalign.tar.xz ]; then
-    echo 'Error: missing app/php/usalign.tar.xz. Supply the project US-align archive.' >&2
+if [ ! -s app/bin/usalign.tar.xz ]; then
+    echo 'Error: missing app/bin/usalign.tar.xz. Supply the project US-align archive.' >&2
     exit 1
 fi
 if ! command -v sha256sum >/dev/null; then
@@ -110,14 +153,14 @@ sha256sum --check app/python/tools.sha256
 
 mkdir -p -- "$MP_DATA"
 MP_DATA=$(cd -- "$MP_DATA" && pwd -P)
-mkdir -p -- "$MP_DATA/repo" "$MP_DATA/cache"
+mkdir -p -- "$MP_DATA/repo"
 if [ ! -d "$MP_DATA/es" ]; then
     cp -a app/elasticsearch/init "$MP_DATA/es"
 fi
 # Existing ES/repository contents and ownership are never reset here.
 # Ensure the application user can use an existing bind-mounted data directory.
-if [ ! -w "$MP_DATA/repo" ] || [ ! -w "$MP_DATA/cache" ]; then
-    echo "Error: $MP_DATA/repo and $MP_DATA/cache must be writable by UID $(id -u)." >&2
+if [ ! -w "$MP_DATA/repo" ]; then
+    echo "Error: $MP_DATA/repo must be writable by UID $(id -u)." >&2
     exit 1
 fi
 if [[ "$MP_DATA" == *"'"* || "$MP_DATA" == *$'\n'* ]]; then
@@ -128,7 +171,7 @@ fi
 # Update only managed settings; keep any custom timeout/concurrency variables.
 if [ -f .env ]; then
     env_tmp=$(mktemp .env.XXXXXX)
-    sed '/^MP_PORT=/d; /^MP_DATA=/d; /^MP_CE=/d; /^MP_UID=/d; /^MP_GID=/d' .env > "$env_tmp"
+    sed '/^MP_PORT=/d; /^MP_DATA=/d; /^MP_CE=/d; /^MP_UID=/d; /^MP_GID=/d; /^MP_CACHE_SHM_MB=/d; /^MP_CACHE_PATH=/d; /^MP_SHM_SIZE_MB=/d' .env > "$env_tmp"
     cat "$env_tmp" > .env
     rm -f -- "$env_tmp"
 fi
@@ -139,6 +182,9 @@ MP_DATA='$MP_DATA'
 MP_CE=$MP_CE
 MP_UID=$(id -u)
 MP_GID=$(id -g)
+MP_CACHE_SHM_MB=$MP_CACHE_SHM_MB
+MP_CACHE_PATH=$MP_CACHE_PATH
+MP_SHM_SIZE_MB=$MP_SHM_SIZE_MB
 ENV
 
 # Detached mode applies to container execution, not image building or waiting
@@ -168,7 +214,7 @@ if [[ $("$MP_CE" --version) == *podman* ]]; then
             -f "$dockerfile" -t "$target" "$context" </dev/null
     }
     build_podman_image elasticsearch:7.12.1 app/elasticsearch/Dockerfile app/elasticsearch localhost/mineprot_es:latest
-    build_podman_image python:3.12-slim-bookworm app/python/Dockerfile . localhost/mineprot_web:latest
+    build_podman_image python:3.12-slim-trixie app/python/Dockerfile . localhost/mineprot_web:latest
 else
     "${compose[@]}" build </dev/null
 fi
