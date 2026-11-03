@@ -1,0 +1,71 @@
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../../assets/js/highcharts.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/data.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/heatmap.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/boost.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/boost-canvas.js"></script>
+    <script src="https://code.highcharts.com/10.3.1/modules/accessibility.js"></script>
+</head>
+
+<body>
+    <div id="container" style="height: 95vh; max-width: 95vh; margin: 0 auto"></div>
+    <pre id="csv" style="display: none">Residue_x, Residue_y, PAE
+{{ csv }}</pre>
+    <script>
+        Highcharts.chart('container', {
+            data: {
+                csv: document.getElementById('csv').innerHTML
+            },
+            chart: {
+                type: 'heatmap',
+                inverted: true
+            },
+            boost: {
+                useGPUTranslations: true
+            },
+            title: {
+                text: {{ title|tojson }},
+                align: 'left'
+            },
+            xAxis: {
+                min: 0,
+                max: {{ Data_Length }}
+            },
+            yAxis: {
+                title: {
+                    text: null
+                },
+                min: 0,
+                max: {{ Data_Length }},
+                showLastLabel: false
+            },
+            colorAxis: {
+                stops: [
+                    [0, '#1F4E79'],
+                    [1, '#FFF']
+                ],
+                min: 0,
+                max: {{ Max_PAE }},
+                showLastLabel: false
+            },
+            series: [{
+                boostThreshold: 1,
+                borderWidth: 0,
+                colsize: 1,
+                tooltip: {
+                    headerFormat: 'PAE<br/>',
+                    pointFormat: '{point.x}-{point.y}: <b>{point.value}</b>'
+                },
+                turboThreshold: Number.MAX_VALUE
+            }]
+        });
+    </script>
+</body>
+
+</html>

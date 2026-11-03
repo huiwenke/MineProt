@@ -1,0 +1,1 @@
+"""MineProt Python web application."""

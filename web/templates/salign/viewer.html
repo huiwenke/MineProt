@@ -1,0 +1,31 @@
+<style>
+.msp-plugin {
+    margin: 0 0 0 0;
+}
+#{{ Salign_Result_Viewer }} {
+    float: center;
+    width: 100%;
+    height: 50vh;
+    position: relative;
+    z-index: 31;
+}
+</style>
+<div id="{{ Salign_Result_Viewer }}"></div>
+<script>
+    //Create plugin instance
+    var {{ Salign_Result_Viewer }} = new PDBeMolstarPlugin();
+
+    //Set options (Checkout available options list in the documentation)
+    var options = {
+        alphafoldView: true,
+        customData: {
+            url: {{ Salign_Query_Path|tojson }},
+            format: "pdb"
+        }
+    }
+
+    var viewerContainer = document.getElementById({{ Salign_Result_Viewer|tojson }});
+
+    {{ Salign_Result_Viewer }}.render(viewerContainer, options);
+    {{ Salign_Result_Viewer }}.visual.update({alphafoldView: true, customData: {url: {{ Salign_Result_Path|tojson }}, format: "cif"}}, false);
+</script>

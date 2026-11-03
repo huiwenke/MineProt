@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MineProt</title>
+    <link rel="shortcut icon" type="image/png" href="../assets/img/logo.png">
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/pdbe-molstar-1.2.1.css">
+    <script src="../assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
+</head>
+<body>
+{% include 'salign/header.html' %}
+    <main style="min-height: 100vh;">
+        {% if waiting %}{% include 'salign/wait.html' %}{% else %}
+        <section class="main">
+            <div style="display: block; width: 100%;">
+                <h2 class="main_h2">
+                    {{ Search_Result_Num|string + ' results' if Search_Result_Num else ' No result' }}
+                </h2>
+                <HR id="hr1" color=#21262d SIZE=1>
+                <br>
+                {% for Salign_Result in displayed %}{% include 'salign/card.html' %}{% endfor %}
+            </div>
+        </section>
+        {% if Search_Result_Num %}{% include 'salign/legend.html' %}{% endif %}{% endif %}
+    </main>
+    {% if not waiting %}<script>
+        function MainFunction() {
+            var isExpanded = document.getElementsByClassName("msp-layout-expanded");
+            var hr1 = document.getElementById("hr1");
+            if (isExpanded.length==0) {
+                hr1.style.visibility = "visible";
+            } else hr1.style.visibility = "hidden";
+            var mspSeqs = document.getElementsByClassName("msp-layout-top");
+            for (var i=0;i<mspSeqs.length;i++){
+                mspSeqs[i].remove();
+            }
+            setTimeout(() => {
+                MainFunction()
+            }, 100)
+        }
+        MainFunction();
+    </script>{% endif %}
+</body>
+
+</html>

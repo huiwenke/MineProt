@@ -1,0 +1,14 @@
+# Only application files and the two tool archives enter the Web build context.
+**
+!LICENSE
+!web
+!web/**
+!app
+!app/python
+!app/python/Dockerfile
+!app/python/tools.sha256
+!app/php
+!app/php/foldcomp.tar.gz
+!app/php/usalign.tar.xz
+web/**/__pycache__
+web/**/*.pyc

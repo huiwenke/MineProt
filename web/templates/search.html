@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search | {{ search_term }}</title>
+    <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="./assets/css/pdbe-molstar-1.2.1.css">
+    <script type="text/javascript" src="./assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
+</head>
+
+<body>
+    {% include 'header.html' %}
+    <main style="min-height: 100vh;">
+        {% include 'form.html' %}
+        <section class="main">
+            <div style="display: block; width: 100%;">
+                <h2 class="main_h2">
+                    {{ ' No result' if not Search_Result_Num else (' Top 200 results' if Search_Result_Num >= 200 else Search_Result_Num|string + ' results') }}
+                </h2>
+                <HR color=#21262d SIZE=1.5>
+                <br>
+                {% for Search_Result in displayed %}{% include 'search_card.html' %}{% endfor %}
+            </div>
+        </section>
+        {% if Search_Result_Num %}{% include 'legend.html' %}{% endif %}
+    </main>
+    <script>
+        function MolstarLayoutCheck() {
+            var isExpanded = document.getElementsByClassName("msp-layout-expanded");
+            var header = document.getElementsByTagName("header")[0];
+            if (isExpanded.length == 0) {
+                header.style.visibility = "visible";
+            } else header.style.visibility = "hidden";
+            setTimeout(() => {
+                MolstarLayoutCheck()
+            }, 100)
+        }
+        MolstarLayoutCheck();
+    </script>
+    <div id="search_api_json" style="display:none">|JSON|{{ search_json|b64 }}|JSON|</div>
+</body>
+
+</html>

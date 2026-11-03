@@ -1,0 +1,51 @@
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .msp-plugin ::-webkit-scrollbar-thumb {
+        background-color: #474748 !important;
+    }
+
+    .viewerSection {
+        margin: 120px 0 0 0;
+    }
+
+    #{{ Search_Result_Viewer }} {
+        float: center;
+        width: 100%;
+        height: 50vh;
+        position: relative;
+        z-index: 31;
+    }
+</style>
+<div class="viewerSection">
+    <!-- Molstar container -->
+    <div id="{{ Search_Result_Viewer }}"></div>
+
+</div>
+<script>
+    //Create plugin instance
+    var viewerInstance = new PDBeMolstarPlugin();
+
+    //Set options (Checkout available options list in the documentation)
+    var options = {
+        customData: {
+            url: {{ Search_Result_Path|tojson }},
+            format: 'cif'
+        },
+        alphafoldView: true,
+        bgColor: {
+            r: 255,
+            g: 255,
+            b: 255
+        },
+        hideCanvasControls: ['selection', 'animation', 'controlToggle', 'controlInfo']
+    }
+
+    var viewerContainer = document.getElementById({{ Search_Result_Viewer|tojson }});
+
+    viewerInstance.render(viewerContainer, options);
+</script>

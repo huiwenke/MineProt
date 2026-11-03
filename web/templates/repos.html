@@ -1,0 +1,6 @@
+{% for Data_Repo in DATA_REPOS %}
+    <ul><li><div class="list-item-div">
+        <input type="checkbox" id="{{ Data_Repo }}" value="{{ Data_Repo }}" name="repo[]" class="a-item-div"{% if Data_Repo in selected_repos %} checked{% endif %}>
+        <label for="{{ Data_Repo }}"><font color="white">{{ Data_Repo }}</font></label>
+    </div></li></ul>
+{% endfor %}

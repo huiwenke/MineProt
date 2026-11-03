@@ -1,0 +1,451 @@
+"""HTTP compatibility layer for the original MineProt frontend and toolkit.
+
+Run from web/: uvicorn mineprot.app:app --host 0.0.0.0 --port 8000
+"""
+import base64
+from contextlib import asynccontextmanager
+import gzip
+import hashlib
+import html
+import json
+import logging
+import math
+import mimetypes
+from pathlib import Path
+import subprocess
+import tempfile
+from urllib.parse import quote, urlencode, urlsplit
+
+import httpx
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.concurrency import run_in_threadpool
+from starlette.middleware.gzip import GZipMiddleware
+
+from . import jobs, search, settings
+from .storage import (atomic_write, b64decode, bounded_gunzip, component, decompress_fcz,
+                      inside, protein_names, read_file, repo_file)
+from .structures import cif_to_pdb, pdb_to_alphacif, viewer_cif
+
+logger = logging.getLogger("mineprot")
+
+
+class BodyLimitMiddleware:
+    """Bound both declared and streamed bodies before handlers can write files."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        headers = dict(scope["headers"])
+        try:
+            length = int(headers.get(b"content-length", b"0"))
+        except ValueError:
+            return await PlainTextResponse("Invalid Content-Length", status_code=400)(scope, receive, send)
+        if length > settings.MAX_BODY:
+            return await PlainTextResponse("Request too large", status_code=413)(scope, receive, send)
+        body = bytearray()
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                return
+            body.extend(message.get("body", b""))
+            if len(body) > settings.MAX_BODY:
+                return await PlainTextResponse("Request too large", status_code=413)(scope, receive, send)
+            if not message.get("more_body", False):
+                break
+        delivered = False
+
+        async def replay():
+            nonlocal delivered
+            if not delivered:
+                delivered = True
+                return {"type": "http.request", "body": bytes(body), "more_body": False}
+            return await receive()
+        await self.app(scope, replay, send)
+
+
+@asynccontextmanager
+async def lifespan(app):
+    settings.REPO_ROOT.mkdir(parents=True, exist_ok=True)
+    settings.CACHE_ROOT.mkdir(parents=True, exist_ok=True)
+    yield
+
+
+app = FastAPI(title="MineProt", lifespan=lifespan, docs_url=None, redoc_url=None)
+app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
+app.add_middleware(BodyLimitMiddleware)
+app.mount("/assets", StaticFiles(directory=settings.WEB_ROOT / "assets"), name="assets")
+templates = Jinja2Templates(directory=settings.WEB_ROOT / "templates")
+templates.env.filters["b64"] = lambda value: base64.b64encode(str(value).encode()).decode()
+
+
+def token(value: str) -> str:
+    return quote(base64.b64encode(value.encode()).decode(), safe="")
+
+
+def homolog_url(annotation):
+    homolog = quote(annotation.get("homolog", ""), safe="")
+    if annotation.get("database") == "afdb":
+        return "https://alphafold.com/entry/" + homolog
+    return "https://www.uniprot.org/" + quote(annotation.get("database", ""), safe="") + "?query=" + homolog
+
+
+def mime(name):
+    return {".json": "application/json", ".pdb": "text/plain", ".cif": "text/plain",
+            ".a3m": "text/plain"}.get(Path(name).suffix, "application/octet-stream")
+
+
+@app.exception_handler(FileNotFoundError)
+async def missing(request, exc):
+    return PlainTextResponse("File not found", status_code=404)
+
+
+@app.exception_handler(gzip.BadGzipFile)
+@app.exception_handler(UnicodeError)
+@app.exception_handler(ValueError)
+async def invalid(request, exc):
+    return PlainTextResponse(str(exc), status_code=400)
+
+
+@app.exception_handler(KeyError)
+async def missing_field(request, exc):
+    return PlainTextResponse("Missing field: " + str(exc), status_code=400)
+
+
+@app.exception_handler(httpx.HTTPError)
+@app.exception_handler(subprocess.SubprocessError)
+@app.exception_handler(RuntimeError)
+async def upstream_error(request, exc):
+    logger.exception("Backend operation failed", exc_info=exc)
+    return PlainTextResponse("Backend operation failed; see server log", status_code=502)
+
+
+@app.get("/healthz")
+def health():
+    return {"status": "ok"}
+
+
+async def context(request):
+    repos = await run_in_threadpool(search.datasets)
+    selected = request.query_params.getlist("repo[]")
+    if not selected and request.query_params.get("repo"):
+        selected = [request.query_params["repo"]]
+    if "search" in request.query_params and not selected:
+        selected = repos
+    return {"DATA_REPOS": repos, "selected_repos": selected}
+
+
+def render(request, name, values, headers=None):
+    return templates.TemplateResponse(request=request, name=name, context=values, headers=headers)
+
+
+@app.api_route("/", methods=["GET", "POST"])
+@app.api_route("/index.php", methods=["GET", "POST"])
+@app.get("/index.html")
+async def home(request: Request):
+    return render(request, "index.html", await context(request))
+
+
+@app.get("/import.php")
+async def import_page(request: Request):
+    return render(request, "import.html", await context(request))
+
+
+def paginate(items, form):
+    try:
+        page = max(1, int(form.get("page", "1")))
+    except (TypeError, ValueError):
+        page = 1
+    total = (len(items) + 9) // 10
+    page = min(page, max(1, total))
+    return items[(page - 1) * 10:page * 10], {"page": page, "top": (page - 1) * 10, "tot": total, "length": 10}
+
+
+def decorate_search(hit):
+    source = hit.get("_source", {})
+    source.setdefault("anno", {})
+    annotation = source["anno"] or {}
+    path = "/api/file/" + quote(hit["_index"], safe="") + "/" + quote(source["name"], safe="")
+    hit["_view"] = {
+        "annotation": annotation, "homolog_url": homolog_url(annotation),
+        "b64_Data_URL": token(path + ".json"),
+        "Search_Result_Viewer": "MP_" + hashlib.md5((hit["_index"] + "/" + source["name"]).encode()).hexdigest(),
+        "Search_Result_Path": path + ".cif"}
+    return hit
+
+
+@app.api_route("/search.php", methods=["GET", "POST"])
+async def search_page(request: Request):
+    values = await context(request)
+    term = request.query_params.get("search", "")
+    repos = values["selected_repos"] or values["DATA_REPOS"]
+    hits = await run_in_threadpool(search.search, repos, term)
+    raw = json.dumps(hits, ensure_ascii=False)
+    for index, hit in enumerate(hits):
+        if hit.get("_source", {}).get("name") == term:
+            hits[0], hits[index] = hits[index], hits[0]
+            break
+    displayed, info = paginate(hits, await request.form(max_part_size=settings.MAX_BODY) if request.method == "POST" else {})
+    values.update(search_term=term, search_json=raw, Search_Result_Num=len(hits),
+                  displayed=[decorate_search(hit) for hit in displayed], Page_Info=info)
+    return render(request, "search.html", values)
+
+
+@app.api_route("/browse.php", methods=["GET", "POST"])
+async def browse_page(request: Request):
+    values = await context(request)
+    repo = request.query_params.get("repo", "")
+    sort = "plddt" if (await request.form(max_part_size=settings.MAX_BODY)).get("sort") == "plddt" else "name"
+    rows = await run_in_threadpool(search.browse_cache, repo, sort) if repo else []
+    for row in rows:
+        row["homolog_url"] = homolog_url(row)
+    values.update(repo=repo, rows=rows)
+    return render(request, "browse.html", values)
+
+
+# Do not redirect trailing-slash legacy POST requests: serve directory and
+# index.php aliases explicitly, including the empty document ID for index ops.
+@app.api_route("/api/es/{repo}/{action}", methods=["GET", "POST", "DELETE"])
+@app.api_route("/api/es/{repo}/{action}/{term:path}", methods=["GET", "POST", "DELETE"])
+async def es_api(request: Request, repo: str, action: str, term: str = ""):
+    if action not in ("get", "add", "del", "search"):
+        raise HTTPException(404, "Unknown operation")
+    if action == "search":
+        result = await run_in_threadpool(search.search, repo.split(","), b64decode(term).decode())
+        return Response(json.dumps(result), media_type="application/json")
+    indexes = ",".join(quote(component(value), safe="*") for value in repo.split(","))
+    path = indexes + ("/_doc/" + quote(term, safe="") if term else "")
+    if action == "add":
+        if not term:
+            raise ValueError("Document ID required")
+        body = await request.body()
+        json.loads(body)
+        response = await run_in_threadpool(search.es_request, "POST", path, content=body,
+                                          headers={"Content-Type": "application/json"})
+        await run_in_threadpool(search.clear_browse, repo)
+        # The original add endpoint returns an empty successful body.
+        return Response(status_code=response.status_code if response.is_error else 200)
+    response = await run_in_threadpool(search.es_request, "DELETE" if action == "del" else "GET", path)
+    if action == "del":
+        for name in repo.split(","):
+            if "*" not in name:
+                await run_in_threadpool(search.clear_browse, name)
+    return Response(response.content, media_type="application/json", status_code=response.status_code)
+
+
+@app.api_route("/api/file/{repo}/{name}", methods=["GET", "HEAD"])
+def file_api(repo: str, name: str):
+    data = read_file(repo, name)
+    if name.lower().endswith(".cif"):
+        data = viewer_cif(data)
+    return Response(data, media_type=mime(name))
+
+
+@app.post("/api/pdb2alphacif/")
+@app.post("/api/pdb2alphacif/index.php")
+async def convert_pdb(request: Request):
+    body = await request.json()
+    name = component(str(body.get("name", "model")))
+    data = b64decode(body["data"])
+    result = await run_in_threadpool(pdb_to_alphacif, data, name)
+    return PlainTextResponse(result)
+
+
+@app.post("/api/cif2pdb/")
+@app.post("/api/cif2pdb/index.php")
+async def convert_cif(request: Request):
+    body = await request.json()
+    result = await run_in_threadpool(cif_to_pdb, b64decode(body["data"]))
+    return PlainTextResponse(result)
+
+
+@app.post("/api/fcz2pdb/")
+@app.post("/api/fcz2pdb/index.php")
+async def convert_fcz(request: Request):
+    form = await request.form(max_part_size=settings.MAX_BODY)
+    upload = form.get("file")
+    if not upload or not hasattr(upload, "read"):
+        raise ValueError("Multipart field 'file' required")
+    data = await upload.read()
+    return Response(await run_in_threadpool(decompress_fcz, data), media_type="text/plain")
+
+
+@app.post("/api/import2repo/")
+@app.post("/api/import2repo/index.php")
+async def import_repo(request: Request):
+    body = json.loads(bounded_gunzip(await request.body()))
+    repo, name = component(body["repo"]), component(body["name"])
+    data = b64decode(body["text"])
+    path = repo_file(repo, name)
+    compressed = repo_file(repo, name + ".gz")
+    if (path.exists() or compressed.exists()) and not body.get("force", False):
+        return PlainTextResponse("Skipping")
+    destination, obsolete = (compressed, path) if body.get("gzip", False) else (path, compressed)
+    await run_in_threadpool(atomic_write, destination, gzip.compress(data) if body.get("gzip", False) else data)
+    obsolete.unlink(missing_ok=True)
+    await run_in_threadpool(search.clear_browse, repo)
+    return PlainTextResponse("Importing")
+
+
+@app.get("/api/import2repo/check.php")
+def check_import(repo: str, name: str):
+    path = repo_file(repo, name)
+    if path.is_file():
+        data = path.read_bytes()
+    elif repo_file(repo, name + ".gz").is_file():
+        data = gzip.decompress(repo_file(repo, name + ".gz").read_bytes())
+    else:
+        return PlainTextResponse("")
+    return PlainTextResponse(hashlib.md5(data).hexdigest())
+
+
+@app.get("/api/cache/get.php")
+def get_cache(data_url: str, download: str = ""):
+    path = inside(settings.CACHE_ROOT, b64decode(data_url).decode())
+    if not path.is_file():
+        raise FileNotFoundError(path.name)
+    return FileResponse(path, media_type="application/octet-stream" if download else mime(path.name),
+                        filename=path.name if download else None)
+
+
+@app.get("/api/cache/clear.php")
+def clear_cache(repo: str, force: str = ""):
+    search.clear_browse(repo)
+    return Response()
+
+
+@app.api_route("/api/cache/update.php", methods=["GET", "POST"])
+def update_cache():
+    jobs.cleanup()
+    for repo in search.datasets():
+        search.clear_browse(repo)
+        for sort in ("name", "plddt"):
+            search.browse_cache(repo, sort)
+    return Response()
+
+
+@app.get("/api/plot/pae.php")
+def pae_page(request: Request, data_url: str):
+    # Generated legacy URLs may use the old internal hostname. Resolve their
+    # /api/file path locally instead of making an arbitrary outbound request.
+    path = urlsplit(b64decode(data_url).decode()).path
+    from urllib.parse import unquote
+    parts = path.split("/")
+    if len(parts) != 5 or parts[1:3] != ["api", "file"] or not parts[4].endswith(".json"):
+        raise ValueError("PAE data must reference a repository JSON file")
+    data = json.loads(read_file(unquote(parts[3]), unquote(parts[4])))
+    matrix = data["pae"]
+    length = len(matrix)
+    if any(len(row) != length for row in matrix):
+        raise ValueError("PAE matrix must be square")
+    rows = [f"{x},{y},{float(value)}" for x, row in enumerate(matrix) for y, value in enumerate(row)]
+    return render(request, "pae.html", {"csv": "\n".join(rows), "Data_Length": length,
+                  "Max_PAE": float(data["max_pae"]), "title": Path(unquote(parts[4])).stem})
+
+
+@app.get("/salign/")
+@app.get("/salign/index.php")
+async def salign_page(request: Request):
+    return render(request, "salign/index.html", await context(request))
+
+
+@app.post("/api/salign/")
+@app.post("/api/salign/index.php")
+async def submit_salign(request: Request):
+    form = await request.form(max_part_size=settings.MAX_BODY)
+    structure = str(form.get("structure", ""))
+    if not structure.strip():
+        raise ValueError("Query structure required")
+    threshold = float(form.get("tmscore", 0.5))
+    if not math.isfinite(threshold) or not 0 <= threshold <= 1:
+        raise ValueError("TM-score threshold must be between 0 and 1")
+    repos = form.getlist("repo[]") or await run_in_threadpool(search.datasets)
+    term = str(form.get("search", ""))
+    if term:
+        hits = await run_in_threadpool(search.search, repos, term)
+        targets = [{"repo": hit["_index"], "name": hit["_source"]["name"]} for hit in hits]
+    else:
+        targets = []
+        for repo in repos:
+            targets.extend({"repo": repo, "name": name} for name in await run_in_threadpool(protein_names, repo))
+    for target in targets:
+        component(target["repo"])
+        component(target["name"])
+    rid = await run_in_threadpool(jobs.submit, structure, targets)
+    return RedirectResponse("/salign/result.php?" + urlencode({"rid": rid, "tmscore": threshold}), status_code=302)
+
+
+def decorate_salign(hit):
+    repo, name, prefix = hit["repo"], hit["name"], hit["prefix"]
+    hit["_view"] = {
+        "Salign_Name": name, "Salign_Repo": repo,
+        "Salign_Result_Viewer": "MP_" + hashlib.md5(prefix.encode()).hexdigest(),
+        "Salign_Result_Path": "/api/file/" + quote(repo, safe="") + "/" + quote(name, safe="") + ".cif",
+        "Salign_Query_Path": "/api/cache/get.php?data_url=" + token(prefix + ".pdb"),
+        "PDB1_Path": token(hit["query"]), "PDB2_Path": token(hit["target"]),
+        "Salign_Result_Data_URLs": {
+            "hit": "/api/file/" + quote(repo, safe="") + "/" + quote(name, safe="") + ".pdb",
+            **{key: token(prefix + suffix) for key, suffix in {
+                "pdb": ".pdb", "pml": ".pml", "all": "_all.pml", "all_atm": "_all_atm.pml",
+                "all_atm_lig": "_all_atm_lig.pml", "atm": "_atm.pml"}.items()}}}
+    return hit
+
+
+@app.api_route("/salign/result.php", methods=["GET", "POST"])
+async def salign_result(request: Request, rid: str, tmscore: float = 0.5):
+    directory = jobs.job_path(rid)
+    if not directory.is_dir():
+        raise FileNotFoundError(rid)
+    status = await run_in_threadpool(jobs.status, directory)
+    waiting = not (directory / "result.tar.gz").is_file()
+    hits = await run_in_threadpool(jobs.results, rid, tmscore) if not waiting else []
+    displayed, info = paginate(hits, await request.form(max_part_size=settings.MAX_BODY) if request.method == "POST" else {})
+    values = {"Job_Status": status, "waiting": waiting, "Search_Result_Num": len(hits),
+              "displayed": [decorate_salign(hit) for hit in displayed], "Page_Info": info,
+              "Current_USalign_Num": int((directory / "progress.txt").read_text()),
+              "Total_USalign_Num": max(1, int((directory / "total.txt").read_text())),
+              "archive_token": base64.b64encode(f"MP_SALIGN_{rid}/result.tar.gz".encode()).decode()}
+    return render(request, "salign/result.html", values,
+                  headers={"Refresh": "5"} if waiting and status != "failed" else None)
+
+
+@app.get("/salign/detail.php")
+def salign_detail(request: Request, pdb1: str, pdb2: str):
+    query = inside(settings.CACHE_ROOT, b64decode(pdb1).decode())
+    target = inside(settings.CACHE_ROOT, b64decode(pdb2).decode())
+    if not query.is_file() or not query.name.startswith("query_"):
+        raise FileNotFoundError(query.name)
+    repo, name = target.parent.name, target.stem
+    with tempfile.TemporaryDirectory(prefix="MP_SALIGN_DETAIL_") as temporary:
+        restored = Path(temporary) / "hit.pdb"
+        restored.write_bytes(read_file(repo, name + ".pdb"))
+        result = subprocess.run([settings.USALIGN, str(query), str(restored), "-mm", "7", "-afp",
+                                 "-hinge", "9", "-fast"], capture_output=True, text=True,
+                                check=True, timeout=settings.JOB_TIMEOUT)
+    return render(request, "salign/detail.html", {"Details": result.stdout})
+
+
+@app.api_route("/repo", methods=["GET", "HEAD"])
+@app.api_route("/repo/{relative:path}", methods=["GET", "HEAD"])
+def raw_repository(request: Request, relative: str = ""):
+    path = inside(settings.REPO_ROOT, relative)
+    if path.is_file():
+        return FileResponse(path, media_type=mimetypes.guess_type(path.name)[0] or "application/octet-stream")
+    if not path.is_dir():
+        raise FileNotFoundError(relative)
+    links = []
+    if relative.strip("/"):
+        parent = str(Path(relative.rstrip("/")).parent)
+        links.append('<li><a href="/repo/' + quote("" if parent == "." else parent, safe="/") + '/">../</a></li>')
+    for child in sorted(path.iterdir()):
+        # Do not expose symlink targets outside the repository root.
+        if not child.resolve().is_relative_to(settings.REPO_ROOT):
+            continue
+        name = child.name + ("/" if child.is_dir() else "")
+        url = "/repo/" + quote((relative.rstrip("/") + "/" + name).lstrip("/"), safe="/")
+        links.append(f'<li><a href="{html.escape(url, quote=True)}">{html.escape(name)}</a></li>')
+    return HTMLResponse("<!doctype html><title>Index of /repo/" + html.escape(relative) + "</title><ul>" + "".join(links) + "</ul>")
