@@ -31,8 +31,9 @@ Retained components have separate terms:
 - Foldcomp: https://github.com/steineggerlab/foldcomp. Its bundled archive is
   pinned by `app/python/tools.sha256`; preserve the applicable upstream license
   and any included third-party notices when redistributing.
-- PDBe Mol*: https://github.com/molstar/pdbe-molstar (MIT), including its bundled
-  dependencies' individual notices. The existing frontend bundle is unchanged.
+- PDBe Mol*: https://github.com/molstar/pdbe-molstar. Search uses version 3.12.0
+  (Apache-2.0), vendored in `assets/vendor/pdbe-molstar-3.12.0/` with its LICENSE
+  and bundled dependency notices. The original 1.2.1 bundle remains for Salign.
 - Highcharts 10.3.1: https://www.highcharts.com/license. It is not MIT. Review the
   license applicable to that version and the deployment's existing authorization,
   especially for commercial use and redistribution. No new Highcharts rights

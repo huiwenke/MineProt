@@ -53,6 +53,13 @@ Data directories:
 - Cache: Python browse caches and Salign tasks in the container's `/tmp` or
   `/dev/shm`; the old host `cache/` directory is no longer mounted or required.
 
+Browse displays 1000 proteins per page. On cache rebuild it reads metadata via
+Elasticsearch `_mget` in batches of 500, reusing one HTTP connection pool and
+caching both sort orders. Cache hits check the repository directory timestamp
+without scanning every file. Directory changes and application API writes
+invalidate the cache; direct edits to existing files or ES documents are picked
+up within five minutes or immediately after clicking Refresh.
+
 The setup script runs the Web container with the invoking user's UID/GID.
 Existing repository files must be readable, and writable for imports. It does
 not recursively change data ownership. Elasticsearch keeps its original image

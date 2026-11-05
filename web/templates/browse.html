@@ -20,10 +20,24 @@
                 {% if not repo %}{% for Data_Repo in DATA_REPOS %}
 <h3><li style="color:#efefef;"><a style="color:#efefef;" class="user-properties-link" href="browse.php?repo={{ Data_Repo|urlencode }}">{{ Data_Repo }}</a></li></h3>
 {% endfor %}{% else %}
-<form method='post' onsubmit='return reSubmit()'>
+<form method="get" action="browse.php" style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; color:#efefef; margin-top:12px;">
+                        <input type="hidden" name="repo" value="{{ repo }}">
                         <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>⇅ Sort by pLDDT</button>
                         <button style='background-color: #0969da;' class='btn' name='sort' value=''>⇅ Sort by name</button>
-                        <button style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick="clearCache({{ repo|tojson|forceescape }})">⟳ Refresh</button>
+                        {% if page is defined and pages is defined %}
+                        <span aria-hidden="true" style="margin:0 6px;">|</span>
+                        {% if page > 1 %}
+                        {% if first_url is defined %}<a class="btn" style="background-color:#8250df;" href="{{ first_url }}">First</a>{% endif %}
+                        <a class="btn" style="background-color:#563d7c;" href="{{ previous_url }}">Previous</a>
+                        {% endif %}
+                        <span>{{ total }} proteins · Page {{ page }} / {{ pages }} · {{ page_size|default(100) }} per page</span>
+                        {% if page < pages %}
+                        <a class="btn" style="background-color:#563d7c;" href="{{ next_url }}">Next</a>
+                        {% if last_url is defined %}<a class="btn" style="background-color:#8250df;" href="{{ last_url }}">Last</a>{% endif %}
+                        {% endif %}
+                        {% endif %}
+                        <span aria-hidden="true" style="margin:0 6px;">|</span>
+                        <button type="button" style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
                     </form>
                     <br>
 <table><thead><tr align="left"><th>Name</th><th>Structure</th><th>pLDDT</th><th>MSA</th><th>Annotation</th></tr></thead><tbody>
@@ -33,18 +47,17 @@
         </section>
     </main>
     <script>
-        var ifReSubmit = true;
-
-        function clearCache(repoName) {
-            var httpRequest = new XMLHttpRequest();
-            httpRequest.open("GET", "./api/cache/clear.php?force=true&repo=" + repoName, true);
-            httpRequest.send();
-            ifReSubmit = false;
-            location.reload()
-        }
-
-        function reSubmit() {
-            return ifReSubmit;
+        async function clearCache(repoName, button) {
+            button.disabled = true;
+            try {
+                const response = await fetch("./api/cache/clear.php?force=true&repo=" + encodeURIComponent(repoName));
+                if (!response.ok) throw new Error('Could not refresh cache');
+                location.reload();
+            } catch (error) {
+                console.error(error);
+                button.disabled = false;
+                alert('Could not refresh cache. Please try again.');
+            }
         }
     </script>
 </body>

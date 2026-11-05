@@ -10,15 +10,19 @@
     }
 
     .viewerSection {
-        margin: 120px 0 0 0;
+        margin: 24px 0 0 0;
     }
 
     #{{ Search_Result_Viewer }} {
-        float: center;
         width: 100%;
         height: 50vh;
         position: relative;
         z-index: 31;
+    }
+
+    /* Raise the host stacking context as well as the expanded canvas. */
+    #{{ Search_Result_Viewer }}:has(.msp-layout-expanded) {
+        z-index: 100;
     }
 </style>
 <div class="viewerSection">
@@ -27,25 +31,33 @@
 
 </div>
 <script>
-    //Create plugin instance
-    var viewerInstance = new PDBeMolstarPlugin();
-
-    //Set options (Checkout available options list in the documentation)
-    var options = {
+(() => {
+    const viewerInstance = new PDBeMolstarPlugin();
+    const options = {
         customData: {
             url: {{ Search_Result_Path|tojson }},
-            format: 'cif'
+            format: 'cif',
+            binary: false
         },
         alphafoldView: true,
+        // Keep panels inside the viewer, including the sequence above the canvas.
+        landscape: true,
+        reactive: false,
+        hideControls: false,
+        sequencePanel: true,
+        hideCanvasControls: [],
         bgColor: {
             r: 255,
             g: 255,
             b: 255
-        },
-        hideCanvasControls: ['selection', 'animation', 'controlToggle', 'controlInfo']
+        }
     }
 
-    var viewerContainer = document.getElementById({{ Search_Result_Viewer|tojson }});
+    const viewerContainer = document.getElementById({{ Search_Result_Viewer|tojson }});
 
-    viewerInstance.render(viewerContainer, options);
+    viewerInstance.render(viewerContainer, options).catch(error => {
+        console.error('Could not load search structure', error);
+        viewerContainer.textContent = 'Unable to load structure.';
+    });
+})();
 </script>

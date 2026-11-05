@@ -174,7 +174,7 @@ def decorate_search(hit):
         "annotation": annotation, "homolog_url": homolog_url(annotation),
         "b64_Data_URL": token(path + ".json"),
         "Search_Result_Viewer": "MP_" + hashlib.md5((hit["_index"] + "/" + source["name"]).encode()).hexdigest(),
-        "Search_Result_Path": path + ".cif"}
+        "Search_Result_Path": path + ".cif?viewer=modern"}
     return hit
 
 
@@ -199,11 +199,24 @@ async def search_page(request: Request):
 async def browse_page(request: Request):
     values = await context(request)
     repo = request.query_params.get("repo", "")
-    sort = "plddt" if (await request.form(max_part_size=settings.MAX_BODY)).get("sort") == "plddt" else "name"
+    form = await request.form(max_part_size=settings.MAX_BODY) if request.method == "POST" else {}
+    sort = "plddt" if form.get("sort", request.query_params.get("sort")) == "plddt" else "name"
     rows = await run_in_threadpool(search.browse_cache, repo, sort) if repo else []
+    total = len(rows)
+    page_size = 1000
+    pages = max(1, (total + page_size - 1) // page_size)
+    try:
+        page = min(pages, max(1, int(request.query_params.get("page", "1"))))
+    except ValueError:
+        page = 1
+    rows = rows[(page - 1) * page_size:page * page_size]
     for row in rows:
         row["homolog_url"] = homolog_url(row)
-    values.update(repo=repo, rows=rows)
+    values.update(repo=repo, rows=rows, sort=sort, total=total, page=page, pages=pages, page_size=page_size,
+                  first_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": 1}),
+                  last_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": pages}),
+                  previous_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": page - 1}),
+                  next_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": page + 1}))
     return render(request, "browse.html", values)
 
 
@@ -238,9 +251,10 @@ async def es_api(request: Request, repo: str, action: str, term: str = ""):
 
 
 @app.api_route("/api/file/{repo}/{name}", methods=["GET", "HEAD"])
-def file_api(repo: str, name: str):
+def file_api(repo: str, name: str, viewer: str = ""):
     data = read_file(repo, name)
-    if name.lower().endswith(".cif"):
+    # Search uses current Molstar; keep the legacy adapter for existing clients.
+    if name.lower().endswith(".cif") and viewer != "modern":
         data = viewer_cif(data)
     return Response(data, media_type=mime(name))
 
