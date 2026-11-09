@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <script src="/assets/js/theme.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Browse</title>
     <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
@@ -15,32 +16,32 @@
         {% include 'form.html' %}
         <section class="main_browse">
             <div style="display: block; width: 100%;">
-                <h1 style="margin-bottom: 8px; color:#efefef;">Browse {{ repo }}</h1>
-                <HR color=#21262d SIZE=1.5>
+                <h1 style="margin-bottom: 8px;" class="text-primary">Browse {{ repo }}</h1>
+                <hr>
                 {% if not repo %}{% for Data_Repo in DATA_REPOS %}
-<h3><li style="color:#efefef;"><a style="color:#efefef;" class="user-properties-link" href="browse.php?repo={{ Data_Repo|urlencode }}">{{ Data_Repo }}</a></li></h3>
+<h3><li class="text-primary"><a class="user-properties-link text-primary" href="browse.php?repo={{ Data_Repo|urlencode }}">{{ Data_Repo }}</a></li></h3>
 {% endfor %}{% else %}
-<form method="get" action="browse.php" style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; color:#efefef; margin-top:12px;">
+<form method="get" action="browse.php" style="display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:12px;" class="text-primary">
                         <input type="hidden" name="repo" value="{{ repo }}">
-                        <button style='background-color: #0969da;' class='btn' name='sort' value='plddt'>⇅ Sort by pLDDT</button>
-                        <button style='background-color: #0969da;' class='btn' name='sort' value=''>⇅ Sort by name</button>
+                        <button class='btn btn-blue' name='sort' value='plddt'>⇅ Sort by pLDDT</button>
+                        <button class='btn btn-blue' name='sort' value=''>⇅ Sort by name</button>
                         {% if page is defined and pages is defined %}
                         <span aria-hidden="true" style="margin:0 6px;">|</span>
                         {% if page > 1 %}
-                        {% if first_url is defined %}<a class="btn" style="background-color:#8250df;" href="{{ first_url }}">First</a>{% endif %}
-                        <a class="btn" style="background-color:#563d7c;" href="{{ previous_url }}">Previous</a>
+                        {% if first_url is defined %}<a class="btn btn-purple-bright" href="{{ first_url }}">First</a>{% endif %}
+                        <a class="btn btn-purple" href="{{ previous_url }}">Previous</a>
                         {% endif %}
                         <span>{{ total }} proteins · Page {{ page }} / {{ pages }} · {{ page_size|default(100) }} per page</span>
                         {% if page < pages %}
-                        <a class="btn" style="background-color:#563d7c;" href="{{ next_url }}">Next</a>
-                        {% if last_url is defined %}<a class="btn" style="background-color:#8250df;" href="{{ last_url }}">Last</a>{% endif %}
+                        <a class="btn btn-purple" href="{{ next_url }}">Next</a>
+                        {% if last_url is defined %}<a class="btn btn-purple-bright" href="{{ last_url }}">Last</a>{% endif %}
                         {% endif %}
                         {% endif %}
                         <span aria-hidden="true" style="margin:0 6px;">|</span>
-                        <button type="button" style='background-color: #FF5733;' class='btn' title='Refresh cache' onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
+                        <button type="button" class='btn btn-refresh' title='Refresh cache' onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
                     </form>
                     <br>
-<table><thead><tr align="left"><th>Name</th><th>Structure</th><th>pLDDT</th><th>MSA</th><th>Annotation</th></tr></thead><tbody>
+<table class="data-table"><thead><tr align="left"><th>Name</th><th>Structure</th><th>pLDDT</th><th>MSA</th><th>Annotation</th></tr></thead><tbody>
 {% for row in rows %}{% include 'browse_row.html' %}{% endfor %}
 </tbody></table>{% endif %}
             </div>

@@ -5,10 +5,6 @@
         box-sizing: border-box;
     }
 
-    .msp-plugin ::-webkit-scrollbar-thumb {
-        background-color: #474748 !important;
-    }
-
     .viewerSection {
         margin: 24px 0 0 0;
     }
@@ -33,6 +29,7 @@
 <script>
 (() => {
     const viewerInstance = new PDBeMolstarPlugin();
+    const syncViewerTheme = MineProtMolstarTheme.register(viewerInstance);
     const options = {
         customData: {
             url: {{ Search_Result_Path|tojson }},
@@ -46,16 +43,12 @@
         hideControls: false,
         sequencePanel: true,
         hideCanvasControls: [],
-        bgColor: {
-            r: 255,
-            g: 255,
-            b: 255
-        }
+        bgColor: MineProtMolstarTheme.backgroundColor()
     }
 
     const viewerContainer = document.getElementById({{ Search_Result_Viewer|tojson }});
 
-    viewerInstance.render(viewerContainer, options).catch(error => {
+    viewerInstance.render(viewerContainer, options).then(syncViewerTheme).catch(error => {
         console.error('Could not load search structure', error);
         viewerContainer.textContent = 'Unable to load structure.';
     });

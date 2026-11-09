@@ -9,19 +9,19 @@
     <div class="card-inner-div">
         <div>
             <div style="width=100%;">
-                <strong><a target='_blank' class='user-properties-link' style="color:#c9d1d9; margin-top: 7px;" href="../search.php?search={{ Salign_Name|urlencode }}&repo[]={{ Salign_Repo|urlencode }}">{{ Salign_Name }}</a></strong>
+                <strong><a target='_blank' class='user-properties-link text-body' style="margin-top: 7px;" href="../search.php?search={{ Salign_Name|urlencode }}&repo[]={{ Salign_Repo|urlencode }}">{{ Salign_Name }}</a></strong>
                 <br><br>
                 <span>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["pdb"] }}" style="background-color: rgb(0, 83, 214);" class="btn"><center>query.pdb</center></a>
-                    <a target="_blank" href="{{ Salign_Result_Data_URLs["hit"] }}" style="background-color: #fd1593;" class="btn"><center>hit.pdb</center></a>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["pml"] }}" style="background-color: #563d7c;" class="btn"><center>query.pml</center></a>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all"] }}" style="background-color: #563d7c;" class="btn"><center>all.pml</center></a>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all_atm"] }}" style="background-color: #563d7c;" class="btn"><center>all_atm.pml</center></a>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all_atm_lig"] }}" style="background-color: #563d7c;" class="btn"><center>all_atm_lig.pml</center></a>
-                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["atm"] }}" style="background-color: #563d7c;" class="btn"><center>atm.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["pdb"] }}" class="btn btn-structure"><center>query.pdb</center></a>
+                    <a target="_blank" href="{{ Salign_Result_Data_URLs["hit"] }}" class="btn btn-pink"><center>hit.pdb</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["pml"] }}" class="btn btn-purple"><center>query.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all"] }}" class="btn btn-purple"><center>all.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all_atm"] }}" class="btn btn-purple"><center>all_atm.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["all_atm_lig"] }}" class="btn btn-purple"><center>all_atm_lig.pml</center></a>
+                    <a target="_blank" href="../api/cache/get.php?download=true&data_url={{ Salign_Result_Data_URLs["atm"] }}" class="btn btn-purple"><center>atm.pml</center></a>
 	            </span>
                 <br><br>
-                <table style="font-size:12px;">
+                <table class="data-table" style="font-size:12px;">
                     <thead>
                         <tr>
                             <th style='width: 16.7%;'>RMSD</th>
@@ -41,7 +41,7 @@
                             <td>{{ Salign_Result["IDali"] }}</td>
                             <td>{{ Salign_Result["ID1"] }}</td>
                             <td>{{ Salign_Result["ID2"] }}</td>
-                            <td><a class='btn' style='background-color: #DC143C;' target="_blank" href="./detail.php?pdb1={{ PDB1_Path }}&pdb2={{ PDB2_Path }}">▶</a></td>
+                            <td><a class='btn btn-red' target="_blank" href="./detail.php?pdb1={{ PDB1_Path }}&pdb2={{ PDB2_Path }}">▶</a></td>
                         </tr>
                     </tbody>
                 </table>

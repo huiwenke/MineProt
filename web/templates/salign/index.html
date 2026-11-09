@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <script src="/assets/js/theme.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MineProt</title>
     <link rel="shortcut icon" type="image/png" href="../assets/img/logo.png">
@@ -21,15 +22,15 @@
                     </label>
                     <br>
                     <h2 class="h2_aside">Protein Repositories</h2>
-                    <HR color=#21262d SIZE=1.5>
+                    <hr>
                     {% include 'repos.html' %}
-                    <HR color=#21262d SIZE=1.5><br>
+                    <hr><br>
                     
                     <div style="display: flex;">
-                        <div style="width: 15%; color: white;">
+                        <div style="width: 15%;" class="text-primary">
                             <strong>Key words</strong>
                         </div>
-                        <div style="width: 85%; color: white;">
+                        <div style="width: 85%;" class="text-primary">
                             <label class="wrapper">
                                 <input name="search" class="form-control-header" placeholder="🔍︎ Enter keywords...">
                             </label>
@@ -37,20 +38,20 @@
                     </div>
                     <br>
                     <div style="display: flex;">
-                        <div style="width: 15%; color: white;">
+                        <div style="width: 15%;" class="text-primary">
                             <strong>TM-score threshold</strong>
                         </div>
-                        <div style="width: 7.5%; color: white;">
+                        <div style="width: 7.5%;" class="text-primary">
                             <label class="wrapper">
                                 <input name="tmscore" class="form-control-header" value=0.5>
                             </label>
                         </div>
                         <div style="width: 5%;">
                         </div>
-                        <div style="width: 10%; color: white;">
+                        <div style="width: 10%;" class="text-primary">
                             <strong>Hinge (0–9)</strong>
                         </div>
-                        <div style="width: 7.5%; color: white;">
+                        <div style="width: 7.5%;" class="text-primary">
                             <label class="wrapper">
                                 <input type="number" name="hinge" class="form-control-header" min="0" max="9" step="1" value="0" required>
                             </label>

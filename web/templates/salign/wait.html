@@ -2,13 +2,13 @@
 <section class="main_salign">
     <div style="display: block; width: 100%;">
         <center>
-            <h1 style="margin-bottom: 8px; color:#efefef;">{{ 'Search failed' if Job_Status == 'failed' else 'Packaging results...' if Job_Status == 'packaging' else 'Searching...' }}</h1>
+            <h1 style="margin-bottom: 8px;" class="text-primary">{{ 'Search failed' if Job_Status == 'failed' else 'Packaging results...' if Job_Status == 'packaging' else 'Searching...' }}</h1>
         </center>
         <center>
             <progress value="{{ Current_USalign_Num }}" max="{{ Total_USalign_Num }}"></progress>
-            <p style="color:#efefef;">{{ Current_USalign_Num }} / {{ Total_USalign_Num }}</p>
+            <p class="text-primary">{{ Current_USalign_Num }} / {{ Total_USalign_Num }}</p>
             {% if Job_Status == 'failed' %}
-                <p style="color:#efefef;">The background job failed. Please check the task's query.err log.</p>
+                <p class="text-primary">The background job failed. Please check the task's query.err log.</p>
             {% endif %}
         </center>
     </div>

@@ -34,6 +34,9 @@ Retained components have separate terms:
 - PDBe Mol*: https://github.com/molstar/pdbe-molstar. Search uses version 3.12.0
   (Apache-2.0), vendored in `assets/vendor/pdbe-molstar-3.12.0/` with its LICENSE
   and bundled dependency notices. The original 1.2.1 bundle remains for Salign.
+  Both versions include their matching, unmodified light stylesheet. The 1.2.1
+  light stylesheet comes from
+  https://www.ebi.ac.uk/pdbe/pdb-component-library/css/pdbe-molstar-light-1.2.1.css.
 - Highcharts 10.3.1: https://www.highcharts.com/license. It is not MIT. Review the
   license applicable to that version and the deployment's existing authorization,
   especially for commercial use and redistribution. No new Highcharts rights

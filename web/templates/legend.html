@@ -1,32 +1,32 @@
-<section class="aside_right" style="float: right; background-color: transparent; overflow-y: auto;">
+<section class="aside_right legend-aside" style="float: right; overflow-y: auto;">
     <div style="padding: auto 24px; margin-top: 32px;">
         <h2 class="h2_aside">Page(s)</h2>
-        <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px; border-color: #21262d; border-bottom: 1px solid #30363d;">
+        <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px;" class="legend-section">
             <form method="post">
                 {% for Page_i in range(1, Page_Info.tot + 1) %}
-<button class="btn" style="margin-right:4px; margin-bottom:4px; width:20%; background-color: {{ '#0969da' if Page_Info.page == Page_i else '#30363d' }};{% if Page_Info.page == Page_i %} pointer-events:none;{% endif %}" type="submit" name="page" value="{{ Page_i }}">{{ Page_i }}</button>
+<button class="btn btn-page{% if Page_Info.page == Page_i %} is-active{% endif %}" style="margin-right:4px; margin-bottom:4px; width:20%;{% if Page_Info.page == Page_i %} pointer-events:none;{% endif %}" type="submit" name="page" value="{{ Page_i }}">{{ Page_i }}</button>
 {% endfor %}
             </form>
         </div>
-        <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px; border-color: #21262d; border-bottom: 1px solid #30363d;">
-            <p style="margin-bottom: 8px; color:#efefef;">pLDDT</p>
+        <div style="padding: 8px 0; margin: 8px 0; margin-right: 10px;" class="legend-section">
+            <p style="margin-bottom: 8px;" class="text-primary">pLDDT</p>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(0, 83, 214);"></span>
+                <span class="lang_color plddt-very-high"></span>
                 <span>&nbsp;<strong>Very high</strong> (>90)</span>
             </span>
             <br>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(101, 203, 243);"></span>
+                <span class="lang_color plddt-confident"></span>
                 <span>&nbsp;<strong>Confident</strong> (70~90)</span>
             </span>
             <br>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(255, 219, 19);"></span>
+                <span class="lang_color plddt-low"></span>
                 <span>&nbsp;<strong>Low</strong> (50~70)</span>
             </span>
             <br>
             <span class="programming_lang-span">
-                <span class="lang_color" style="background-color:rgb(255, 125, 69);"></span>
+                <span class="lang_color plddt-very-low"></span>
                 <span>&nbsp;<strong>Very low</strong> (<50)</span>
             </span>
         </div>

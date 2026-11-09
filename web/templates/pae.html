@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="utf-8">
+    <script src="/assets/js/theme.js"></script>
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="../../assets/js/highcharts.js"></script>
     <script src="https://code.highcharts.com/10.3.1/modules/exporting.js"></script>
@@ -13,17 +15,19 @@
     <script src="https://code.highcharts.com/10.3.1/modules/accessibility.js"></script>
 </head>
 
-<body>
-    <div id="container" style="height: 95vh; max-width: 95vh; margin: 0 auto"></div>
+<body class="standalone-page">
+    <div id="container" class="pae-plot" style="height: 95vh; max-width: 95vh; margin: 0 auto"></div>
     <pre id="csv" style="display: none">Residue_x, Residue_y, PAE
 {{ csv }}</pre>
     <script>
+        const plotColors = getComputedStyle(document.documentElement);
         Highcharts.chart('container', {
             data: {
                 csv: document.getElementById('csv').innerHTML
             },
             chart: {
                 type: 'heatmap',
+                backgroundColor: plotColors.getPropertyValue('--visualization-bg').trim(),
                 inverted: true
             },
             boost: {
@@ -47,8 +51,8 @@
             },
             colorAxis: {
                 stops: [
-                    [0, '#1F4E79'],
-                    [1, '#FFF']
+                    [0, plotColors.getPropertyValue('--pae-low').trim()],
+                    [1, plotColors.getPropertyValue('--pae-high').trim()]
                 ],
                 min: 0,
                 max: {{ Max_PAE }},

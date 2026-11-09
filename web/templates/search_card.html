@@ -6,16 +6,16 @@
 <div class="card-inner-div">
     <div>
         <div style="margin-left: 16px; width=100%;">
-            <strong style="color:#c9d1d9; margin-top: 7px;">{{ Search_Result["_source"]["name"] }}</strong>
-            <div style="color:#c9d1d9; margin-top: 7px;">
+            <strong style="margin-top: 7px;" class="text-body">{{ Search_Result["_source"]["name"] }}</strong>
+            <div style="margin-top: 7px;" class="text-body">
                 Similar to {% if annotation.homolog %}<a class="card-link user-properties-link" href="{{ homolog_url }}">{{ annotation.homolog }}</a>: {{ annotation.description[0] if annotation.description else '' }}{% else %}none{% endif %}                
             </div>
             <br>
             <span name="search_result_link" id="/api/file/{{ Search_Result["_index"] }}/{{ Search_Result["_source"]["name"] }}">
-		        <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.pdb" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>PDB</center></a>
-		        <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.cif" style="width: 10%; background-color: rgb(0, 83, 214);" class="btn"><center>CIF</center></a>
-                <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.json" style="width: 20%; background-color: #563d7c;" class="btn"><center>Score (JSON)</center></a>
-                <a target="_blank" href="./api/plot/pae.php?data_url={{ b64_Data_URL }}" style="width: 15%; background-color: #fd1593;" class="btn"><center>PAE plot</center></a>
+		        <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.pdb" style="width: 10%;" class="btn btn-structure"><center>PDB</center></a>
+		        <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.cif" style="width: 10%;" class="btn btn-structure"><center>CIF</center></a>
+                <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.json" style="width: 20%;" class="btn btn-purple"><center>Score (JSON)</center></a>
+                <a target="_blank" href="./api/plot/pae.php?data_url={{ b64_Data_URL }}" style="width: 15%;" class="btn btn-pink"><center>PAE plot</center></a>
 	        </span>
         </div>
     </div>

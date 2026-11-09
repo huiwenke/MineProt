@@ -12,20 +12,26 @@
 </style>
 <div id="{{ Salign_Result_Viewer }}"></div>
 <script>
-    //Create plugin instance
-    var {{ Salign_Result_Viewer }} = new PDBeMolstarPlugin();
-
-    //Set options (Checkout available options list in the documentation)
-    var options = {
+(() => {
+    const viewerInstance = new PDBeMolstarPlugin();
+    const syncViewerTheme = MineProtMolstarTheme.register(viewerInstance);
+    const options = {
         alphafoldView: true,
+        bgColor: MineProtMolstarTheme.backgroundColor(),
         customData: {
             url: {{ Salign_Query_Path|tojson }},
             format: "pdb"
         }
     }
 
-    var viewerContainer = document.getElementById({{ Salign_Result_Viewer|tojson }});
+    const viewerContainer = document.getElementById({{ Salign_Result_Viewer|tojson }});
 
-    {{ Salign_Result_Viewer }}.render(viewerContainer, options);
-    {{ Salign_Result_Viewer }}.visual.update({alphafoldView: true, customData: {url: {{ Salign_Result_Path|tojson }}, format: "cif"}}, false);
+    viewerInstance.render(viewerContainer, options);
+    viewerInstance.visual.update({
+        alphafoldView: true,
+        bgColor: MineProtMolstarTheme.backgroundColor(),
+        customData: {url: {{ Salign_Result_Path|tojson }}, format: "cif"}
+    }, false);
+    syncViewerTheme();
+})();
 </script>
