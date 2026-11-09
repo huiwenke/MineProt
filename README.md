@@ -17,15 +17,26 @@ By the aid of MineProt toolkit, you can:
 
 ### Deployment
 
-Linux systems with [docker](https://www.docker.com/) and [docker-compose](https://github.com/docker/compose) are best for MineProt deployment:
+Use a Linux x86-64 host with Docker and Docker Compose. The current Web service runs on Python 3.12, FastAPI, and Uvicorn; legacy `.php` URLs remain supported without PHP, PHP-FPM, or MAXIT.
+
+From a checkout containing the current Python implementation, run:
 
 ```bash
-git clone https://github.com/huiwenke/MineProt.git
-cd MineProt
-toolkit/setup.sh -p 80 -d ./data
+cd /path/to/MineProt
+bash toolkit/setup.sh -c docker -p 8080 -d ./data
 ```
 
-After a few minutes, you can access your MineProt site at http://localhost.
+After setup completes, open http://localhost:8080. Setup builds the images, starts Elasticsearch, and checks service health before exiting. Repository files and Elasticsearch data are stored under `./data/repo/` and `./data/es/`.
+
+Podman with a working Compose provider is also supported:
+
+```bash
+bash toolkit/setup.sh -c podman -p 8080 -d ./data
+```
+
+Cache defaults to `/tmp/mineprot` inside the Web container. Add `-s 1024` to use a 1024 MiB shared-memory cache, subject to host memory and shared-memory limits. Cached files are temporary and are not preserved when the container is recreated.
+
+Setup retains supported options in `.env` for subsequent runs. Elasticsearch and the bundled IK plugin remain at **7.12.1**. See the [Python deployment guide](web/DEPLOYMENT.md) for configuration, permissions, updates, and deployment without containers.
 
 ### Import data
 
@@ -98,20 +109,17 @@ Usability from mobile devices with portrait screen is not guaranteed.
 
 ### Platform compatibility
 
-We recommend Linux platform for non-docker deployment, as MAXIT (converter app between PDB and CIF) is not supported on Windows.
+The bundled Foldcomp and US-align executables require a Linux x86-64 container engine. Setup checks the engine architecture and verifies the tool archives against `app/python/tools.sha256` before building.
 
-In our developing & testing environment, we employed BioLinux 8.0.7 (PHP 5.5.9, Apache 2.4.7) for non-docker deployment, and Ubuntu 18.04 LTS (Docker 20.10.16, docker-compose 1.29.2) for docker-based deployment.
+For deployment without containers, prepare:
 
-If you want to deploy this project on your server without Docker, please note that this project and its components depend on the following packages and libraries:
+- Python 3.12 and the packages in `web/requirements.txt`, including FastAPI, Uvicorn, and Gemmi.
+- Elasticsearch 7.12.1 with the matching IK plugin.
+- US-align and Foldcomp executables available on PATH, or configured through `MP_USALIGN` and `MP_FOLDCOMP`.
 
-```
-PHP 5.5.9+ with cURL
-Elasticsearch 7.12.1
-WebServer basic platform (NGINX, Apache, etc.)
-MAXIT 11.100
-US-align (Version 20220924)
-```
-See [Deployment manual](https://github.com/huiwenke/MineProt/wiki/Deployment-manual) for more information.
+The Python service serves pages, static assets, repository downloads, and legacy API URLs directly. A reverse proxy can provide TLS and access control. The current Compose deployment does not use PHP or Nginx containers.
+
+See the [Python deployment guide](web/DEPLOYMENT.md) for startup commands and environment variables.
 
 ### Toolkit dependencies
 
