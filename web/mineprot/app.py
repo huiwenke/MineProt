@@ -280,11 +280,11 @@ async def convert_cif(request: Request):
 @app.post("/api/fcz2pdb/")
 @app.post("/api/fcz2pdb/index.php")
 async def convert_fcz(request: Request):
-    form = await request.form(max_part_size=settings.MAX_BODY)
-    upload = form.get("file")
-    if not upload or not hasattr(upload, "read"):
-        raise ValueError("Multipart field 'file' required")
-    data = await upload.read()
+    async with request.form(max_part_size=settings.MAX_BODY) as form:
+        upload = form.get("file")
+        if not upload or not hasattr(upload, "read"):
+            raise ValueError("Multipart field 'file' required")
+        data = await upload.read()
     return Response(await run_in_threadpool(decompress_fcz, data), media_type="text/plain")
 
 

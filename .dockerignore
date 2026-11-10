@@ -1,4 +1,4 @@
-# Only application files and the two tool archives enter the Web build context.
+# Only application files and the US-align archive enter the Web build context.
 **
 !LICENSE
 !web
@@ -8,7 +8,6 @@
 !app/python/Dockerfile
 !app/python/tools.sha256
 !app/bin
-!app/bin/foldcomp.tar.gz
 !app/bin/usalign.tar.xz
 web/**/__pycache__
 web/**/*.pyc

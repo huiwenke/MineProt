@@ -4,3 +4,4 @@ Jinja2==3.1.6
 httpx==0.28.1
 python-multipart==0.0.20
 gemmi==0.7.1
+foldcomp==1.0.0

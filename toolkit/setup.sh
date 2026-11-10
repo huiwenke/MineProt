@@ -112,7 +112,7 @@ else
     exit 1
 fi
 
-# The bundled Foldcomp and US-align archives are Linux x86-64 executables.
+# The bundled US-align archive contains a Linux x86-64 executable.
 # Query the engine's architecture, which may differ from the client machine.
 # Docker exposes Architecture; Podman exposes Host.Arch. Probe both schemas
 # so wrappers and Docker-compatible Podman commands also work.
@@ -126,20 +126,8 @@ else
 fi
 case "$server_arch" in
     amd64|x86_64) ;;
-    *) echo "Error: bundled Foldcomp/US-align require a Linux x86-64 daemon (found $server_arch)." >&2; exit 1 ;;
+    *) echo "Error: bundled US-align requires a Linux x86-64 daemon (found $server_arch)." >&2; exit 1 ;;
 esac
-if [ ! -s app/bin/foldcomp.tar.gz ]; then
-    if ! command -v curl >/dev/null; then
-        echo 'Error: curl is required to download Foldcomp.' >&2
-        exit 1
-    fi
-    archive=$(mktemp app/bin/foldcomp.tar.gz.XXXXXX)
-    trap 'rm -f -- "$archive"' EXIT
-    echo 'Downloading Foldcomp...'
-    curl --fail --location --retry 3 --connect-timeout 30 --max-time 600 https://mmseqs.com/foldcomp/foldcomp-linux-x86_64.tar.gz -o "$archive"
-    mv -- "$archive" app/bin/foldcomp.tar.gz
-    trap - EXIT
-fi
 if [ ! -s app/bin/usalign.tar.xz ]; then
     echo 'Error: missing app/bin/usalign.tar.xz. Supply the project US-align archive.' >&2
     exit 1

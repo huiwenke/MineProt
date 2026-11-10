@@ -18,6 +18,7 @@ services:
       MP_MAX_BODY_BYTES: "104857600"
       MP_SALIGN_CONCURRENCY: "${MP_SALIGN_CONCURRENCY:-2}"
       MP_SALIGN_TIMEOUT: "${MP_SALIGN_TIMEOUT:-300}"
+      MP_FOLDCOMP_TIMEOUT: "${MP_FOLDCOMP_TIMEOUT:-300}"
     volumes:
       - ./web:/app/web:ro
       - ${MP_DATA:-./data}/repo:/var/www/data

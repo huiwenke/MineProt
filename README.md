@@ -109,13 +109,13 @@ Usability from mobile devices with portrait screen is not guaranteed.
 
 ### Platform compatibility
 
-The bundled Foldcomp and US-align executables require a Linux x86-64 container engine. Setup checks the engine architecture and verifies the tool archives against `app/python/tools.sha256` before building.
+The bundled US-align executable requires a Linux x86-64 container engine. Setup checks the engine architecture and verifies its archive against `app/python/tools.sha256` before building. Foldcomp 1.0.0 is installed from PyPI with the other Python dependencies; no standalone Foldcomp executable is required.
 
 For deployment without containers, prepare:
 
-- Python 3.12 and the packages in `web/requirements.txt`, including FastAPI, Uvicorn, and Gemmi.
+- Python 3.12 and the packages in `web/requirements.txt`, including FastAPI, Uvicorn, Gemmi, and Foldcomp.
 - Elasticsearch 7.12.1 with the matching IK plugin.
-- US-align and Foldcomp executables available on PATH, or configured through `MP_USALIGN` and `MP_FOLDCOMP`.
+- US-align available on PATH, or configured through `MP_USALIGN`.
 
 The Python service serves pages, static assets, repository downloads, and legacy API URLs directly. A reverse proxy can provide TLS and access control. The current Compose deployment does not use PHP or Nginx containers.
 

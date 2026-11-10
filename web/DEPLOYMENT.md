@@ -18,7 +18,10 @@ filesystem ceiling, not reserved RAM; later memory pressure or a full cache
 can still cause a task to fail. Cache contents in shared memory are lost when
 the container is stopped; neither cache mode is preserved on recreation.
 The script builds and starts `web` and `es`; it does not delete existing data.
-The bundled Foldcomp and US-align executables require Linux x86-64.
+The bundled US-align executable requires Linux x86-64. Foldcomp 1.0.0 is
+installed from PyPI with the Python dependencies using a prebuilt wheel for
+Python 3.12 on Linux x86-64. No Foldcomp executable or separate archive download
+is required.
 Image building runs in the foreground. Setup starts Elasticsearch in detached
 mode and explicitly waits up to 180 seconds for yellow/green cluster health,
 then starts Web without a second Compose dependency wait and checks `/healthz`
@@ -40,11 +43,12 @@ Old nginx/php containers are removed by Compose's `--remove-orphans` option.
 The original US-align archive is retained, including local changes, under
 `app/bin/`; that directory name does not imply a runtime PHP dependency.
 
-The setup script verifies `app/python/tools.sha256` before building. If a
-Foldcomp download no longer matches the pinned local archive, setup stops.
-Obtain the matching archive, or review and explicitly update its checksum
-before deploying a different version. Do the same when updating US-align.
-An archive must contain the root-level `foldcomp` or `USalign` executable.
+The setup script verifies the US-align archive against `app/python/tools.sha256`
+before building. Review and update its checksum when replacing the archive,
+which must contain the root-level `USalign` executable. Foldcomp's version is
+pinned in `web/requirements.txt`; image builds install only binary wheels and
+fail if no compatible wheel is available. A leftover `app/bin/foldcomp.tar.gz`
+from an older deployment is ignored and excluded from the Web build context.
 
 Data directories:
 
@@ -67,8 +71,9 @@ user and its existing directory permission requirements.
 
 ## Without Docker
 
-Use Python 3.12, install `web/requirements.txt`, and make `foldcomp` and
-`USalign` available on PATH. Run an Elasticsearch 7.12.1 instance with the
+Use Python 3.12, install `web/requirements.txt` (including Foldcomp), and make
+`USalign` available on PATH or set `MP_USALIGN` to its executable path.
+`MP_FOLDCOMP` is no longer used. Run an Elasticsearch 7.12.1 instance with the
 project's matching IK plugin separately. From `web/`, run:
 
 ```sh
@@ -86,6 +91,16 @@ during a container restart are marked failed when their result page is opened;
 completed results remain downloadable. Submit a new query to retry a failed job.
 
 ## Structure compatibility
+
+FCZ conversion and repository fallbacks use the Foldcomp Python API in a spawned
+Python worker, without temporary FCZ/PDB files or a standalone Foldcomp
+executable. Foldcomp 1.0.0 can crash on malformed FCZ data and holds the GIL;
+isolating each conversion keeps native crashes and decoding work out of the
+Web process. The existing FCZ upload URLs and PDB response format are retained.
+Invalid FCZ inputs, including decoder crashes, return HTTP 400. Set
+`MP_FOLDCOMP_TIMEOUT` (default 300 seconds) to bound each conversion, including
+worker startup; a timeout terminates the worker and returns HTTP 502.
+`MP_SALIGN_TIMEOUT` continues to control US-align only.
 
 `/api/pdb2alphacif/` uses Gemmi and adds missing observed polymer sequences,
 ModelCIF pLDDT categories and missing standard chemical component types for
@@ -124,11 +139,24 @@ fetch arbitrary external URLs. Downloads are confined to repository/cache roots.
 
 ## Validation status
 
-No tests, service starts, dependency installation or image builds were run as
-part of this migration, at the user's request. Suggested manual coverage:
-existing toolkit imports (including gzip/force), search and pagination, browse
-sort/refresh, all file fallbacks, AF2 sequence and pLDDT colors/tooltips, PAE,
-Salign progress/failure/detail/archive, and existing-data Docker startup.
+The Foldcomp migration has regression coverage for Python API decoding,
+repository FCZ and gzipped FCZ fallbacks, both upload URLs, the file endpoint,
+malformed-input crash isolation, timeout cleanup and subsequent successful
+decoding. Run with Python 3.12 and the installed Web dependencies:
 
-See `THIRD_PARTY.md` for license and source information. The repository-root
-README describes the former PHP deployment; use this document for Python.
+```sh
+PYTHONPATH=web python -m unittest discover -s web/tests -v
+```
+
+The upstream test fixture and its MIT license are in `tests/fixtures/`.
+These six tests passed on Python 3.12 and inside the built Web image as UID
+1000. The image also passed a real Uvicorn startup, health check and HTTP FCZ
+upload with no Foldcomp executable present. The deployment script passed Bash
+syntax checking and the retained US-align archive passed checksum verification.
+The fixture's decoded atom identities and pLDDT values match the formerly bundled CLI, with
+coordinate component differences of at most 0.001 angstrom; PDB text formatting
+differs. These focused tests do not exercise Elasticsearch, the full setup
+script against existing data, or the complete Salign/browser workflows.
+
+See `THIRD_PARTY.md` for license and source information, and the repository-root
+README for the project overview.

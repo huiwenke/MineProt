@@ -2,12 +2,13 @@
 import base64
 import gzip
 import io
+import multiprocessing
 import os
-import subprocess
 import tempfile
 from pathlib import Path
 
 from . import settings
+from .foldcomp_worker import decompress as foldcomp_decompress
 
 
 def component(value: str) -> str:
@@ -52,13 +53,33 @@ def atomic_write(path: Path, data: bytes) -> None:
 
 
 def decompress_fcz(data: bytes) -> bytes:
-    with tempfile.TemporaryDirectory(prefix="MP_FCZ_") as temporary:
-        source = Path(temporary) / "input.fcz"
-        output = Path(temporary) / "output.pdb"
-        source.write_bytes(data)
-        subprocess.run([settings.FOLDCOMP, "decompress", str(source), str(output)],
-                       check=True, capture_output=True, timeout=settings.JOB_TIMEOUT)
-        return output.read_bytes()
+    if len(data) <= 4 or not data.startswith(b"FCMP"):
+        raise ValueError("Invalid FCZ file")
+    # Foldcomp's native decoder can crash on malformed inputs and holds the GIL.
+    # Spawn rather than fork: HTTP handlers and alignment jobs run in threads.
+    context = multiprocessing.get_context("spawn")
+    receiver, sender = context.Pipe(duplex=False)
+    worker = context.Process(target=foldcomp_decompress, args=(sender, data), daemon=True)
+    try:
+        worker.start()
+        sender.close()
+        if not receiver.poll(settings.FOLDCOMP_TIMEOUT):
+            raise RuntimeError("FCZ decompression timed out")
+        try:
+            valid, result = receiver.recv()
+        except EOFError as exc:
+            raise ValueError("Invalid FCZ file") from exc
+        if not valid:
+            raise ValueError("Invalid FCZ file")
+        return result
+    finally:
+        sender.close()
+        receiver.close()
+        if worker.pid is not None:
+            if worker.is_alive():
+                worker.kill()
+            worker.join()
+        worker.close()
 
 
 def read_file(repo: str, name: str) -> bytes:
