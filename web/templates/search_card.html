@@ -1,4 +1,4 @@
-{% set annotation = Search_Result._view.annotation %}
+{% set description = Search_Result._view.annotation_description %}
 {% set homolog_url = Search_Result._view.homolog_url %}
 {% set b64_Data_URL = Search_Result._view.b64_Data_URL %}
 {% set Search_Result_Viewer = Search_Result._view.Search_Result_Viewer %}
@@ -7,9 +7,9 @@
     <div>
         <div style="margin-left: 16px; width=100%;">
             <strong style="margin-top: 7px;" class="text-body">{{ Search_Result["_source"]["name"] }}</strong>
-            <div style="margin-top: 7px;" class="text-body">
-                Similar to {% if annotation.homolog %}<a class="card-link user-properties-link" href="{{ homolog_url }}">{{ annotation.homolog }}</a>: {{ annotation.description[0] if annotation.description else '' }}{% else %}none{% endif %}                
-            </div>
+            {% if description %}<div style="margin-top: 7px;" class="text-body">
+                Similar to <a class="card-link user-properties-link" href="{{ homolog_url }}">{{ description }}</a>
+            </div>{% endif %}
             <br>
             <span name="search_result_link" id="/api/file/{{ Search_Result["_index"] }}/{{ Search_Result["_source"]["name"] }}">
 		        <a href="./api/file/{{ Search_Result["_index"]|urlencode }}/{{ Search_Result["_source"]["name"]|urlencode }}.pdb" style="width: 10%;" class="btn btn-structure"><center>PDB</center></a>

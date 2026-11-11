@@ -179,9 +179,13 @@ def decorate_search(hit):
     source = hit.get("_source", {})
     source.setdefault("anno", {})
     annotation = source["anno"] or {}
+    descriptions = annotation.get("description") or []
+    description = (descriptions[0] or "") if descriptions else ""
+    annotation_url = (homolog_url(annotation) if annotation.get("homolog") else
+                      "https://www.bing.com/search?" + urlencode({"q": description}))
     path = "/api/file/" + quote(hit["_index"], safe="") + "/" + quote(source["name"], safe="")
     hit["_view"] = {
-        "annotation": annotation, "homolog_url": homolog_url(annotation),
+        "annotation": annotation, "annotation_description": description, "homolog_url": annotation_url,
         "b64_Data_URL": token(path + ".json"),
         "Search_Result_Viewer": "MP_" + hashlib.md5((hit["_index"] + "/" + source["name"]).encode()).hexdigest(),
         "Search_Result_Path": path + ".cif?viewer=modern"}
