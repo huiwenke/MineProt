@@ -123,7 +123,7 @@ See the [Python deployment guide](web/DEPLOYMENT.md) for startup commands and en
 
 ### Toolkit dependencies
 
-This project's inbox scripts depends on `Python 3.6+`. Operations will be more convenient with a `Bash` shell.
+Most bundled scripts require Python 3.6+. The batch repository importer requires Python 3.8+ and Requests; `-m 4` additionally uses `foldcomp==1.0.0` to compress PDBs into FCZ. `-z` selects server-side gzip storage and cannot be combined with `-m 4`. See the [batch import guide](web/DEPLOYMENT.md#batch-repository-imports) for format checks, batching and examples. Operations are more convenient with a Bash shell.
 
 Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
 

@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 import gzip
 import hashlib
 import html
+import io
 import json
 import logging
 import math
@@ -24,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.gzip import GZipMiddleware
 
-from . import jobs, search, settings
+from . import imports, jobs, search, settings
 from .storage import (atomic_write, b64decode, bounded_gunzip, component, decompress_fcz,
                       inside, protein_names, read_file, repo_file)
 from .structures import cif_to_pdb, pdb_to_alphacif, viewer_cif
@@ -47,25 +48,34 @@ class BodyLimitMiddleware:
             return await PlainTextResponse("Invalid Content-Length", status_code=400)(scope, receive, send)
         if length > settings.MAX_BODY:
             return await PlainTextResponse("Request too large", status_code=413)(scope, receive, send)
-        body = bytearray()
-        while True:
-            message = await receive()
-            if message["type"] == "http.disconnect":
-                return
-            body.extend(message.get("body", b""))
-            if len(body) > settings.MAX_BODY:
-                return await PlainTextResponse("Request too large", status_code=413)(scope, receive, send)
-            if not message.get("more_body", False):
-                break
-        delivered = False
+        # Keep bounded memory even when multiple batches arrive concurrently.
+        with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as body:
+            size = 0
+            while True:
+                message = await receive()
+                if message["type"] == "http.disconnect":
+                    return
+                chunk = message.get("body", b"")
+                size += len(chunk)
+                if size > settings.MAX_BODY:
+                    return await PlainTextResponse("Request too large", status_code=413)(scope, receive, send)
+                body.write(chunk)
+                if not message.get("more_body", False):
+                    break
+            body.seek(0)
+            remaining = size
 
-        async def replay():
-            nonlocal delivered
-            if not delivered:
-                delivered = True
-                return {"type": "http.request", "body": bytes(body), "more_body": False}
-            return await receive()
-        await self.app(scope, replay, send)
+            async def replay():
+                nonlocal remaining
+                if remaining is None:
+                    return await receive()
+                chunk = body.read(65536)
+                remaining -= len(chunk)
+                more = remaining > 0
+                if not more:
+                    remaining = None
+                return {"type": "http.request", "body": chunk, "more_body": more}
+            await self.app(scope, replay, send)
 
 
 @asynccontextmanager
@@ -294,27 +304,51 @@ async def import_repo(request: Request):
     body = json.loads(bounded_gunzip(await request.body()))
     repo, name = component(body["repo"]), component(body["name"])
     data = b64decode(body["text"])
-    path = repo_file(repo, name)
-    compressed = repo_file(repo, name + ".gz")
-    if (path.exists() or compressed.exists()) and not body.get("force", False):
-        return PlainTextResponse("Skipping")
-    destination, obsolete = (compressed, path) if body.get("gzip", False) else (path, compressed)
-    await run_in_threadpool(atomic_write, destination, gzip.compress(data) if body.get("gzip", False) else data)
-    obsolete.unlink(missing_ok=True)
-    await run_in_threadpool(search.clear_browse, repo)
-    return PlainTextResponse("Importing")
+    if name.endswith('.fcz') and body.get('gzip', False):
+        raise ValueError('FCZ + gzip storage is not supported')
+    item = {'name': name, 'storage': 'fcz' if name.endswith('.fcz') else ('gzip' if body.get('gzip', False) else 'plain'),
+            'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+    if item['storage'] == 'fcz':
+        decoded = await run_in_threadpool(decompress_fcz, data)
+        item['content_sha256'] = hashlib.sha256(decoded).hexdigest()
+    result = await run_in_threadpool(imports.commit, {'repo': repo, 'force': body.get('force', False), 'files': [item]}, [io.BytesIO(data)])
+    result = result['results'][0]
+    if result['status'] == 'error':
+        return PlainTextResponse(result['error'], status_code=409)
+    return PlainTextResponse('Importing' if result['status'] == 'imported' else 'Skipping')
+
+
+@app.post('/api/import2repo/batch/check')
+async def check_import_batch(request: Request):
+    body = imports.manifest(await request.json())
+    return await run_in_threadpool(imports.check, body)
+
+
+@app.post('/api/import2repo/batch')
+async def import_batch(request: Request):
+    async with request.form(max_files=imports.MAX_FILES, max_fields=1,
+                            max_part_size=1024 * 1024) as form:
+        body = imports.manifest(json.loads(form['manifest']))
+        expected = {'manifest'} | {'file' + str(i) for i in range(len(body['files']))}
+        if set(form) != expected or len(form.multi_items()) != len(expected):
+            raise ValueError('Multipart files do not match manifest')
+        uploads = [form['file' + str(i)] for i in range(len(body['files']))]
+        if any(not hasattr(upload, 'file') for upload in uploads):
+            raise ValueError('Missing multipart file')
+        return await run_in_threadpool(imports.commit, body, [upload.file for upload in uploads])
 
 
 @app.get("/api/import2repo/check.php")
-def check_import(repo: str, name: str):
-    path = repo_file(repo, name)
-    if path.is_file():
-        data = path.read_bytes()
-    elif repo_file(repo, name + ".gz").is_file():
-        data = gzip.decompress(repo_file(repo, name + ".gz").read_bytes())
-    else:
-        return PlainTextResponse("")
-    return PlainTextResponse(hashlib.md5(data).hexdigest())
+def check_import(repo: str, name: str, gzip: bool = False):
+    storage = 'fcz' if name.endswith('.fcz') else ('gzip' if gzip else 'plain')
+    imports.entry({'name': name, 'storage': storage})
+    if name.endswith('.fcz') and gzip:
+        raise ValueError('FCZ + gzip storage is not supported')
+    with imports.locked(component(repo)):
+        path = imports.existing(repo, name, storage)
+        if path is None:
+            return PlainTextResponse('')
+        return PlainTextResponse(hashlib.md5(imports.logical_bytes(path, storage)).hexdigest())
 
 
 @app.get("/api/cache/get.php")

@@ -90,6 +90,63 @@ import JSON. No Redis or separate task service is required. Active jobs lost
 during a container restart are marked failed when their result page is opened;
 completed results remain downloadable. Submit a new query to retry a failed job.
 
+## Batch repository imports
+
+Upgrade the Web service before using the new `toolkit/scripts/import2repo.py`.
+The script requires Python 3.8+ and Requests; mode 4 also requires
+`pip install foldcomp==1.0.0`. Install the toolkit requirements for the full
+toolkit. Example commands from the project root:
+
+```sh
+# Store ordinary local PDBs as gzip on the server.
+python toolkit/scripts/import2repo.py -i /path/to/models -n proteins -m 3 -z
+# Compress single-chain local PDBs to FCZ and store FCZ directly.
+python toolkit/scripts/import2repo.py -i /path/to/models -n proteins -m 4
+```
+
+Use `--url http://HOST/api/import2repo/` for a remote server. Modes 0..3 retain
+their file selection rules, including `.a3m` in mode 0. Local files are read as
+bytes and are never rewritten. Mode 4 ignores non-PDB files; unsupported or
+multichain PDBs are reported as failed, without an automatic fallback.
+
+Each batch uses `POST /api/import2repo/batch/check` for a JSON manifest and
+`POST /api/import2repo/batch` for multipart binary data. The defaults are at most
+256 files, a target of 16 MiB including estimated multipart overhead, and two
+concurrent batches. Tune `--batch-files`, `--batch-mib` and `--workers` (1..8).
+A single larger file is sent alone, subject to the server limit. The server
+advertises its body limit during preflight; clients split uploads further when
+needed. Connections are reused; transient request failures are retried. Old
+servers are reported as unsupported instead of silently using individual uploads.
+
+Ordinary files use gzip for transport independently of `-z`, which selects
+gzip storage. Content hashes are calculated over the uncompressed bytes so a
+local PDB and its server-side `.pdb.gz` verify correctly. FCZ uses raw binary
+transport and storage. Its byte SHA-256 verifies transport; an additional hash
+of the PDB decoded from FCZ verifies equivalent FCZ content. Foldcomp output
+bytes can vary between identical compressions, so raw FCZ hashes alone cannot
+reliably detect unchanged structures. The decoded hash compares two FCZ outputs,
+not the original PDB against its lossy reconstruction.
+
+Storage formats must agree. Server gzip requires `-z`; server FCZ requires
+`-m 4`; server plain files require the ordinary mode without `-z`. `-m 4 -z`
+is rejected locally. New `.fcz.gz` imports are rejected, and an existing
+`.fcz.gz` or multiple same-name PDB/FCZ variants are reported as conflicts.
+`-f` permits replacing different content in the same format only. Identical
+content is skipped; different existing content without `-f` is reported as
+`exists` and skipped. Format conflicts are errors even with `-f`.
+
+The old single-file URLs remain available and enforce the same storage-format
+rules. Legacy `check.php` accepts `gzip=true` to check decompressed gzip content.
+
+Uploads are length/hash checked and atomically committed per file; a failed file
+does not roll back successful files in the batch. Upload commits recheck server
+state under repository locks, and retries recognize completed content. FCZ
+validation reuses an isolated Python process per batch and replaces it after a
+native crash or timeout. Request bodies spill to temporary disk after 1 MiB,
+and multipart uploads are closed after processing. Temporary storage must have
+room for concurrent batches. Browse caches are cleared once per changed batch.
+The CLI prints per-file outcomes and a summary, and exits nonzero for failures.
+
 ## Structure compatibility
 
 FCZ conversion and repository fallbacks use the Foldcomp Python API in a spawned
@@ -139,24 +196,19 @@ fetch arbitrary external URLs. Downloads are confined to repository/cache roots.
 
 ## Validation status
 
-The Foldcomp migration has regression coverage for Python API decoding,
-repository FCZ and gzipped FCZ fallbacks, both upload URLs, the file endpoint,
-malformed-input crash isolation, timeout cleanup and subsequent successful
-decoding. Run with Python 3.12 and the installed Web dependencies:
+Batch import regression tests cover gzip content verification, strict format
+conflicts, same-format overwrite, retries, integrity failures, partial success,
+request limits, FCZ native crash/timeout recovery, and real CLI-to-Web imports
+including repeated FCZ compression. Run with Python 3.12, Web dependencies and
+Requests installed:
 
 ```sh
 PYTHONPATH=web python -m unittest discover -s web/tests -v
 ```
 
 The upstream test fixture and its MIT license are in `tests/fixtures/`.
-These six tests passed on Python 3.12 and inside the built Web image as UID
-1000. The image also passed a real Uvicorn startup, health check and HTTP FCZ
-upload with no Foldcomp executable present. The deployment script passed Bash
-syntax checking and the retained US-align archive passed checksum verification.
-The fixture's decoded atom identities and pLDDT values match the formerly bundled CLI, with
-coordinate component differences of at most 0.001 angstrom; PDB text formatting
-differs. These focused tests do not exercise Elasticsearch, the full setup
-script against existing data, or the complete Salign/browser workflows.
+These focused tests do not exercise Elasticsearch, the full setup script against
+existing data, or the complete Salign/browser workflows.
 
 See `THIRD_PARTY.md` for license and source information, and the repository-root
 README for the project overview.
