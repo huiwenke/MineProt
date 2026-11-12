@@ -1,75 +1,74 @@
-
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <script src="/assets/js/theme.js"></script>
-    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="../../assets/js/highcharts.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/data.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/heatmap.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/boost.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/boost-canvas.js"></script>
-    <script src="https://code.highcharts.com/10.3.1/modules/accessibility.js"></script>
+    <title>PAE | {{ title }}</title>
+    <script src="/assets/js/theme.js"></script>
+    <link rel="icon" type="image/png" href="/assets/img/logo.png">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/pae.css">
+    <link rel="stylesheet" href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar.css" data-molstar-theme
+        data-dark-href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar.css"
+        data-light-href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar-light.css">
+    <script src="/assets/js/molstar-theme.js"></script>
+    <script defer src="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar-plugin.js"></script>
+    <script defer src="/assets/js/pae-viewer.js"></script>
 </head>
-
-<body class="standalone-page">
-    <div id="container" class="pae-plot" style="height: 95vh; max-width: 95vh; margin: 0 auto"></div>
-    <pre id="csv" style="display: none">Residue_x, Residue_y, PAE
-{{ csv }}</pre>
-    <script>
-        const plotColors = getComputedStyle(document.documentElement);
-        Highcharts.chart('container', {
-            data: {
-                csv: document.getElementById('csv').innerHTML
-            },
-            chart: {
-                type: 'heatmap',
-                backgroundColor: plotColors.getPropertyValue('--visualization-bg').trim(),
-                inverted: true
-            },
-            boost: {
-                useGPUTranslations: true
-            },
-            title: {
-                text: {{ title|tojson }},
-                align: 'left'
-            },
-            xAxis: {
-                min: 0,
-                max: {{ Data_Length }}
-            },
-            yAxis: {
-                title: {
-                    text: null
-                },
-                min: 0,
-                max: {{ Data_Length }},
-                showLastLabel: false
-            },
-            colorAxis: {
-                stops: [
-                    [0, plotColors.getPropertyValue('--pae-low').trim()],
-                    [1, plotColors.getPropertyValue('--pae-high').trim()]
-                ],
-                min: 0,
-                max: {{ Max_PAE }},
-                showLastLabel: false
-            },
-            series: [{
-                boostThreshold: 1,
-                borderWidth: 0,
-                colsize: 1,
-                tooltip: {
-                    headerFormat: 'PAE<br/>',
-                    pointFormat: '{point.x}-{point.y}: <b>{point.value}</b>'
-                },
-                turboThreshold: Number.MAX_VALUE
-            }]
-        });
-    </script>
+<body class="standalone-page pae-page">
+    <main class="pae-workspace">
+        <header class="pae-header">
+            <div>
+                <p class="pae-eyebrow">Predicted aligned error · {{ repo }}</p>
+                <h1>{{ title }}</h1>
+                <p id="pae-summary" class="pae-muted"></p>
+            </div>
+            <nav class="pae-actions" aria-label="Viewer actions">
+                <button id="pae-clear" type="button">Clear selection</button>
+                <button id="pae-reset" type="button" disabled>Reset view</button>
+                <button id="pae-export" type="button">Save PAE image</button>
+                <a href="{{ pae_data.json_url }}" download>PAE JSON</a>
+            </nav>
+        </header>
+        <p id="pae-warning" class="pae-warning" role="status" hidden></p>
+        <section class="pae-sequence-panel" aria-label="Protein sequence">
+            <div class="pae-panel-heading"><h2>Sequence</h2><span class="pae-muted">Drag to select a range · dotted residues have no coordinates</span></div>
+            <div id="pae-sequence" class="pae-sequence"></div>
+        </section>
+        <div class="pae-panels">
+            <section class="pae-panel pae-heatmap-panel" aria-labelledby="pae-heading">
+                <div class="pae-panel-heading"><h2 id="pae-heading">Predicted aligned error</h2><span id="pae-length" class="pae-muted"></span></div>
+                <div class="pae-chart">
+                    <div class="pae-y-title">Aligned residue (reference)</div>
+                    <div class="pae-square">
+                        <canvas id="pae-canvas" tabindex="0" role="img" aria-label="Interactive PAE heatmap. Arrow keys move between residue pairs; Enter selects; Escape clears."></canvas>
+                        <svg id="pae-overlay" aria-hidden="true"></svg>
+                        <div id="pae-tooltip" class="pae-tooltip" hidden></div>
+                        <div id="pae-x-ticks" class="pae-x-ticks" aria-hidden="true"></div>
+                        <div id="pae-y-ticks" class="pae-y-ticks" aria-hidden="true"></div>
+                    </div>
+                    <div class="pae-x-title">Scored residue</div>
+                </div>
+                <div class="pae-scale"><div class="pae-gradient"></div><div id="pae-scale-ticks"></div><p>Expected position error (Å) · darker = more confident</p></div>
+                <p class="pae-help">Hover to inspect · click to pin a residue pair · drag a box to select two ranges</p>
+            </section>
+            <section class="pae-panel pae-structure-panel" aria-labelledby="pae-structure-heading">
+                <div class="pae-panel-heading"><h2 id="pae-structure-heading">Structure</h2><span id="pae-structure-status" class="pae-muted">Loading structure…</span></div>
+                <div id="pae-structure" class="pae-structure"></div>
+                <div class="pae-structure-footer">
+                    <span><i class="pae-swatch pae-color-x"></i>Scored range</span>
+                    <span><i class="pae-swatch pae-color-y"></i>Reference range</span>
+                    <span><i class="pae-swatch pae-color-both"></i>Overlap</span>
+                    <span class="pae-muted">Unselected: pLDDT · &gt;90 blue / 70–90 cyan / 50–70 yellow / &lt;50 orange</span>
+                </div>
+            </section>
+        </div>
+        <section class="pae-selection-panel" aria-label="Selection details">
+            <p id="pae-selection" role="status" aria-live="polite">No selection. Select a residue pair or drag a box in the PAE plot.</p>
+            <p id="pae-hover" class="pae-muted">PAE is directional: error at the scored residue when aligned on the reference residue.</p>
+        </section>
+        <noscript>This viewer requires JavaScript.</noscript>
+    </main>
+    <script id="pae-data" type="application/json">{{ pae_data|tojson }}</script>
 </body>
-
 </html>

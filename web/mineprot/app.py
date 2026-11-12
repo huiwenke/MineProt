@@ -25,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.gzip import GZipMiddleware
 
-from . import imports, jobs, search, settings
+from . import imports, jobs, pae, search, settings
 from .storage import (atomic_write, b64decode, bounded_gunzip, component, decompress_fcz,
                       inside, protein_names, read_file, repo_file)
 from .structures import cif_to_pdb, pdb_to_alphacif, viewer_cif
@@ -390,14 +390,41 @@ def pae_page(request: Request, data_url: str):
     parts = path.split("/")
     if len(parts) != 5 or parts[1:3] != ["api", "file"] or not parts[4].endswith(".json"):
         raise ValueError("PAE data must reference a repository JSON file")
-    data = json.loads(read_file(unquote(parts[3]), unquote(parts[4])))
+    repo, filename = unquote(parts[3]), unquote(parts[4])
+    data = json.loads(read_file(repo, filename))
     matrix = data["pae"]
+    if not isinstance(matrix, list) or not matrix:
+        raise ValueError("No PAE matrix is available for this model")
     length = len(matrix)
-    if any(len(row) != length for row in matrix):
+    if any(not isinstance(row, list) or len(row) != length for row in matrix):
         raise ValueError("PAE matrix must be square")
-    rows = [f"{x},{y},{float(value)}" for x, row in enumerate(matrix) for y, value in enumerate(row)]
-    return render(request, "pae.html", {"csv": "\n".join(rows), "Data_Length": length,
-                  "Max_PAE": float(data["max_pae"]), "title": Path(unquote(parts[4])).stem})
+    for row in matrix:
+        for i, value in enumerate(row):
+            try:
+                value = float(value)
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise ValueError("PAE values must be finite and non-negative") from exc
+            if not math.isfinite(value) or value < 0:
+                raise ValueError("PAE values must be finite and non-negative")
+            row[i] = value
+    try:
+        maximum = float(data.get("max_pae", 31.75))
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("Maximum PAE must be finite and positive") from exc
+    if not math.isfinite(maximum) or maximum <= 0:
+        raise ValueError("Maximum PAE must be finite and positive")
+    title = Path(filename).stem
+    file_url = "/api/file/" + quote(repo, safe="") + "/" + quote(title, safe="")
+    residues, warning = [], ""
+    try:
+        residues, warning = pae.residue_map(read_file(repo, title + ".cif"), length)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        logger.warning("Cannot map PAE residues for %s/%s: %s", repo, title, exc)
+        warning = "The structure sequence could not be read. PAE remains available; linked selection is disabled."
+    return render(request, "pae.html", {"title": title, "repo": repo, "pae_data": {
+        "matrix": matrix, "maximum": maximum, "residues": residues, "warning": warning,
+        "structure_url": file_url + ".cif?viewer=modern", "json_url": file_url + ".json",
+    }})
 
 
 @app.get("/salign/")
