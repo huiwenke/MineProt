@@ -187,7 +187,7 @@ def results(rid: str, threshold: float) -> list[dict]:
         prefix = f"MP_SALIGN_{rid}/{repo}/query_{name}"
         hit = dict(zip(("TM1", "TM2", "RMSD", "ID1", "ID2", "IDali", "L1", "L2", "Lali"), scores))
         hit.update(repo=repo, name=name, prefix=prefix,
-                   query=str(settings.CACHE_ROOT / (prefix + ".pdb")), target=str(directory / relative))
+                   query=str(directory / "query.pdb"), target=str(directory / relative))
         hits.append(hit)
     return sorted(hits, key=lambda hit: (hit["TM1"] + hit["TM2"]) / 2, reverse=True)
 

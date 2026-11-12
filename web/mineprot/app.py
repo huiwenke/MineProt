@@ -473,10 +473,10 @@ async def salign_result(request: Request, rid: str, tmscore: float = 0.5):
 def salign_detail(request: Request, pdb1: str, pdb2: str):
     query = inside(settings.CACHE_ROOT, b64decode(pdb1).decode())
     target = inside(settings.CACHE_ROOT, b64decode(pdb2).decode())
-    if not query.is_file() or not query.name.startswith("query_"):
+    if not query.is_file() or query.name != "query.pdb":
         raise FileNotFoundError(query.name)
     repo, name = target.parent.name, target.stem
-    hinge = jobs.job_hinge(query.parent.parent)
+    hinge = jobs.job_hinge(query.parent)
     with tempfile.TemporaryDirectory(prefix="MP_SALIGN_DETAIL_") as temporary:
         restored = Path(temporary) / "hit.pdb"
         restored.write_bytes(read_file(repo, name + ".pdb"))
