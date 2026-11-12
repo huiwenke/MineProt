@@ -225,7 +225,8 @@ async def browse_page(request: Request):
         page = 1
     rows = rows[(page - 1) * page_size:page * page_size]
     for row in rows:
-        row["homolog_url"] = homolog_url(row)
+        row["homolog_url"] = (homolog_url(row) if row.get("homolog") else
+                              "https://www.bing.com/search?" + urlencode({"q": row["anno"]}))
     values.update(repo=repo, rows=rows, sort=sort, total=total, page=page, pages=pages, page_size=page_size,
                   first_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": 1}),
                   last_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": pages}),
