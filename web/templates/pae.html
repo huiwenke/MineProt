@@ -40,26 +40,26 @@
             </nav>
         </header>
         <p id="pae-warning" class="pae-warning" role="status" hidden></p>
-        <section class="pae-sequence-panel" aria-label="Protein sequence">
-            <div class="pae-panel-heading"><h2>Sequence</h2><span class="pae-muted">Drag to select a range · dotted residues have no coordinates</span></div>
+        <section class="pae-sequence-panel" aria-label="Complex chains and tokens">
+            <div class="pae-panel-heading"><h2>Chains &amp; tokens</h2><span class="pae-muted">Drag to select a range · dotted tokens have no structure link</span></div>
             <div id="pae-sequence" class="pae-sequence"></div>
         </section>
         <div class="pae-panels">
             <section class="pae-panel pae-heatmap-panel" aria-labelledby="pae-heading">
                 <div class="pae-panel-heading"><h2 id="pae-heading">Predicted aligned error</h2><span id="pae-length" class="pae-muted"></span></div>
                 <div class="pae-chart">
-                    <div class="pae-y-title">Aligned residue (reference)</div>
+                    <div class="pae-y-title">Aligned token position (reference)</div>
                     <div class="pae-square">
-                        <canvas id="pae-canvas" tabindex="0" role="img" aria-label="Interactive PAE heatmap. Arrow keys move between residue pairs; Enter selects; Escape clears."></canvas>
+                        <canvas id="pae-canvas" tabindex="0" role="img" aria-label="Interactive PAE heatmap. Arrow keys move between token pairs; Enter selects; Escape clears."></canvas>
                         <svg id="pae-overlay" aria-hidden="true"></svg>
                         <div id="pae-tooltip" class="pae-tooltip" hidden></div>
                         <div id="pae-x-ticks" class="pae-x-ticks" aria-hidden="true"></div>
                         <div id="pae-y-ticks" class="pae-y-ticks" aria-hidden="true"></div>
                     </div>
-                    <div class="pae-x-title">Scored residue</div>
+                    <div class="pae-x-title">Scored token position</div>
                 </div>
                 <div class="pae-scale"><div class="pae-gradient"></div><div id="pae-scale-ticks"></div><p>Expected position error (Å) · darker = more confident</p></div>
-                <p class="pae-help">Hover to inspect · click to pin a residue pair · drag a box to select two ranges</p>
+                <p class="pae-help">Hover to inspect · click to pin a token pair · drag a box to select two ranges</p>
             </section>
             <section class="pae-panel pae-structure-panel" aria-labelledby="pae-structure-heading">
                 <div class="pae-panel-heading"><h2 id="pae-structure-heading">Structure</h2><span id="pae-structure-status" class="pae-muted">Loading structure…</span></div>
@@ -73,8 +73,8 @@
             </section>
         </div>
         <section class="pae-selection-panel" aria-label="Selection details">
-            <p id="pae-selection" role="status" aria-live="polite">No selection. Select a residue pair or drag a box in the PAE plot.</p>
-            <p id="pae-hover" class="pae-muted">PAE is directional: error at the scored residue when aligned on the reference residue.</p>
+            <p id="pae-selection" role="status" aria-live="polite">No selection. Select a token pair or drag a box in the PAE plot.</p>
+            <p id="pae-hover" class="pae-muted">PAE is directional: error at the scored token when aligned on the reference token.</p>
         </section>
         <noscript>This viewer requires JavaScript.</noscript>
     </main>

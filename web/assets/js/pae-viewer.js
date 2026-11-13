@@ -1,5 +1,5 @@
 /* PAE indices are zero-based; all displayed positions are one-based.
- * matrix[scored][aligned] is intentionally not transposed or symmetrized.
+ * matrix[aligned][scored]: rows are reference frames, columns are scored tokens.
  */
 (() => {
     'use strict';
@@ -19,7 +19,13 @@
     const buttons = [];
     const chainBoundaries = mapped ? residues.flatMap((r, i) =>
         i > 0 && r.chain !== residues[i - 1].chain ? [i] : []) : [];
-    const indexByResidue = new Map();
+    const indexBySelection = new Map();
+    const selectionKey = (chain, namespace, seq, ins = '', atom = '') =>
+        JSON.stringify([chain, namespace, String(seq), ins || '', atom || '']);
+    function registerIndex(key, i) {
+        if (!indexBySelection.has(key)) indexBySelection.set(key, new Set());
+        indexBySelection.get(key).add(i);
+    }
     let viewer, ready = false, selection = null, hover = null, drag = null;
     let keyboardPoint = { x: 0, y: 0 };
     let hoverFrame = 0, pendingHighlight = null;
@@ -32,7 +38,7 @@
         node.hidden = false;
     }
     if (data.warning) warning(data.warning);
-    $('pae-summary').textContent = `${n.toLocaleString()} sequence positions · PAE in ångströms` +
+    $('pae-summary').textContent = `${n.toLocaleString()} token positions · PAE in ångströms` +
         (n > 1800 ? ' · Display sampled; inspected values use the full matrix' : '');
     $('pae-length').textContent = `${n} × ${n}`;
     overlay.setAttribute('viewBox', `0 0 ${n} ${n}`);
@@ -41,7 +47,8 @@
         if (!mapped) return `Position ${i + 1}`;
         const r = residues[i];
         const author = r.auth_seq ? `${r.auth_chain}:${r.auth_seq}${r.ins}` : `${r.chain}:${r.seq}`;
-        return `${author} ${r.comp} (position ${i + 1})${r.observed ? '' : ' · no coordinates'}`;
+        const atom = r.atom ? ` / ${r.atom}` : '';
+        return `${author} ${r.comp}${atom} (token ${i + 1})${r.observed ? '' : ' · ' + (r.reason || 'no coordinates')}`;
     }
     function rangeLabel(range) {
         return range[0] === range[1] ? label(range[0]) : `${label(range[0])} → ${label(range[1])}`;
@@ -49,7 +56,7 @@
     const inRange = (i, range) => range && i >= range[0] && i <= range[1];
     const normalized = (a, b) => [Math.min(a, b), Math.max(a, b)];
     const pairSelection = (a, b) => ({ x: normalized(a.x, b.x), y: normalized(a.y, b.y) });
-    const paeValue = (x, y) => `${matrix[x][y].toFixed(2)} Å`;
+    const paeValue = (x, y) => `${matrix[y][x].toFixed(2)} Å`;
 
     // A small raster avoids allocating an N² collection of chart point objects.
     // Large matrices are sampled for display only; inspection uses original data.
@@ -73,7 +80,7 @@
         for (let x = 0; x < rasterSize; x++) {
             const scored = Math.min(n - 1, Math.floor((x + .5) * n / rasterSize));
             const offset = (y * rasterSize + x) * 4;
-            image.data.set(colorAt(matrix[scored][aligned]), offset);
+            image.data.set(colorAt(matrix[aligned][scored]), offset);
             image.data[offset + 3] = 255;
         }
     }
@@ -138,8 +145,7 @@
         });
     }
     function queryFor(i) {
-        const residue = residues[i];
-        return { label_asym_id: residue.chain, label_seq_id: residue.seq };
+        return { ...residues[i].query };
     }
     function highlight(point) {
         pendingHighlight = point;
@@ -169,8 +175,13 @@
         // Merge adjacent label positions to keep Mol* selection updates small.
         residues.forEach((r, i) => {
             const x = inRange(i, active.x), y = inRange(i, active.y);
-            if (!r.observed || (!x && !y)) { last = null; return; }
+            if (!r.observed || !r.query || (!x && !y)) { last = null; return; }
             const color = x && y ? colors.both : x ? colors.x : colors.y;
+            if (r.atom || r.seq === null) {
+                queries.push({ ...r.query, color, opacity: 1 });
+                last = null;
+                return;
+            }
             if (last && last.label_asym_id === r.chain && last.color === color && last.end_label_seq_id + 1 === r.seq) {
                 last.end_label_seq_id = r.seq;
             } else {
@@ -212,7 +223,7 @@
         paintSequence();
         paintHover();
         if (!active) {
-            $('pae-selection').textContent = 'No selection. Select a residue pair or drag a box in the PAE plot.';
+            $('pae-selection').textContent = 'No selection. Select a token pair or drag a box in the PAE plot.';
         } else {
             const pair = active.x[0] === active.x[1] && active.y[0] === active.y[1];
             $('pae-selection').textContent = `Scored: ${rangeLabel(active.x)} · Reference: ${rangeLabel(active.y)}` +
@@ -290,7 +301,8 @@
                 row.className = 'pae-chain';
                 const label = document.createElement('span');
                 label.className = 'pae-chain-label';
-                label.textContent = `Chain ${r.auth_chain || chain}`;
+                const kindLabel = { protein: 'Protein', dna: 'DNA', rna: 'RNA', ion: 'Ion', ligand: 'Ligand', polymer: 'Polymer' };
+                label.textContent = `${r.auth_chain || chain} · ${kindLabel[r.kind] || 'Tokens'}`;
                 container = document.createElement('div');
                 container.className = 'pae-chain-residues';
                 row.append(label, container);
@@ -298,20 +310,23 @@
             }
             const button = document.createElement('button');
             button.type = 'button';
-            button.className = 'pae-residue' + (r.observed ? '' : ' is-missing');
+            button.className = 'pae-residue' + (r.observed ? '' : ' is-missing') + (r.atom ? ' is-atom' : '');
             button.dataset.index = i;
-            button.textContent = r.letter;
+            button.textContent = r.display || r.letter;
             button.title = label(i);
             button.setAttribute('aria-label', label(i));
             button.tabIndex = i === 0 ? 0 : -1;
             if (i === 0 || residues[i - 1].chain !== chain || (i + 1) % 10 === 0) button.dataset.tick = i + 1;
             buttons.push(button);
             container.append(button);
-            indexByResidue.set(`${r.chain}:${r.seq}`, i);
+            if (r.observed && r.query) {
+                if (r.seq !== null) registerIndex(selectionKey(r.chain, 'label', r.seq, '', r.atom), i);
+                if (r.auth_seq !== '') registerIndex(selectionKey(r.chain, 'auth', r.auth_seq, r.ins, r.atom), i);
+            }
         });
         sequence.append(fragment);
     } else {
-        sequence.textContent = 'A matching structure sequence is unavailable. You can still inspect and select regions in the PAE plot.';
+        sequence.textContent = 'A matching token map is unavailable. You can still inspect and select regions in the PAE plot.';
     }
     function sequenceIndex(event) {
         const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.pae-residue');
@@ -408,9 +423,9 @@
             ctx.fillText(String(i + 1), 30, 39 + p);
         });
         ctx.textAlign = 'center';
-        ctx.fillText('Scored residue', 65 + size / 2, size + 76);
+        ctx.fillText('Scored token position', 65 + size / 2, size + 76);
         ctx.save(); ctx.translate(16, 35 + size / 2); ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Aligned residue (reference)', 0, 0); ctx.restore();
+        ctx.fillText('Aligned token position (reference)', 0, 0); ctx.restore();
         const gradient = ctx.createLinearGradient(65, 0, size + 65, 0);
         palette.forEach((rgb, i) => gradient.addColorStop(i / 4, `rgb(${rgb.join(',')})`));
         ctx.fillStyle = gradient; ctx.fillRect(65, size + 94, size, 12);
@@ -434,7 +449,21 @@
     function structureIndex(event) {
         const r = event.eventData;
         if (!mapped || !r) return null;
-        return indexByResidue.get(`${r.label_asym_id}:${r.seq_id}`) ?? null;
+        const atomNames = Array.isArray(r.atom_id) ? r.atom_id : r.atom_id ? [r.atom_id] : [];
+        function candidates(atoms) {
+            const found = new Set();
+            atoms.forEach(atom => {
+                const keys = [selectionKey(r.label_asym_id, 'label', r.seq_id, '', atom),
+                    selectionKey(r.label_asym_id, 'auth', r.auth_seq_id, r.ins_code, atom)];
+                keys.forEach(key => indexBySelection.get(key)?.forEach(i => found.add(i)));
+            });
+            return found;
+        }
+        // Atom-specific mappings take priority over whole-residue mappings.
+        const atomic = candidates(atomNames);
+        if (atomic.size) return atomic.size === 1 ? [...atomic][0] : null;
+        const polymer = candidates(['']);
+        return polymer.size === 1 ? [...polymer][0] : null;
     }
     host.addEventListener('PDB.molstar.mouseover', event => {
         const i = structureIndex(event);
@@ -464,11 +493,12 @@
             alphafoldView: true, landscape: true, reactive: false,
             hideControls: true, sequencePanel: false, pdbeLink: false,
             hideCanvasControls: [], bgColor: MineProtMolstarTheme.backgroundColor(),
-            granularity: 'residue', selectInteraction: false,
-        }).then(() => {
+            granularity: 'element', selectInteraction: false,
+        }).then(async () => {
+            await viewer.visual.visibility({ polymer: true, het: true, carbs: true, nonStandard: true });
             ready = true;
             syncTheme();
-            $('pae-structure-status').textContent = mapped ? 'pLDDT coloring · hover or click a residue' : 'pLDDT coloring · linking unavailable';
+            $('pae-structure-status').textContent = mapped ? 'pLDDT coloring · hover or click a residue / atom' : 'pLDDT coloring · linking unavailable';
             $('pae-reset').disabled = false;
             if (selection) updateViewer(false);
         }).catch(structureError);

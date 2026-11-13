@@ -418,7 +418,7 @@ def pae_page(request: Request, data_url: str):
     file_url = "/api/file/" + quote(repo, safe="") + "/" + quote(title, safe="")
     residues, warning = [], ""
     try:
-        residues, warning = pae.residue_map(read_file(repo, title + ".cif"), length)
+        residues, warning = pae.residue_map(read_file(repo, title + ".cif"), length, data)
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         logger.warning("Cannot map PAE residues for %s/%s: %s", repo, title, exc)
         warning = "The structure sequence could not be read. PAE remains available; linked selection is disabled."

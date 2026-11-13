@@ -17,11 +17,12 @@
 .pae-panel-heading h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-strong); }
 .pae-sequence { max-height: 172px; overflow: auto; overscroll-behavior: contain; user-select: none; touch-action: pan-y; }
 .pae-chain { display: flex; align-items: flex-start; margin: 8px 0 12px; gap: 12px; }
-.pae-chain-label { min-width: 44px; position: sticky; top: 0; font: 12px/2.2 monospace; color: var(--text-muted); }
+.pae-chain-label { min-width: 90px; position: sticky; top: 0; font: 12px/2.2 monospace; color: var(--text-muted); }
 .pae-chain-residues { display: flex; flex-wrap: wrap; gap: 2px 0; padding-top: 14px; }
 .pae-residue { position: relative; width: 17px; height: 26px; border: 0; border-radius: 2px; padding: 0; font: 13px/26px monospace; color: var(--text-body); background: transparent; cursor: pointer; touch-action: none; }
 .pae-residue[data-tick]::before { content: attr(data-tick); position: absolute; bottom: 24px; left: 1px; font: 9px/12px monospace; color: var(--text-muted); pointer-events: none; }
 .pae-residue.is-missing { text-decoration: underline dotted; opacity: .6; }
+.pae-residue.is-atom { width: auto; min-width: 28px; margin-right: 4px; padding: 0 7px; border: 1px solid var(--border); border-radius: 4px; }
 .pae-residue.is-x { background: #26a6cf; color: #061f27; }
 .pae-residue.is-y { background: #f6c344; color: #3b2800; }
 .pae-residue.is-x.is-y { background: #bd83e5; color: #261035; }
@@ -44,7 +45,7 @@
 #pae-scale-ticks { display: flex; justify-content: space-between; margin-top: 4px; }
 .pae-scale p { margin: 5px 0; color: var(--text-muted); }
 .pae-help { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 16px 20px; text-align: center; }
-.pae-tooltip { position: absolute; z-index: 3; pointer-events: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg-surface); color: var(--text-body); font-size: 12px; white-space: pre-line; box-shadow: 0 3px 12px #0003; max-width: 240px; }
+.pae-tooltip { position: absolute; z-index: 3; pointer-events: none; padding: 8px 10px; border: 1px solid var(--border); border-radius: 5px; background: color-mix(in srgb, var(--bg-surface) 50%, transparent); color: var(--text-body); font-size: 12px; white-space: pre-line; box-shadow: 0 3px 12px #0001; max-width: 240px; }
 .pae-structure-panel { display: flex; flex-direction: column; }
 .pae-structure { flex: 1; position: relative; min-height: 480px; width: 100%; background: var(--viewer-bg); }
 .pae-structure:has(.msp-layout-expanded) { z-index: 1000; }

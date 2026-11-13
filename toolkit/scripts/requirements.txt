@@ -1,4 +1,5 @@
 numpy
 requests
 biopython
+gemmi==0.7.1
 foldcomp==1.0.0
