@@ -228,11 +228,12 @@ async def browse_page(request: Request):
         row["homolog_url"] = (homolog_url(row) if row.get("homolog") else
                               "https://www.bing.com/search?" + urlencode({"q": row["anno"]}))
     values.update(repo=repo, rows=rows, sort=sort, total=total, page=page, pages=pages, page_size=page_size,
+                  refresh_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": page}),
                   first_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": 1}),
                   last_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": pages}),
                   previous_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": page - 1}),
                   next_url="/browse.php?" + urlencode({"repo": repo, "sort": sort, "page": page + 1}))
-    return render(request, "browse.html", values)
+    return render(request, "browse.html", values, headers={"Cache-Control": "no-store"})
 
 
 # Do not redirect trailing-slash legacy POST requests: serve directory and
@@ -368,7 +369,7 @@ def get_cache(data_url: str, download: str = ""):
 @app.get("/api/cache/clear.php")
 def clear_cache(repo: str, force: str = ""):
     search.clear_browse(repo)
-    return Response()
+    return Response(headers={"Cache-Control": "no-store"})
 
 
 @app.api_route("/api/cache/update.php", methods=["GET", "POST"])

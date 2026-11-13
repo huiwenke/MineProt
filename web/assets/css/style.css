@@ -399,6 +399,13 @@ summary {
 	border-color: var(--overlay);
 }
 
+.btn:disabled, .btn:disabled:hover {
+	color: var(--text-muted);
+	background-color: var(--bg-table-alt);
+	cursor: not-allowed;
+	opacity: .65;
+}
+
 ul {
 	list-style: none !important;
 	padding-left: 0;

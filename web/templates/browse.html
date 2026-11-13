@@ -28,17 +28,23 @@
                         {% if page is defined and pages is defined %}
                         <span aria-hidden="true" style="margin:0 6px;">|</span>
                         {% if page > 1 %}
-                        {% if first_url is defined %}<a class="btn btn-purple-bright" href="{{ first_url }}">First</a>{% endif %}
+                        <a class="btn btn-purple-bright" href="{{ first_url }}">First</a>
                         <a class="btn btn-purple" href="{{ previous_url }}">Previous</a>
+                        {% else %}
+                        <button type="button" class="btn btn-purple-bright" disabled>First</button>
+                        <button type="button" class="btn btn-purple" disabled>Previous</button>
                         {% endif %}
                         <span>{{ total }} proteins · Page {{ page }} / {{ pages }} · {{ page_size|default(100) }} per page</span>
                         {% if page < pages %}
                         <a class="btn btn-purple" href="{{ next_url }}">Next</a>
-                        {% if last_url is defined %}<a class="btn btn-purple-bright" href="{{ last_url }}">Last</a>{% endif %}
+                        <a class="btn btn-purple-bright" href="{{ last_url }}">Last</a>
+                        {% else %}
+                        <button type="button" class="btn btn-purple" disabled>Next</button>
+                        <button type="button" class="btn btn-purple-bright" disabled>Last</button>
                         {% endif %}
                         {% endif %}
                         <span aria-hidden="true" style="margin:0 6px;">|</span>
-                        <button type="button" class='btn btn-refresh' title='Refresh cache' onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
+                        <button type="button" class='btn btn-refresh' title='Refresh cache' data-refresh-url="{{ refresh_url }}" onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
                     </form>
                     <br>
 <table class="data-table"><thead><tr align="left"><th>Name</th><th>Structure</th><th>pLDDT</th><th>MSA</th><th>Annotation</th></tr></thead><tbody>
@@ -49,14 +55,22 @@
     </main>
     <script>
         async function clearCache(repoName, button) {
+            if (button.disabled) return;
+            const originalText = button.textContent;
             button.disabled = true;
+            button.textContent = '⟳ Refreshing…';
+            button.setAttribute('aria-busy', 'true');
             try {
-                const response = await fetch("./api/cache/clear.php?force=true&repo=" + encodeURIComponent(repoName));
+                const response = await fetch("./api/cache/clear.php?force=true&repo=" + encodeURIComponent(repoName), {
+                    cache: 'no-store'
+                });
                 if (!response.ok) throw new Error('Could not refresh cache');
-                location.reload();
+                location.replace(button.dataset.refreshUrl);
             } catch (error) {
                 console.error(error);
                 button.disabled = false;
+                button.textContent = originalText;
+                button.removeAttribute('aria-busy');
                 alert('Could not refresh cache. Please try again.');
             }
         }
