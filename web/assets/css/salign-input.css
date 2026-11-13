@@ -1,0 +1,41 @@
+.salign-input {
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-surface);
+    color: var(--text-body);
+    transition: border-color .15s, box-shadow .15s;
+}
+.salign-input-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.salign-input-heading h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-strong); }
+.salign-format-tag { border: 1px solid var(--border); border-radius: 5px; padding: 3px 7px; font: 10px/1.4 monospace; letter-spacing: .06em; color: var(--text-muted); }
+.salign-drop-area { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px dashed var(--border); border-radius: 8px; background: var(--bg-page); transition: border-color .15s, background-color .15s; }
+.salign-upload-icon { flex: 0 0 42px; height: 42px; display: grid; place-items: center; border-radius: 10px; background: var(--bg-table-alt); color: var(--link); }
+.salign-upload-icon svg { width: 25px; height: 25px; }
+.salign-drop-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.salign-drop-copy strong { font-size: 14px; color: var(--text-strong); }
+.salign-drop-copy span { font-size: 12px; color: var(--text-muted); }
+#salign-choose-file { padding: 7px 15px; flex-shrink: 0; }
+.salign-input.is-dragging { border-color: var(--focus); box-shadow: 0 0 0 3px var(--focus-ring); }
+.salign-input.is-dragging .salign-drop-area { border-color: var(--link); background-color: var(--bg-table-alt); }
+.salign-input.is-dragging .salign-upload-icon { color: var(--text-on-color); background: var(--button-blue); }
+.salign-file-info { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; padding: 8px 0; }
+#salign-file-status { margin: 0; color: var(--text-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+#salign-file-status.is-loaded { color: var(--success); }
+#salign-file-status.is-error { color: var(--code-deletion); }
+.salign-clear-file { border: 0; border-radius: 4px; background: transparent; color: var(--text-muted); font: inherit; font-size: 12px; cursor: pointer; padding: 4px 6px; }
+.salign-clear-file:hover { color: var(--text-strong); background: var(--bg-table-alt); }
+.salign-text-label { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin: 4px 0 8px; font-size: 12px; font-weight: 600; }
+.salign-text-label span { font-weight: 400; font-size: 11px; color: var(--text-muted); }
+.salign-structure-text { display: block; box-sizing: border-box; width: 100%; min-height: 130px; height: 20vh; resize: vertical; padding: 12px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-body); background: var(--bg-page); font: 12px/1.7 monospace; tab-size: 4; }
+.salign-structure-text::placeholder { color: var(--text-muted); }
+.salign-structure-text:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.salign-input button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.salign-file-hint { margin: 10px 0 0; color: var(--text-muted); font-size: 11px; line-height: 1.6; }
+.salign-input [hidden] { display: none !important; }
+@media (max-width: 600px) {
+    .salign-input { padding: 14px; }
+    .salign-drop-area { padding: 18px 14px; flex-wrap: wrap; gap: 12px; }
+    #salign-choose-file { margin-left: 54px; }
+    .salign-drop-copy { flex-basis: calc(100% - 60px); }
+}

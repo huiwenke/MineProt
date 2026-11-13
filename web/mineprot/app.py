@@ -431,7 +431,10 @@ def pae_page(request: Request, data_url: str):
 @app.get("/salign/")
 @app.get("/salign/index.php")
 async def salign_page(request: Request):
-    return render(request, "salign/index.html", await context(request))
+    values = await context(request)
+    # Leave room for URL-encoding expansion and the remaining form fields.
+    values["structure_upload_limit"] = min(20 * 1024 * 1024, settings.MAX_BODY // 4)
+    return render(request, "salign/index.html", values)
 
 
 @app.post("/api/salign/")

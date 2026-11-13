@@ -8,6 +8,8 @@
     <title>MineProt</title>
     <link rel="shortcut icon" type="image/png" href="../assets/img/logo.png">
     <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/salign-input.css">
+    <script defer src="/assets/js/salign-input.js"></script>
 </head>
 
 <body>
@@ -15,11 +17,34 @@
     <main style="min-height: 100vh;">
         <section class="main_salign">
             <div style="display: block; width: 100%;">
-                <form action="../api/salign/index.php" method="post">
+                <form id="salign-form" action="../api/salign/index.php" method="post">
                     <br><br>
-                    <label class="wrapper">
-                        <textarea name="structure" class="form-control-header" style="height: 25vh;" placeholder="Paste query structure (PDB or CIF) here..." required=""></textarea>
-                    </label>
+                    <section id="salign-structure-input" class="salign-input" aria-labelledby="salign-input-heading" data-max-bytes="{{ structure_upload_limit }}">
+                        <div class="salign-input-heading">
+                            <h2 id="salign-input-heading">Query structure</h2>
+                            <span class="salign-format-tag">PDB / CIF</span>
+                        </div>
+                        <div class="salign-drop-area">
+                            <div class="salign-upload-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 16V4m-4 4 4-4 4 4M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/>
+                                </svg>
+                            </div>
+                            <div class="salign-drop-copy">
+                                <strong>Drop a structure file here</strong>
+                                <span>or choose a file from your computer</span>
+                            </div>
+                            <button id="salign-choose-file" class="btn btn-blue" type="button" aria-describedby="salign-file-hint" hidden>Choose file</button>
+                            <input id="salign-file" type="file" accept=".pdb,.cif,.mmcif" hidden>
+                        </div>
+                        <div class="salign-file-info">
+                            <p id="salign-file-status" role="status" aria-live="polite">Paste a structure below, or enable JavaScript to load a file.</p>
+                            <button id="salign-clear-file" class="salign-clear-file" type="button" hidden>Clear</button>
+                        </div>
+                        <label for="salign-structure" class="salign-text-label">Structure text <span>Paste directly or edit the loaded file</span></label>
+                        <textarea id="salign-structure" name="structure" class="salign-structure-text" placeholder="Paste query structure (PDB or CIF) here…" spellcheck="false" autocapitalize="off" autocomplete="off" required aria-describedby="salign-file-hint"></textarea>
+                        <p id="salign-file-hint" class="salign-file-hint">One .pdb, .cif or .mmcif file · up to {{ (structure_upload_limit / 1024 / 1024)|round(1) }} MB · submitted when you click Search</p>
+                    </section>
                     <br>
                     <h2 class="h2_aside">Protein Repositories</h2>
                     <hr>
@@ -59,7 +84,7 @@
                         <div style="width: 5%;">
                         </div>
                         <div style="width: 50%;">
-                            <button class="btn" type="submit" style="width: 100%;"><strong>Search</strong></button>
+                            <button id="salign-submit" class="btn" type="submit" style="width: 100%;"><strong>Search</strong></button>
                         </div>
                     </div>
                 </form>
