@@ -32,7 +32,6 @@
                                 <select id="system" onchange="selectSystem()">
                                     <option value="colabfold">ColabFold</option>
                                     <option value="alphafold2">AlphaFold2</option>
-                                    <option value="alphafold3">AlphaFold3</option>
                                 </select>
                             </div>
                         </div>
@@ -77,7 +76,7 @@
                                 <strong>Path to python3</strong>
                             </div>
                             <div style="width: 50%;">
-                                <input class="input-import" id="python_path" placeholder="/path/to/your/python3" value="/usr/bin/python3">
+                                <input class="input-import" id="python_path" placeholder="/path/to/your/python3" value="python3">
                             </div>
                         </div>
                         <br>
@@ -100,8 +99,6 @@
                             </div>
                         </div>
                         <div id="alphafold2_opt" name="system_opt" style="margin-top: 7px; display: none;">
-                        </div>
-                        <div id="alphafold3_opt" name="system_opt" style="margin-top: 7px; display: none;">
                         </div>
                         <br>
                         <button class="btn" onclick="generateCode()"><strong>Generate</strong></button>
@@ -142,7 +139,7 @@
             }
             codeForImport.innerHTML += "cd " + scriptPath + " \n\n";
             codeForImport.innerHTML += "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
-            codeForImport.innerHTML += currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
+            codeForImport.innerHTML += "bash ai/" + currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
             var nameMode = document.getElementById("name_mode").value;
             codeForImport.innerHTML += "--name-mode " + nameMode + " \\\n";
             var systemArgs = document.getElementsByName(currentSystem.value + "_args");
@@ -157,10 +154,10 @@
             }
             var apiURL = window.location.href.replace(window.location.pathname, "");
             codeForImport.innerHTML += "--url " + apiURL + '\n';
-            preProcessedHTML = "\n# If your data have been preprocessed by " + currentSystem.value + "/transform.py, run: \n\n";
-            cmdImport2es = [pythonPath, "import2es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
+            preProcessedHTML = "\n# If your data have been preprocessed by ai/" + currentSystem.value + "/transform.py, run: \n\n";
+            cmdImport2es = [pythonPath || "python3", "batch/import_es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
             preProcessedHTML += cmdImport2es.join(' ') + '\n';
-            cmdImport2repo = [pythonPath, "import2repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
+            cmdImport2repo = [pythonPath || "python3", "batch/import_repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
             preProcessedHTML += cmdImport2repo.join(' ') + '\n';
             codeForImport.innerHTML += preProcessedHTML;
             hljs.highlightAll();

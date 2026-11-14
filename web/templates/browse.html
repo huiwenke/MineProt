@@ -44,7 +44,9 @@
                         {% endif %}
                         {% endif %}
                         <span aria-hidden="true" style="margin:0 6px;">|</span>
+                        {% if not read_only %}
                         <button type="button" class='btn btn-refresh' title='Refresh cache' data-refresh-url="{{ refresh_url }}" onclick="clearCache({{ repo|tojson|forceescape }}, this)">⟳ Refresh</button>
+                        {% endif %}
                     </form>
                     <br>
 <table class="data-table"><thead><tr align="left"><th>Name</th><th>Structure</th><th>pLDDT</th><th>MSA</th><th>Annotation</th></tr></thead><tbody>

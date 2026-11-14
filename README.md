@@ -28,6 +28,12 @@ bash toolkit/setup.sh -c docker -p 8080 -d ./data
 
 After setup completes, open http://localhost:8080. Setup builds the images, starts Elasticsearch, and checks service health before exiting. Repository files and Elasticsearch data are stored under `./data/repo/` and `./data/es/`.
 
+For public hosting, add `--production`: the public Web becomes read-only and
+management is available only at `http://127.0.0.1:8081` on the server. Toolkit
+scripts default to this management URL. Use `-a PORT` for a different management
+port, and `--development` to restore writable public access. Setup remembers
+the mode. See the [production deployment guide](web/DEPLOYMENT.md#production-public-read-only-access-and-local-management).
+
 Podman with a working Compose provider is also supported:
 
 ```bash
@@ -40,25 +46,27 @@ Setup retains supported options in `.env` for subsequent runs. Elasticsearch and
 
 ### Import data
 
-Above all, please get your python3 ready and install dependencies:
+Use Python 3.12+ and install the toolkit package from the project root:
 
 ```bash
-cd toolkit/scripts
-pip3 install -r requirements.txt
+python -m pip install -e ./toolkit
 ```
 
 Then, use scripts in MineProt toolkit to import your data. For example, if you employ `colabfold_search` and `colabfold_batch` with parameters `--zip` `--amber` to generate large scale structure predictions, run the command below to import:
 
 ```bash
-colabfold/import.sh /path/to/your/results --repo demo \
+bash toolkit/scripts/ai/colabfold/import.sh /path/to/your/results --repo demo \
 --name-mode 1 \
 --zip \
 --relax \
---python /usr/bin/python3 \
---url http://localhost
+--python python3 \
+--url http://127.0.0.1:8081
 ```
 
 You will finally find the protein repository **demo** at the homepage of your MineProt site, where all proteins have been annotated with UniProt, GO and InterPro, and their structures are visible online.
+
+Run this on the production server or through an SSH tunnel. In development mode,
+set `--url` to the writable Web address, for example `http://127.0.0.1:8080`.
 
 > The **import page** is designed to generate commands for importing, especially useful when you are new to MineProt scripting.
 
@@ -123,7 +131,7 @@ See the [Python deployment guide](web/DEPLOYMENT.md) for startup commands and en
 
 ### Toolkit dependencies
 
-Most bundled scripts require Python 3.6+. The batch repository importer requires Python 3.8+ and Requests; `-m 4` additionally uses `foldcomp==1.0.0` to compress PDBs into FCZ. `-z` selects server-side gzip storage and cannot be combined with `-m 4`. See the [batch import guide](web/DEPLOYMENT.md#batch-repository-imports) for format checks, batching and examples. Operations are more convenient with a Bash shell.
+The toolkit is a Python 3.12+ package configured in `toolkit/pyproject.toml`. Scripts are grouped into `ai/`, `batch/` and `misc/`, with a standalone `import_single.py` entrypoint; shared implementations live in `toolkit/src/mineprot_toolkit/`. See the [toolkit guide and migration table](toolkit/README.md) for installation, commands and development checks. The batch repository importer uses Requests; `-m 4` additionally uses `foldcomp==1.0.0` to compress PDBs into FCZ. `-z` selects server-side gzip storage and cannot be combined with `-m 4`. See the [batch import guide](web/DEPLOYMENT.md#batch-repository-imports) for format checks, batching and examples. Operations are more convenient with a Bash shell.
 
 Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
 

@@ -1,5 +1,5 @@
 services:
-  web:
+  web: &web
     image: localhost/mineprot_web:latest
     container_name: MineWeb
     restart: always
@@ -12,6 +12,7 @@ services:
     ports:
       - "${MP_PORT:-80}:8000"
     environment:
+      MP_READ_ONLY: "${MP_READ_ONLY:-false}"
       MP_REPO_PATH: /var/www/data
       MP_CACHE_PATH: ${MP_CACHE_PATH:-/tmp/mineprot}
       MP_ELASTICSEARCH: http://elasticsearch:9200
@@ -21,10 +22,27 @@ services:
       MP_FOLDCOMP_TIMEOUT: "${MP_FOLDCOMP_TIMEOUT:-300}"
     volumes:
       - ./web:/app/web:ro
-      - ${MP_DATA:-./data}/repo:/var/www/data
+      - ${MP_DATA:-./data}/repo:/var/www/data:${MP_REPO_ACCESS:-rw}
     depends_on:
       es:
         condition: service_healthy
+  admin:
+    <<: *web
+    container_name: MineAdmin
+    profiles: [production]
+    shm_size: "64m"
+    ports:
+      - "127.0.0.1:${MP_ADMIN_PORT:-8081}:8000"
+    environment:
+      MP_READ_ONLY: "false"
+      MP_REPO_PATH: /var/www/data
+      MP_CACHE_PATH: /tmp/mineprot
+      MP_ELASTICSEARCH: http://elasticsearch:9200
+      MP_MAX_BODY_BYTES: "104857600"
+      MP_FOLDCOMP_TIMEOUT: "${MP_FOLDCOMP_TIMEOUT:-300}"
+    volumes:
+      - ./web:/app/web:ro
+      - ${MP_DATA:-./data}/repo:/var/www/data:rw
   es:
     image: localhost/mineprot_es:latest
     container_name: elasticsearch

@@ -69,6 +69,60 @@ Existing repository files must be readable, and writable for imports. It does
 not recursively change data ownership. Elasticsearch keeps its original image
 user and its existing directory permission requirements.
 
+## Production: public read-only access and local management
+
+```sh
+bash toolkit/setup.sh -c docker -p 8080 -d ./data --production
+```
+
+Production starts a read-only `web` service and a writable `admin` service
+bound to `127.0.0.1:8081` on the deployment server. Use `-a PORT` to change
+the management port. The mode and ports are saved in `.env`; subsequent setup
+runs retain them. `--development` restores the original writable public Web
+and removes the separate management container, without removing its repository
+or Elasticsearch data.
+
+Public Web rejects repository imports (including batch/check and legacy aliases),
+Elasticsearch add/delete operations, the import page, and explicit cache
+clear/rebuild requests with HTTP 403, regardless of HTTP method or forwarded
+client IP. Its repository mount is read-only. Search, browsing, downloads,
+conversions and Salign remain available; their temporary cache stays writable.
+Elasticsearch has no published host port. Do not publish the management service
+through a public reverse proxy.
+
+Toolkit scripts default to `http://127.0.0.1:8081`, including conversion helpers
+and the interactive importer. Run them on the deployment server, or create an
+SSH tunnel from your workstation:
+
+```sh
+ssh -N -L 8081:127.0.0.1:8081 user@server
+```
+
+For a custom management port or a development deployment, supply `--url`
+explicitly. Batch import example:
+
+```sh
+python toolkit/scripts/batch/import_repo.py -i /path/to/models -n proteins \
+  --url http://127.0.0.1:8081/api/import2repo/
+```
+
+Web and management use separate temporary caches. Repository directory changes
+invalidate browse caches immediately; index-only updates and replacement of
+existing files appear within five minutes. Refreshing the management cache
+does not clear the public service's cache.
+
+Setup manages `MP_READ_ONLY=true`, `MP_REPO_ACCESS=ro` and
+`COMPOSE_PROFILES=production` in production, with the opposite settings in
+development. Without containers, set `MP_READ_ONLY=true` for the public process
+and run a separate writable process bound to `127.0.0.1` for management. Also
+enforce read-only repository permissions for the public process.
+
+Regression checks (no running Elasticsearch or container engine required):
+
+```sh
+PYTHONPATH=web python -m unittest discover -s web/tests -v
+```
+
 ## Without Docker
 
 Use Python 3.12, install `web/requirements.txt` (including Foldcomp), and make
@@ -92,16 +146,17 @@ completed results remain downloadable. Submit a new query to retry a failed job.
 
 ## Batch repository imports
 
-Upgrade the Web service before using the new `toolkit/scripts/import2repo.py`.
-The script requires Python 3.8+ and Requests; mode 4 also requires
-`pip install foldcomp==1.0.0`. Install the toolkit requirements for the full
-toolkit. Example commands from the project root:
+Upgrade the Web service before using the new `toolkit/scripts/batch/import_repo.py`.
+The toolkit requires Python 3.12+. Install it with
+`python -m pip install -e ./toolkit` from the project root; dependencies,
+including Requests and Foldcomp 1.0.0, are declared in its `pyproject.toml`.
+See the [toolkit guide](../toolkit/README.md) for grouped commands and migration. Example commands from the project root:
 
 ```sh
 # Store ordinary local PDBs as gzip on the server.
-python toolkit/scripts/import2repo.py -i /path/to/models -n proteins -m 3 -z
+python toolkit/scripts/batch/import_repo.py -i /path/to/models -n proteins -m 3 -z
 # Compress single-chain local PDBs to FCZ and store FCZ directly.
-python toolkit/scripts/import2repo.py -i /path/to/models -n proteins -m 4
+python toolkit/scripts/batch/import_repo.py -i /path/to/models -n proteins -m 4
 ```
 
 Use `--url http://HOST/api/import2repo/` for a remote server. Modes 0..3 retain

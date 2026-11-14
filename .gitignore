@@ -1,0 +1,16 @@
+data/
+.env
+app/bin/foldcomp.tar.gz
+app/bin/maxit.tar.gz
+
+# Python development and packaging artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/

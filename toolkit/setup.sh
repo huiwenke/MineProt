@@ -5,6 +5,8 @@ MP_PORT=80
 MP_DATA=./data
 MP_CE=docker
 MP_CACHE_SHM_MB=0
+MP_MODE=development
+MP_ADMIN_PORT=8081
 
 # Load only the supported setup options as data, without executing .env.
 # Priority: explicit command-line options > existing .env > defaults above.
@@ -12,7 +14,7 @@ if [ -f .env ]; then
     single_quoted="^'([^']*)'[[:space:]]*(#.*)?$"
     double_quoted='^"([^"]*)"[[:space:]]*(#.*)?$'
     while IFS= read -r line || [ -n "$line" ]; do
-        if [[ "$line" =~ ^[[:space:]]*(MP_PORT|MP_DATA|MP_CE|MP_CACHE_SHM_MB)[[:space:]]*=(.*)$ ]]; then
+        if [[ "$line" =~ ^[[:space:]]*(MP_PORT|MP_DATA|MP_CE|MP_CACHE_SHM_MB|MP_MODE|MP_ADMIN_PORT)[[:space:]]*=(.*)$ ]]; then
             key=${BASH_REMATCH[1]}
             value=${BASH_REMATCH[2]}
             value=${value#"${value%%[![:space:]]*}"}
@@ -31,22 +33,33 @@ if [ -f .env ]; then
                 MP_DATA) MP_DATA=$value ;;
                 MP_CE) MP_CE=$value ;;
                 MP_CACHE_SHM_MB) MP_CACHE_SHM_MB=$value ;;
+                MP_MODE) MP_MODE=$value ;;
+                MP_ADMIN_PORT) MP_ADMIN_PORT=$value ;;
             esac
         fi
     done < .env
 fi
 
 usage() {
-    echo "Usage: toolkit/setup.sh [-d data-directory] [-p port] [-c container-engine] [-s shm-MiB]"
+    echo "Usage: toolkit/setup.sh [-d data-directory] [-p port] [-c container-engine] [-s shm-MiB] [-a admin-port] [--production|--development]"
     echo "-s: cache in /dev/shm with this size in MiB; 0 (default) uses /tmp."
+    echo "--production: public read-only Web plus management on 127.0.0.1 (port 8081 by default)."
+    echo "--development: restore the original writable Web; stop the management service."
+    echo "-a: local management port (default: 8081)."
     echo "Unspecified options use .env values, then defaults: port 80, ./data, docker."
 }
-while getopts ':d:p:c:s:h' option; do
+while getopts ':d:p:c:s:a:h-:' option; do
     case "$option" in
         d) MP_DATA=$OPTARG ;;
         p) MP_PORT=$OPTARG ;;
         c) MP_CE=$OPTARG ;;
         s) MP_CACHE_SHM_MB=$OPTARG ;;
+        a) MP_ADMIN_PORT=$OPTARG ;;
+        -) case "$OPTARG" in
+               production) MP_MODE=production ;;
+               development) MP_MODE=development ;;
+               *) usage >&2; exit 1 ;;
+           esac ;;
         h) usage; exit 0 ;;
         *) usage >&2; exit 1 ;;
     esac
@@ -56,6 +69,28 @@ if [ "$#" -ne 0 ] || ! [[ "$MP_PORT" =~ ^[0-9]+$ ]] || [ "$MP_PORT" -lt 1 ] || [
     echo 'Error: provide a port between 1 and 65535.' >&2
     exit 1
 fi
+if [[ "$MP_MODE" != production && "$MP_MODE" != development ]]; then
+    echo 'Error: MP_MODE must be production or development.' >&2
+    exit 1
+fi
+if ! [[ "$MP_ADMIN_PORT" =~ ^[0-9]+$ ]] || [ "$MP_ADMIN_PORT" -lt 1 ] || [ "$MP_ADMIN_PORT" -gt 65535 ]; then
+    echo 'Error: provide an admin port between 1 and 65535.' >&2
+    exit 1
+fi
+MP_READ_ONLY=false
+MP_REPO_ACCESS=rw
+COMPOSE_PROFILES=
+if [ "$MP_MODE" = production ]; then
+    if [ "$((10#$MP_PORT))" -eq "$((10#$MP_ADMIN_PORT))" ]; then
+        echo 'Error: public and admin ports must be different in production.' >&2
+        exit 1
+    fi
+    MP_READ_ONLY=true
+    MP_REPO_ACCESS=ro
+    COMPOSE_PROFILES=production
+fi
+# Keep this invocation consistent even if the calling shell sets Compose variables.
+export MP_READ_ONLY MP_REPO_ACCESS COMPOSE_PROFILES MP_ADMIN_PORT
 if ! [[ "$MP_CACHE_SHM_MB" =~ ^(0|[1-9][0-9]{0,6})$ ]]; then
     echo 'Error: -s must be an integer number of MiB (0 uses /tmp).' >&2
     exit 1
@@ -159,7 +194,7 @@ fi
 # Update only managed settings; keep any custom timeout/concurrency variables.
 if [ -f .env ]; then
     env_tmp=$(mktemp .env.XXXXXX)
-    sed '/^MP_PORT=/d; /^MP_DATA=/d; /^MP_CE=/d; /^MP_UID=/d; /^MP_GID=/d; /^MP_CACHE_SHM_MB=/d; /^MP_CACHE_PATH=/d; /^MP_SHM_SIZE_MB=/d' .env > "$env_tmp"
+    sed '/^MP_PORT=/d; /^MP_DATA=/d; /^MP_CE=/d; /^MP_UID=/d; /^MP_GID=/d; /^MP_CACHE_SHM_MB=/d; /^MP_CACHE_PATH=/d; /^MP_SHM_SIZE_MB=/d; /^MP_MODE=/d; /^MP_ADMIN_PORT=/d; /^MP_READ_ONLY=/d; /^MP_REPO_ACCESS=/d; /^COMPOSE_PROFILES=/d' .env > "$env_tmp"
     cat "$env_tmp" > .env
     rm -f -- "$env_tmp"
 fi
@@ -173,6 +208,11 @@ MP_GID=$(id -g)
 MP_CACHE_SHM_MB=$MP_CACHE_SHM_MB
 MP_CACHE_PATH=$MP_CACHE_PATH
 MP_SHM_SIZE_MB=$MP_SHM_SIZE_MB
+MP_MODE=$MP_MODE
+MP_ADMIN_PORT=$MP_ADMIN_PORT
+MP_READ_ONLY=$MP_READ_ONLY
+MP_REPO_ACCESS=$MP_REPO_ACCESS
+COMPOSE_PROFILES=$COMPOSE_PROFILES
 ENV
 
 # Detached mode applies to container execution, not image building or waiting
@@ -227,15 +267,29 @@ until es_status=$("$MP_CE" exec elasticsearch curl --fail --silent --max-time 5 
     sleep 2
 done
 echo "Elasticsearch ready ($es_status). Starting Web in detached mode..."
-"${compose[@]}" up -d --no-build --no-deps --remove-orphans web </dev/null
-echo 'Waiting up to 180 seconds for Web...'
-startup_deadline=$((SECONDS + 180))
-until "$MP_CE" exec MineWeb python -c \
-        "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)" \
-        >/dev/null 2>&1; do
-    if [ "$SECONDS" -ge "$startup_deadline" ]; then
-        startup_failed MineWeb
-    fi
-    sleep 2
+services=(web)
+containers=(MineWeb)
+if [ "$MP_MODE" = production ]; then
+    services+=(admin)
+    containers+=(MineAdmin)
+else
+    # Profiled services are not treated as orphans when switching modes.
+    "${compose[@]}" --profile production rm -sf admin </dev/null
+fi
+"${compose[@]}" up -d --no-build --no-deps --remove-orphans "${services[@]}" </dev/null
+for container in "${containers[@]}"; do
+    echo "Waiting up to 180 seconds for $container..."
+    startup_deadline=$((SECONDS + 180))
+    until "$MP_CE" exec "$container" python -c \
+            "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)" \
+            >/dev/null 2>&1; do
+        if [ "$SECONDS" -ge "$startup_deadline" ]; then
+            startup_failed "$container"
+        fi
+        sleep 2
+    done
 done
+if [ "$MP_MODE" = production ]; then
+    echo "Production: public Web is read-only; management URL: http://127.0.0.1:$MP_ADMIN_PORT"
+fi
 echo "Setup finished. Service logs: ${compose[*]} logs -f"

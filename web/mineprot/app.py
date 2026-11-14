@@ -33,6 +33,30 @@ from .structures import cif_to_pdb, pdb_to_alphacif, viewer_cif
 logger = logging.getLogger("mineprot")
 
 
+class WriteAccessMiddleware:
+    """Reject management requests before buffering uploads, regardless of method."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and settings.READ_ONLY:
+            path = scope["path"].rstrip("/")
+            parts = path.split("/")
+            management = (
+                path == "/import.php"
+                or path == "/api/import2repo"
+                or path.startswith("/api/import2repo/")
+                or path in ("/api/cache/clear.php", "/api/cache/update.php")
+                or (path.startswith("/api/es/")
+                    and (len(parts) < 5 or parts[4] not in ("get", "search")))
+            )
+            if management:
+                return await PlainTextResponse(
+                    "Read-only service: use the local management endpoint.", status_code=403
+                )(scope, receive, send)
+        await self.app(scope, receive, send)
+
+
 class BodyLimitMiddleware:
     """Bound both declared and streamed bodies before handlers can write files."""
     def __init__(self, app):
@@ -88,6 +112,7 @@ async def lifespan(app):
 app = FastAPI(title="MineProt", lifespan=lifespan, docs_url=None, redoc_url=None)
 app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=6)
 app.add_middleware(BodyLimitMiddleware)
+app.add_middleware(WriteAccessMiddleware)
 app.mount("/assets", StaticFiles(directory=settings.WEB_ROOT / "assets"), name="assets")
 templates = Jinja2Templates(directory=settings.WEB_ROOT / "templates")
 templates.env.filters["b64"] = lambda value: base64.b64encode(str(value).encode()).decode()
@@ -150,7 +175,8 @@ async def context(request):
 
 
 def render(request, name, values, headers=None):
-    return templates.TemplateResponse(request=request, name=name, context=values, headers=headers)
+    return templates.TemplateResponse(request=request, name=name,
+                                      context={**values, "read_only": settings.READ_ONLY}, headers=headers)
 
 
 @app.api_route("/", methods=["GET", "POST"])

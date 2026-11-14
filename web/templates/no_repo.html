@@ -2,6 +2,8 @@
     <div style="display: block; width: 100%;">
         <h1 style="margin-bottom: 8px;" class="text-primary">No protein repositories found</h1>
         <br>
+        {% if not read_only %}
         <a class='btn btn-import' href="import.php"><h1>Import</h1></a>
+        {% endif %}
     </div>
 </section>
