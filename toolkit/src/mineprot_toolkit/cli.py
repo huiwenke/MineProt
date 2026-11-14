@@ -10,6 +10,7 @@ COMMANDS = {
     "ai": {
         "alphafold2": {"transform": "ai.alphafold2.transform"},
         "alphafold3": {
+            "transform": "ai.alphafold3.transform",
             "prepare-complex": "ai.alphafold3.prepare_complex",
             "prepare-pair": "ai.alphafold3.prepare_pair",
             "select-max": "ai.alphafold3.select_max",

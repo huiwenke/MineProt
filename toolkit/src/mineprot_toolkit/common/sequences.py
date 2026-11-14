@@ -1,17 +1,22 @@
-def pdb2seq(pdb_file):
-    """Convert a PDB file to a FASTA sequence"""
-    seq = ""
-    id = 0
-    with open(pdb_file, "r") as f:
-        for line in f:
-            if line.startswith("ATOM"):
-                residue = line[17:20].strip()
-                if id != int(line[22:26].strip()):
-                    id = int(line[22:26].strip())
-                    seq += amino_acid_code(residue)
+from .structures import load_structure, protein_residues
 
-    # return the sequence as a FASTA string
-    return seq
+
+def structure_sequence(structure):
+    """Join amino-acid residues across first-model chains in structure order."""
+    import gemmi
+
+    residues = protein_residues(structure)
+    if not residues:
+        raise ValueError("No amino-acid residues found in the structure")
+    return "".join(
+        gemmi.find_tabulated_residue(residue.name).one_letter_code.upper() for residue in residues
+    )
+
+
+def pdb2seq(pdb_file):
+    """Read a protein sequence, also accepting CIF and FCZ structures."""
+    structure, _ = load_structure(pdb_file)
+    return structure_sequence(structure)
 
 
 def amino_acid_code(residue):

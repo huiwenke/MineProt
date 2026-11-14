@@ -26,7 +26,7 @@ toolkit/
 ├── scripts/                        # Source-checkout entrypoints
 │   ├── ai/
 │   │   ├── alphafold2/              # Transform and import pipeline
-│   │   ├── alphafold3/              # Complex/pair preparation, ipTM selection
+│   │   ├── alphafold3/              # Local transform, complex/pair preparation, ipTM selection
 │   │   └── colabfold/               # Transform and import pipeline
 │   ├── batch/                      # import_es, import_repo, prepare_beacon
 │   ├── import_single.py            # Standalone interactive importer
@@ -82,7 +82,55 @@ arguments, stop when a step fails and clean their temporary directory on exit.
 Logs remain in the temporary-files directory for diagnosis. `--scripts-dir`
 accepts the categorized `toolkit/scripts` directory if an override is needed.
 
-The default server URL remains **http://127.0.0.1:8081**, the production
+### Index repositories containing CIF or FCZ
+
+```bash
+mineprot-toolkit batch import-es -i /path/to/repo -n demo
+```
+
+`import-es` scans PDB, CIF/mmCIF and FCZ files, including gzip-compressed
+PDB/CIF files. JSON and A3M companions may also be gzip-compressed. One document
+is written per protein name; if several formats share a name, CIF is preferred,
+then PDB, then FCZ (plain files before gzip within each extension).
+
+Sequences are read from amino-acid coordinates across all chains in the first
+model. Scores prefer the companion JSON's pLDDT, including AlphaFold3
+`atom_plddts`. Without JSON confidence values, scores come from explicit
+ModelCIF pLDDT, then C-alpha B-factors (heavy-atom mean when C-alpha is missing).
+Structures can therefore be imported without JSON or A3M files. With `-a`,
+missing A3M simply skips UniProt annotation and retains the protein name as a
+search keyword. Invalid structures/confidence values are reported as failures.
+FCZ decoding runs locally in a separate process; source files are not rewritten.
+An input directory with no supported structures fails before any index reset.
+
+### AlphaFold3 local transformation
+
+```bash
+mineprot-toolkit ai alphafold3 transform -i /path/to/result.zip -o /path/to/output
+python toolkit/scripts/ai/alphafold3/transform.py -i /path/to/result -o /path/to/output
+mineprot-toolkit ai alphafold3 transform -i /path/to/results_parent -o /path/to/output
+```
+
+Input is detected automatically. A ZIP is extracted temporarily and processed as
+one result directory (a single enclosing directory is also supported). A result
+directory is processed directly; a parent directory processes each immediate
+result subdirectory, continuing after errors and returning a nonzero exit code
+if any failed. ZIP input represents one result directory, rather than a batch.
+
+- With an `msas/` directory, select `*_model_0.cif` and merge the matching
+  `*_full_data_0.json` and `*_summary_confidences_0.json`.
+- Without `msas/`, select `*_model.cif` and merge the matching
+  `*_confidences.json` and `*_summary_confidences.json`.
+
+Both layouts produce `<prefix>.cif` and `<prefix>.json`. CIF bytes are preserved;
+JSON is merged at the top level with summary values taking precedence. Fields
+are retained without renaming or rounding; `msas/` only selects the layout and
+is not exported. Both confidence files must exist and contain JSON objects.
+Existing output pairs are skipped unless `-f` is supplied; partial pairs and
+duplicate names across input subdirectories are reported as errors. This command
+runs locally and has no `--url` or conversion-service dependency.
+
+The default server URL for networked commands remains **http://127.0.0.1:8081**, the production
 management endpoint. Supply `--url` for a different port or a development Web
 service. The batch repository command expects the full endpoint, e.g.
 `--url http://127.0.0.1:8080/api/import2repo/`; AI import pipelines and the
