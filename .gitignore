@@ -14,4 +14,3 @@ build/
 dist/
 .coverage
 htmlcov/
-toolkit/tests/
