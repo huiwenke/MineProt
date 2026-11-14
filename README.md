@@ -13,6 +13,10 @@ By the aid of MineProt toolkit, you can:
 - Visualize, browse or search your data via user-friendly online interface
 - Utilize plugins to extend the functionality of your server
 
+Detailed guides live in [docs/](docs/README.md):
+[deployment](docs/Deployment-manual.md), [toolkit](docs/Toolkit-manual.md) and
+[API reference](docs/API-manual.md).
+
 ## Quick start
 
 ### Deployment
@@ -32,7 +36,7 @@ For public hosting, add `--production`: the public Web becomes read-only and
 management is available only at `http://127.0.0.1:8081` on the server. Toolkit
 scripts default to this management URL. Use `-a PORT` for a different management
 port, and `--development` to restore writable public access. Setup remembers
-the mode. See the [production deployment guide](web/DEPLOYMENT.md#production-public-read-only-access-and-local-management).
+the mode. See the [production deployment guide](docs/Deployment-manual.md#production-public-read-only-access-and-local-management).
 
 Podman with a working Compose provider is also supported:
 
@@ -42,7 +46,7 @@ bash toolkit/setup.sh -c podman -p 8080 -d ./data
 
 Cache defaults to `/tmp/mineprot` inside the Web container. Add `-s 1024` to use a 1024 MiB shared-memory cache, subject to host memory and shared-memory limits. Cached files are temporary and are not preserved when the container is recreated.
 
-Setup retains supported options in `.env` for subsequent runs. Elasticsearch and the bundled IK plugin remain at **7.12.1**. See the [Python deployment guide](web/DEPLOYMENT.md) for configuration, permissions, updates, and deployment without containers.
+Setup retains supported options in `.env` for subsequent runs. Elasticsearch and the bundled IK plugin remain at **7.12.1**. See the [deployment guide](docs/Deployment-manual.md) for configuration, permissions, updates, and deployment without containers.
 
 ### Import data
 
@@ -52,18 +56,21 @@ Use Python 3.12+ and install the toolkit package from the project root:
 python -m pip install -e ./toolkit
 ```
 
-Then, use scripts in MineProt toolkit to import your data. For example, if you employ `colabfold_search` and `colabfold_batch` with parameters `--zip` `--amber` to generate large scale structure predictions, run the command below to import:
+For ColabFold monomer results stored as ZIP archives, use the following pipeline.
+Add `--relax` only when rank-1 relaxed PDBs are present:
 
 ```bash
 bash toolkit/scripts/ai/colabfold/import.sh /path/to/your/results --repo demo \
---name-mode 1 \
+--name-mode 0 \
 --zip \
---relax \
---python python3 \
+--python "$(command -v python)" \
 --url http://127.0.0.1:8081
 ```
 
-You will finally find the protein repository **demo** at the homepage of your MineProt site, where all proteins have been annotated with UniProt, GO and InterPro, and their structures are visible online.
+The pipeline prepares rank-1 models, indexes their metadata and uploads their
+files into repository **demo**. UniProt/GO/InterPro annotation is attempted using
+MSA identifiers; availability depends on the input and external lookups. For
+AlphaFold3 complexes or a single structure, see the [toolkit manual](docs/Toolkit-manual.md).
 
 Run this on the production server or through an SSH tunnel. In development mode,
 set `--url` to the writable Web address, for example `http://127.0.0.1:8080`.
@@ -86,7 +93,8 @@ MineProt interface provides final users with following functions:
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_browse.png"></div>
 
-> To speed up response of the **browse page**, MineProt automatically generates cache for each repository on first access. Clicking the **refresh** button will regenerate the cache.
+> To speed up response of the **browse page**, MineProt automatically generates cache for each repository on first access. On a writable service, **Refresh** regenerates the cache. Production public Web
+> blocks explicit cache-management requests and uses automatic cache expiration.
 
 - **Salign:** Structure search engine powered by [US-align](https://zhanggroup.org/US-align/).
 
@@ -101,13 +109,8 @@ For server administrators, MineProt interface can generate scripts for data impo
 
 ### Browser compatibility
 
-We have tested this project on the following browsers:
-
-| Chrome | Firefox | Edge          | Opera         | Safari |
-| ------ | ------- | ------------- | ------------- | ------ |
-| 67.0+  | 52.9+   | 105.0.1343.27 | 90.0.4480.107 | 13.04  |
-
-> This project **does not** support any version of Internet Explorer.
+Use a current Chrome, Edge, Firefox or Safari release with WebGL enabled for
+the vendored PDBe Mol* 3.12.0 structure viewers. Internet Explorer is unsupported.
 
 ### Screen compatibility
 
@@ -127,15 +130,16 @@ For deployment without containers, prepare:
 
 The Python service serves pages, static assets, repository downloads, and legacy API URLs directly. A reverse proxy can provide TLS and access control. The current Compose deployment does not use PHP or Nginx containers.
 
-See the [Python deployment guide](web/DEPLOYMENT.md) for startup commands and environment variables.
+See the [deployment guide](docs/Deployment-manual.md) for startup commands and environment variables.
 
 ### Toolkit dependencies
 
-The toolkit is a Python 3.12+ package configured in `toolkit/pyproject.toml`. Scripts are grouped into `ai/`, `batch/` and `misc/`, with a standalone `import_single.py` entrypoint; shared implementations live in `toolkit/src/mineprot_toolkit/`. See the [toolkit guide and migration table](toolkit/README.md) for installation, commands and development checks. The batch repository importer uses Requests; `-m 4` additionally uses `foldcomp==1.0.0` to compress PDBs into FCZ. `-z` selects server-side gzip storage and cannot be combined with `-m 4`. See the [batch import guide](web/DEPLOYMENT.md#batch-repository-imports) for format checks, batching and examples. Operations are more convenient with a Bash shell.
+The toolkit is a Python 3.12+ package configured in `toolkit/pyproject.toml`. Scripts are grouped into `ai/`, `batch/` and `misc/`, with a standalone `import_single.py` entrypoint; shared implementations live in `toolkit/src/mineprot_toolkit/`. See the [toolkit manual](docs/Toolkit-manual.md) for installation and usage. The batch repository importer uses Requests; `-m 4` additionally uses `foldcomp==1.0.0` to compress PDBs into FCZ. `-z` selects server-side gzip storage and cannot be combined with `-m 4`. See the [batch import guide](docs/Toolkit-manual.md#batchimport_repopy) for format checks, batching and examples. Operations are more convenient with a Bash shell.
 
 Browser plugins require the [TamperMonkey plugin](https://www.tampermonkey.net/).
 
-See [Toolkit manual](https://github.com/huiwenke/MineProt/wiki/Toolkit-manual) for more information.
+See the [toolkit manual](docs/Toolkit-manual.md) for usage and
+[toolkit/README.md](toolkit/README.md) for package development checks.
 
 ## Citing this project
 ```bibtex
