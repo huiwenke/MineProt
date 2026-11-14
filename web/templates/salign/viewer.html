@@ -3,35 +3,19 @@
     margin: 0 0 0 0;
 }
 #{{ Salign_Result_Viewer }} {
-    float: center;
     width: 100%;
     height: 50vh;
     position: relative;
     z-index: 31;
 }
+#{{ Salign_Result_Viewer }}:has(.msp-layout-expanded) {
+    z-index: 100;
+}
 </style>
 <div id="{{ Salign_Result_Viewer }}"></div>
 <script>
-(() => {
-    const viewerInstance = new PDBeMolstarPlugin();
-    const syncViewerTheme = MineProtMolstarTheme.register(viewerInstance);
-    const options = {
-        alphafoldView: true,
-        bgColor: MineProtMolstarTheme.backgroundColor(),
-        customData: {
-            url: {{ Salign_Query_Path|tojson }},
-            format: "pdb"
-        }
-    }
-
-    const viewerContainer = document.getElementById({{ Salign_Result_Viewer|tojson }});
-
-    viewerInstance.render(viewerContainer, options);
-    viewerInstance.visual.update({
-        alphafoldView: true,
-        bgColor: MineProtMolstarTheme.backgroundColor(),
-        customData: {url: {{ Salign_Result_Path|tojson }}, format: "cif"}
-    }, false);
-    syncViewerTheme();
-})();
+MineProtSalignViewer.render(document.getElementById({{ Salign_Result_Viewer|tojson }}), {
+    queryUrl: {{ Salign_Query_Path|tojson }},
+    targetUrl: {{ Salign_Result_Path|tojson }}
+});
 </script>

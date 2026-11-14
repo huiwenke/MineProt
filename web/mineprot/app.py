@@ -498,7 +498,7 @@ def decorate_salign(hit):
     hit["_view"] = {
         "Salign_Name": name, "Salign_Repo": repo,
         "Salign_Result_Viewer": "MP_" + hashlib.md5(prefix.encode()).hexdigest(),
-        "Salign_Result_Path": "/api/file/" + quote(repo, safe="") + "/" + quote(name, safe="") + ".cif",
+        "Salign_Result_Path": "/api/file/" + quote(repo, safe="") + "/" + quote(name, safe="") + ".cif?viewer=modern",
         "Salign_Query_Path": "/api/cache/get.php?data_url=" + token(prefix + ".pdb"),
         "PDB1_Path": token(hit["query"]), "PDB2_Path": token(hit["target"]),
         "Salign_Result_Data_URLs": {
@@ -538,8 +538,8 @@ def salign_detail(request: Request, pdb1: str, pdb2: str):
     with tempfile.TemporaryDirectory(prefix="MP_SALIGN_DETAIL_") as temporary:
         restored = Path(temporary) / "hit.pdb"
         restored.write_bytes(read_file(repo, name + ".pdb"))
-        result = subprocess.run([settings.USALIGN, str(query), str(restored), "-mm", "7", "-afp",
-                                 "-hinge", str(hinge), "-fast"], capture_output=True, text=True,
+        result = subprocess.run([settings.USALIGN, str(query), str(restored),
+                                 *jobs.alignment_options(query, restored, hinge)], capture_output=True, text=True,
                                 check=True, timeout=settings.JOB_TIMEOUT)
     return render(request, "salign/detail.html", {"Details": result.stdout})
 

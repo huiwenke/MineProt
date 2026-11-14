@@ -12,6 +12,8 @@ import traceback
 import uuid
 from pathlib import Path
 
+import gemmi
+
 from . import settings
 from .storage import atomic_write, component, inside, read_file
 from .structures import cif_to_pdb
@@ -31,6 +33,28 @@ def job_hinge(directory: Path) -> int:
     options = directory / "options.json"
     # Jobs created before this option was exposed always used 9.
     return json.loads(options.read_text())["hinge"] if options.is_file() else 9
+
+
+def is_complex(path: Path) -> bool:
+    """Match US-align's first-model policy, counting polymer chains only."""
+    structure = gemmi.read_pdb(str(path))
+    if not len(structure):
+        raise ValueError(f"No models found in {path.name}")
+    structure.setup_entities()
+    chains = {chain.name for chain in structure[0]
+              if any(residue.entity_type == gemmi.EntityType.Polymer and len(residue)
+                     for residue in chain)}
+    return len(chains) > 1
+
+
+def alignment_options(query: Path, target: Path, hinge: int,
+                      *, query_is_complex: bool | None = None) -> list[str]:
+    """Use oligomer alignment whenever either partner has multiple polymer chains."""
+    if query_is_complex is None:
+        query_is_complex = is_complex(query)
+    if query_is_complex or is_complex(target):
+        return ["-mm", "1", "-fast"]
+    return ["-mm", "7", "-afp", "-hinge", str(hinge), "-fast"]
 
 
 def submit(structure: str, targets: list[dict], hinge: int = 0) -> str:
@@ -84,6 +108,8 @@ def worker(rid: str) -> None:
         state(directory, "running")
         targets = json.loads((directory / "targets.json").read_text())
         hinge = job_hinge(directory)
+        query = directory / "query.pdb"
+        query_is_complex = is_complex(query)
         failed = 0
         with (directory / "query.out").open("w") as output:
             for index, target in enumerate(targets, 1):
@@ -95,8 +121,9 @@ def worker(rid: str) -> None:
                 try:
                     atomic_write(target_path, read_file(repo, name + ".pdb"))
                     result = subprocess.run([
-                        settings.USALIGN, str(directory / "query.pdb"), str(target_path),
-                        "-mm", "7", "-afp", "-hinge", str(hinge), "-fast", "-outfmt", "2",
+                        settings.USALIGN, str(query), str(target_path),
+                        *alignment_options(query, target_path, hinge,
+                                           query_is_complex=query_is_complex), "-outfmt", "2",
                         "-o", str(prefix)], capture_output=True, text=True,
                         timeout=settings.JOB_TIMEOUT, check=True)
                     output.write(result.stdout)

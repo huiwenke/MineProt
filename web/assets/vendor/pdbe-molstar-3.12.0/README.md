@@ -1,7 +1,7 @@
 # PDBe Molstar 3.12.0
 
-Unmodified browser assets for the search page. Salign uses the separate 1.2.1
-bundle. No npm install or local build is needed.
+Unmodified browser assets for search, PAE and Salign result pages.
+No npm install or local build is needed.
 
 Source: https://registry.npmjs.org/pdbe-molstar/-/pdbe-molstar-3.12.0.tgz
 

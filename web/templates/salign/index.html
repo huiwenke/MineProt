@@ -12,10 +12,10 @@
     <script defer src="/assets/js/salign-input.js"></script>
 </head>
 
-<body>
+<body class="salign-search-page">
     {% include 'salign/header.html' %}
     <main style="min-height: 100vh;">
-        <section class="main_salign">
+        <section class="main_salign salign-search-layout">
             <div style="display: block; width: 100%;">
                 <form id="salign-form" action="../api/salign/index.php" method="post">
                     <br><br>
@@ -51,42 +51,36 @@
                     {% include 'repos.html' %}
                     <hr><br>
                     
-                    <div style="display: flex;">
-                        <div style="width: 15%;" class="text-primary">
-                            <strong>Key words</strong>
+                    <section class="salign-options" aria-labelledby="salign-options-heading">
+                        <h2 id="salign-options-heading">Search options</h2>
+                        <div class="salign-options-grid">
+                            <div class="salign-option salign-keywords">
+                                <label for="salign-keywords">Keywords <span class="salign-optional">optional</span></label>
+                                <div class="salign-keyword-input">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+                                    <input id="salign-keywords" name="search" placeholder="Filter by keywords…">
+                                </div>
+                            </div>
+                            <div class="salign-option">
+                                <label for="salign-tmscore">TM-score threshold</label>
+                                <input id="salign-tmscore" name="tmscore" inputmode="decimal" value="0.5">
+                            </div>
+                            <div class="salign-option">
+                                <label for="salign-hinge">Hinge <span class="salign-range">0–9</span>
+                                    <span class="salign-hinge-info" aria-hidden="true" title="Hinge applies only to single-chain alignments. Complexes are aligned automatically without hinge.">ℹ️</span>
+                                </label>
+                                <input id="salign-hinge" type="number" name="hinge" min="0" max="9" step="1" value="0" required aria-describedby="salign-hinge-hint">
+                            </div>
+                            <button id="salign-submit" class="btn salign-search-button" type="submit">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+                                Search
+                            </button>
                         </div>
-                        <div style="width: 85%;" class="text-primary">
-                            <label class="wrapper">
-                                <input name="search" class="form-control-header" placeholder="🔍︎ Enter keywords...">
-                            </label>
+                        <div class="salign-alignment-note">
+                            <span class="salign-note-icon" aria-hidden="true">ℹ️</span>
+                            <p id="salign-hinge-hint"><strong>Complexes handled automatically.</strong> Hinge applies to single-chain alignments only. If either structure has multiple polymer chains, complex alignment is used and hinge is ignored.</p>
                         </div>
-                    </div>
-                    <br>
-                    <div style="display: flex;">
-                        <div style="width: 15%;" class="text-primary">
-                            <strong>TM-score threshold</strong>
-                        </div>
-                        <div style="width: 7.5%;" class="text-primary">
-                            <label class="wrapper">
-                                <input name="tmscore" class="form-control-header" value=0.5>
-                            </label>
-                        </div>
-                        <div style="width: 5%;">
-                        </div>
-                        <div style="width: 10%;" class="text-primary">
-                            <strong>Hinge (0–9)</strong>
-                        </div>
-                        <div style="width: 7.5%;" class="text-primary">
-                            <label class="wrapper">
-                                <input type="number" name="hinge" class="form-control-header" min="0" max="9" step="1" value="0" required>
-                            </label>
-                        </div>
-                        <div style="width: 5%;">
-                        </div>
-                        <div style="width: 50%;">
-                            <button id="salign-submit" class="btn" type="submit" style="width: 100%;"><strong>Search</strong></button>
-                        </div>
-                    </div>
+                    </section>
                 </form>
             </div>
         </section>

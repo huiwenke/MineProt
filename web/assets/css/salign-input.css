@@ -32,9 +32,45 @@
 .salign-structure-text:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
 .salign-input button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 .salign-file-hint { margin: 10px 0 0; color: var(--text-muted); font-size: 11px; line-height: 1.6; }
+.salign-options { container-type: inline-size; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-surface); color: var(--text-body); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.salign-options h2 { margin: 0 0 18px; font-size: 16px; font-weight: 600; color: var(--text-strong); }
+.salign-options-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 150px; align-items: end; gap: 18px 20px; }
+.salign-option { min-width: 0; }
+.salign-keywords { grid-column: 1 / -1; }
+.salign-option label { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; color: var(--text-strong); font-size: 12px; font-weight: 600; line-height: 18px; }
+.salign-optional { margin-left: auto; color: var(--text-muted); font-size: 11px; font-weight: 400; }
+.salign-range { padding: 0 5px; border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); font-size: 10px; font-weight: 400; line-height: 16px; }
+.salign-hinge-info { color: var(--text-muted); cursor: help; font-size: 13px; font-weight: 400; }
+.salign-options input { box-sizing: border-box; display: block; width: 100%; min-width: 0; height: 42px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-page); color: var(--text-body); font: inherit; font-size: 13px; transition: border-color .15s; }
+.salign-options input::placeholder { color: var(--text-muted); }
+.salign-options input:hover { border-color: var(--text-muted); }
+.salign-options input:focus { border-color: var(--focus); outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.salign-keyword-input { position: relative; }
+.salign-keyword-input svg { position: absolute; top: 12px; left: 12px; width: 18px; height: 18px; color: var(--text-muted); pointer-events: none; }
+.salign-keyword-input input { padding-left: 38px; }
+.salign-search-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 24px; border-radius: 7px; font-size: 13px; font-weight: 600; }
+.salign-search-button svg { width: 17px; height: 17px; }
+.salign-search-button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+.salign-alignment-note { display: flex; align-items: baseline; gap: 9px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border-muted); color: var(--text-muted); }
+.salign-note-icon { flex-shrink: 0; color: var(--link); font-size: 14px; }
+.salign-alignment-note p { margin: 0; font-size: 12px; line-height: 1.7; }
+.salign-alignment-note strong { color: var(--text-body); font-weight: 500; }
+@container (min-width: 850px) {
+    .salign-options-grid { grid-template-columns: minmax(0, 1fr) 170px 130px 150px; }
+    .salign-keywords { grid-column: auto; }
+}
+@container (max-width: 480px) {
+    .salign-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+    .salign-search-button { grid-column: 1 / -1; }
+}
 .salign-input [hidden] { display: none !important; }
+@media (max-width: 1100px) {
+    .salign-search-page { margin-left: 0; }
+    .salign-search-layout { box-sizing: border-box; width: 100%; padding-left: 16px !important; padding-right: 16px !important; }
+}
 @media (max-width: 600px) {
     .salign-input { padding: 14px; }
+    .salign-options { padding: 14px; }
     .salign-drop-area { padding: 18px 14px; flex-wrap: wrap; gap: 12px; }
     #salign-choose-file { margin-left: 54px; }
     .salign-drop-copy { flex-basis: calc(100% - 60px); }

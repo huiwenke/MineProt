@@ -15,8 +15,8 @@
             </span>
             <br>
             <span class="programming_lang-span">
-                <span id="hit_color" class="lang_color plddt-very-high"></span>
-                <span>&nbsp;<strong>Hit structure</strong></span>
+                <span class="lang_color" style="background: linear-gradient(to right, var(--plddt-very-high) 0% 25%, var(--plddt-confident) 25% 50%, var(--plddt-low) 50% 75%, var(--plddt-very-low) 75% 100%);"></span>
+                <span>&nbsp;<strong>Target structure</strong></span>
             </span>
         </div>
         <h2 class="h2_aside">Download</h2>
@@ -27,16 +27,3 @@
         </div>
     </div>
 </section>
-<script>
-    function ChangeColor() {
-        var hitColor = document.getElementById("hit_color");
-        var colorClasses = ['plddt-very-high', 'plddt-confident', 'plddt-low', 'plddt-very-low'];
-        var nextColors = colorClasses.filter(colorClass => !hitColor.classList.contains(colorClass));
-        hitColor.classList.remove(...colorClasses);
-        hitColor.classList.add(nextColors[Math.floor(Math.random() * nextColors.length)]);
-        setTimeout(() => {
-            ChangeColor()
-        }, 1000)
-    }
-    ChangeColor();
-</script>

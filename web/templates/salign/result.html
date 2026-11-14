@@ -8,11 +8,12 @@
     <title>MineProt</title>
     <link rel="shortcut icon" type="image/png" href="../assets/img/logo.png">
     <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/pdbe-molstar-1.2.1.css" data-molstar-theme
-        data-dark-href="/assets/css/pdbe-molstar-1.2.1.css"
-        data-light-href="/assets/css/pdbe-molstar-light-1.2.1.css">
+    <link rel="stylesheet" type="text/css" href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar.css" data-molstar-theme
+        data-dark-href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar.css"
+        data-light-href="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar-light.css">
     <script src="/assets/js/molstar-theme.js"></script>
-    <script src="../assets/js/pdbe-molstar-plugin-1.2.1.js"></script>
+    <script src="/assets/vendor/pdbe-molstar-3.12.0/pdbe-molstar-plugin.js"></script>
+    <script src="/assets/js/salign-viewer.js"></script>
 </head>
 <body>
 {% include 'salign/header.html' %}
@@ -23,30 +24,13 @@
                 <h2 class="main_h2">
                     {{ Search_Result_Num|string + ' results' if Search_Result_Num else ' No result' }}
                 </h2>
-                <hr id="hr1">
+                <hr>
                 <br>
                 {% for Salign_Result in displayed %}{% include 'salign/card.html' %}{% endfor %}
             </div>
         </section>
         {% if Search_Result_Num %}{% include 'salign/legend.html' %}{% endif %}{% endif %}
     </main>
-    {% if not waiting %}<script>
-        function MainFunction() {
-            var isExpanded = document.getElementsByClassName("msp-layout-expanded");
-            var hr1 = document.getElementById("hr1");
-            if (isExpanded.length==0) {
-                hr1.style.visibility = "visible";
-            } else hr1.style.visibility = "hidden";
-            var mspSeqs = document.getElementsByClassName("msp-layout-top");
-            for (var i=0;i<mspSeqs.length;i++){
-                mspSeqs[i].remove();
-            }
-            setTimeout(() => {
-                MainFunction()
-            }, 100)
-        }
-        MainFunction();
-    </script>{% endif %}
 </body>
 
 </html>

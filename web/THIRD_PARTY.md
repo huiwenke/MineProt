@@ -29,9 +29,9 @@ Retained components have separate terms:
 - US-align: https://github.com/pylelab/USalign/blob/master/LICENSE.
   Keep upstream notices and reference information when distributing. The local
   archive is intentionally retained; record its source revision when replacing it.
-- PDBe Mol*: https://github.com/molstar/pdbe-molstar. Search uses version 3.12.0
+- PDBe Mol*: https://github.com/molstar/pdbe-molstar. Search, PAE and Salign use version 3.12.0
   (Apache-2.0), vendored in `assets/vendor/pdbe-molstar-3.12.0/` with its LICENSE
-  and bundled dependency notices. The original 1.2.1 bundle remains for Salign.
+  and bundled dependency notices. The original 1.2.1 assets remain for legacy compatibility.
   Both versions include their matching, unmodified light stylesheet. The 1.2.1
   light stylesheet comes from
   https://www.ebi.ac.uk/pdbe/pdb-component-library/css/pdbe-molstar-light-1.2.1.css.

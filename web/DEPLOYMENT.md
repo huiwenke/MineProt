@@ -204,6 +204,20 @@ The CLI prints per-file outcomes and a summary, and exits nonzero for failures.
 
 ## Structure compatibility
 
+Search, PAE and Salign result viewers use the vendored PDBe Mol* 3.12.0 bundle.
+Salign loads the US-align-transformed query as a gray overlay and retains the
+target's default pLDDT display. Both structures are visible initially, with
+sequence panels and viewer controls available. Theme changes preserve the
+alignment, colors and camera.
+
+For each Salign pair, the backend counts polymer chains in the first model of
+both structures. If either contains more than one polymer chain, US-align uses
+`-mm 1 -fast`; otherwise it uses `-mm 7 -afp -hinge N -fast`. Water and
+non-polymer ligand chains do not trigger complex mode, and multiple models are
+not counted as separate chains. The Detail view uses the same selection rule.
+The hinge field's info symbol and help text explain that hinge is ignored for
+complex alignments.
+
 FCZ conversion and repository fallbacks use the Foldcomp Python API in a spawned
 Python worker, without temporary FCZ/PDB files or a standalone Foldcomp
 executable. Foldcomp 1.0.0 can crash on malformed FCZ data and holds the GIL;
