@@ -1,168 +1,97 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <script src="/assets/js/theme.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>import</title>
-    <link rel="shortcut icon" type="image/png" href="./assets/img/logo.png">
-    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
-    <script src="./assets/js/highlight.min.js"></script>
-    <script>
-        hljs.highlightAll();
-    </script>
+    <title>Import · MineProt</title>
+    <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/salign-input.css">
+    <link rel="stylesheet" href="/assets/css/import.css">
+    <script defer src="/assets/js/import.js"></script>
 </head>
-
-<body>
+{% macro upload(id, name, title, formats, required=false) %}
+<section class="salign-input import-upload">
+    <div class="salign-input-heading"><h2 id="{{ id }}-label">{{ title }}</h2><span class="salign-format-tag">{{ formats }}</span></div>
+    <div class="salign-drop-area">
+        <div class="salign-upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m-4 4 4-4 4 4M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></div>
+        <div class="salign-drop-copy"><strong>Drop a file here</strong><span>or choose a file from your computer</span></div>
+        <label class="btn btn-blue import-file-button">Choose file<input id="{{ id }}" name="{{ name }}" type="file" accept="{{ formats }}" aria-labelledby="{{ id }}-label" {% if required %}required{% endif %}></label>
+    </div>
+    <div class="salign-file-info"><p class="import-file-status" role="status">No file selected{% if not required %} · optional{% endif %}</p><button class="salign-clear-file" type="button" hidden>Clear</button></div>
+</section>
+{% endmacro %}
+{% macro common(prefix) %}
+<div class="import-grid">
+    <div><label for="{{ prefix }}-repo">Repository</label><input class="input-import" id="{{ prefix }}-repo" name="repo" list="import-repositories" placeholder="Choose or enter a new repository" required><p class="salign-file-hint">Lowercase; no spaces. A new name creates a repository on import.</p></div>
+    <div><label for="{{ prefix }}-compression">Storage compression</label><select id="{{ prefix }}-compression" name="compression"><option value="plain">Plain (no compression)</option><option value="gz">Gzip (lossless)</option><option value="fcz">Foldcomp (FCZ, lossy)</option></select><p class="salign-file-hint">FCZ: single protein chain only, without ligands or water. JSON / A3M use gzip.</p></div>
+</div>
+<label class="import-check"><input type="checkbox" name="force"> Overwrite conflicting files and metadata</label>
+{% endmacro %}
+<body class="import-page">
     {% include 'header.html' %}
     <main style="min-height: 100vh;">
         {% include 'form.html' %}
-        <section class="main_browse">
-            <div style="display: block; width: 100%;">
-                <h1 style="margin-bottom: 8px;" class="text-primary">Generate command for importing</h1>
-                <hr>
-                <div class="card-inner-div">
-                    <div style="margin-left: 16px; width: 100%;" class="text-body">
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>System</strong>
-                            </div>
-                            <div>
-                                <select id="system" onchange="selectSystem()">
-                                    <option value="colabfold">ColabFold</option>
-                                    <option value="alphafold2">AlphaFold2</option>
-                                </select>
-                            </div>
-                        </div>
-                        <br>
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Repository</strong>
-                            </div>
-                            <div>
-                                <select id="repo_name">
-                                    {% for Data_Repo in DATA_REPOS %}<option value="{{ Data_Repo }}">{{ Data_Repo }}</option>{% endfor %}
-                                    <option value="CREATE_NEW_REPO">Create new repository</option>
-                                </select>
-                            </div>
-                        </div>
-                        <br>
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Naming mode</strong>
-                            </div>
-                            <div>
-                                <select id="name_mode">
-                                    <option value="0">0: Use prefix</option>
-                                    <option value="1">1: Use name in .a3m</option>
-                                    <option value="2">2: Auto rename</option>
-                                    <option value="3">3: Customize name</option>
-                                </select>
-                            </div>
-                        </div>
-                        <br>
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Path to data</strong>
-                            </div>
-                            <div style="width: 50%;">
-                                <input class="input-import" id="data_path" placeholder="/path/to/your/data/for/importing" required="">
-                            </div>
-                        </div>
-                        <br>
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Path to python3</strong>
-                            </div>
-                            <div style="width: 50%;">
-                                <input class="input-import" id="python_path" placeholder="/path/to/your/python3" value="python3">
-                            </div>
-                        </div>
-                        <br>
-                        <div style="display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Path to MineProt scripts</strong>
-                            </div>
-                            <div style="width: 50%;">
-                                <input class="input-import" id="script_path" placeholder="/path/to/your/MineProt/scripts" value=".">
-                            </div>
-                        </div>
-                        <br>
-                        <div id="colabfold_opt" name="system_opt" style="margin-top: 7px; display: flex;">
-                            <div style="width: 33.3%;">
-                                <strong>Parameters</strong>
-                            </div>
-                            <div>
-                                <input type="checkbox" name="colabfold_args" value="--zip" />--zip
-                                <input type="checkbox" name="colabfold_args" value="--relax" />--amber
-                            </div>
-                        </div>
-                        <div id="alphafold2_opt" name="system_opt" style="margin-top: 7px; display: none;">
-                        </div>
-                        <br>
-                        <button class="btn" onclick="generateCode()"><strong>Generate</strong></button>
-                    </div>
-                </div>
-                <pre style="font-size: 16px; font-weight: 500;"><code class="language-bash" id="code_for_import">#Code for import</code></pre>
+        <section class="main_browse"><div class="import-content text-body">
+            <h1 class="text-primary">Import proteins</h1><hr>
+            <div class="import-tabs" role="tablist" aria-label="Import method">
+                <button class="btn" id="tab-single" type="button" role="tab" aria-selected="true" aria-controls="panel-single" data-tab="single">Single model</button>
+                <button class="btn" id="tab-archive" type="button" role="tab" aria-selected="false" aria-controls="panel-archive" tabindex="-1" data-tab="archive">Prediction archive</button>
             </div>
-        </section>
+            <datalist id="import-repositories">{% for repo in DATA_REPOS %}<option value="{{ repo }}">{% endfor %}</datalist>
+            <section id="panel-single" role="tabpanel" aria-labelledby="tab-single">
+                <p>Import one structure with optional confidence JSON, MSA and annotations.</p>
+                <form class="import-form" action="/import.php" method="post" enctype="multipart/form-data" data-max-bytes="{{ upload_limit }}">
+                    <input type="hidden" name="mode" value="single">
+                    {{ upload('single-structure', 'structure', 'Structure', '.pdb,.cif,.mmcif,.pdb.gz,.cif.gz,.mmcif.gz', true) }}
+                    <div class="import-grid">{{ upload('single-json', 'json', 'Confidence JSON', '.json,.json.gz') }}{{ upload('single-msa', 'msa', 'MSA', '.a3m,.a3m.gz') }}</div>
+                    <section class="salign-input">
+                        {{ common('single') }}
+                        <div class="import-grid">
+                            <div><label for="single-name">Protein name</label><input id="single-name" class="input-import" name="name" placeholder="Defaults to structure filename"></div>
+                            <div><label for="single-homolog">Homolog</label><input id="single-homolog" class="input-import" name="homolog" placeholder="Optional accession"></div>
+                            <div><label for="single-database">Database</label><select id="single-database" name="database" disabled><option value="">None</option><option value="afdb">AlphaFold DB</option><option value="uniprotkb">UniProtKB</option><option value="uniparc">UniParc</option></select></div>
+                            <div><label for="single-description">Descriptions</label><textarea id="single-description" name="description" class="salign-structure-text" placeholder="Separate entries with semicolons or newlines"></textarea></div>
+                        </div>
+                        <label class="import-check"><input type="checkbox" name="calculate_plddt"> Calculate pLDDT (confidence JSON first, then structure)</label>
+                        <p class="salign-file-hint">When disabled, score is −1. The name and homolog are included in descriptions. Sequence is left empty, as in toolkit import_single.</p>
+                    </section>
+                    <button class="btn" type="submit">Import model</button>
+                </form>
+            </section>
+            <section id="panel-archive" role="tabpanel" aria-labelledby="tab-archive" hidden>
+                <p>Upload a prediction result archive and select its source system. Matching structures and confidence files are processed automatically.</p>
+                <form class="import-form" action="/import.php" method="post" enctype="multipart/form-data" data-max-bytes="{{ upload_limit }}">
+                    <input type="hidden" name="mode" value="archive">
+                    <section class="salign-input">
+                        <label for="archive-system">Prediction system</label><select id="archive-system" name="system"><option value="alphafold3">AlphaFold3</option><option value="colabfold">ColabFold</option></select>
+                        <p id="archive-system-hint" class="salign-file-hint">AlphaFold3: model CIF and matching confidence / summary JSON, including result subdirectories.</p>
+                    </section>
+                    {{ upload('archive-file', 'archive', 'Prediction archive', '.zip', true) }}
+                    <section class="salign-input">
+                        {{ common('archive') }}
+                        <fieldset id="colabfold-options" disabled hidden><legend>ColabFold options</legend>
+                            <label class="import-check"><input type="checkbox" name="relax"> Use relaxed rank 1 results</label>
+                            <label class="import-check"><input type="checkbox" name="annotate"> Automatic annotation using A3M homologs</label>
+                            <p class="salign-file-hint">Automatic annotation queries UniProt / UniParc and saves the matching A3M. Otherwise A3M is skipped. Relax selects existing relaxed predictions; it does not run relaxation.</p>
+                        </fieldset>
+                        <fieldset id="archive-annotations"><legend>Manual annotations</legend>
+                            <p class="salign-file-hint">These annotations apply to every model in the archive. Each model name is also included in its descriptions.</p>
+                            <div class="import-grid">
+                                <div><label for="archive-homolog">Homolog</label><input id="archive-homolog" class="input-import" name="homolog" placeholder="Optional accession"></div>
+                                <div><label for="archive-database">Database</label><select id="archive-database" name="database" disabled><option value="">None</option><option value="afdb">AlphaFold DB</option><option value="uniprotkb">UniProtKB</option><option value="uniparc">UniParc</option></select></div>
+                                <div><label for="archive-description">Descriptions</label><textarea id="archive-description" name="description" class="salign-structure-text" placeholder="Separate entries with semicolons or newlines"></textarea></div>
+                            </div>
+                        </fieldset>
+                        <p class="salign-file-hint">pLDDT and sequence are calculated automatically. A3M is skipped by default. Upload up to 80 models; choose plain or gzip for complexes.</p>
+                    </section>
+                    <button class="btn" type="submit">Import archive</button>
+                </form>
+            </section>
+            <p class="salign-file-hint">Total upload and expanded archive limit: {{ (upload_limit / 1024 / 1024)|round(1) }} MB. File and metadata writes are separate; completed imports remain if another model fails.</p>
+            <section id="import-result" class="salign-input" role="status" aria-live="polite" hidden><h2>Import results</h2><p id="import-status"></p><ul id="import-results"></ul></section>
+        </div></section>
     </main>
-    <script>
-        function selectSystem() {
-            var currentSystem = document.getElementById("system");
-            var Systems = document.getElementsByName("system_opt");
-            for (i = 0; i < Systems.length; i++) {
-                if (Systems[i].id == currentSystem.value + "_opt") {
-                    Systems[i].style.display = "flex";
-                } else Systems[i].style.display = "none";
-            }
-        }
-
-        function generateCode() {
-            var currentSystem = document.getElementById("system");
-            var codeForImport = document.getElementById("code_for_import");
-            codeForImport.innerHTML = "";
-            var dataPath = document.getElementById("data_path").value;
-            if (dataPath == "") {
-                codeForImport.innerHTML = "# Where is your data for importing?";
-                return;
-            }
-            var repoName = document.getElementById("repo_name").value.toLowerCase();
-            if (repoName == "create_new_repo") {
-                codeForImport.innerHTML += "# Don't forget to replace create_new_repo with your new repo name.\n";
-                codeForImport.innerHTML += "# Please note that repo name should be in lower case.\n\n";
-            }
-            var scriptPath = document.getElementById("script_path").value;
-            if (scriptPath == "") {
-                scriptPath = ".";
-            }
-            codeForImport.innerHTML += "cd " + scriptPath + " \n\n";
-            codeForImport.innerHTML += "# If your data are raw outputs from " + currentSystem.value + ", run: \n\n";
-            codeForImport.innerHTML += "bash ai/" + currentSystem.value + "/import.sh " + dataPath + " --repo " + repoName + " \\\n";
-            var nameMode = document.getElementById("name_mode").value;
-            codeForImport.innerHTML += "--name-mode " + nameMode + " \\\n";
-            var systemArgs = document.getElementsByName(currentSystem.value + "_args");
-            for (i = 0; i < systemArgs.length; i++) {
-                if (systemArgs[i].checked) {
-                    codeForImport.innerHTML += systemArgs[i].value + " \\\n";
-                }
-            }
-            var pythonPath = document.getElementById("python_path").value;
-            if (pythonPath != '') {
-                codeForImport.innerHTML += "--python " + pythonPath + " \\\n";
-            }
-            var apiURL = window.location.href.replace(window.location.pathname, "");
-            codeForImport.innerHTML += "--url " + apiURL + '\n';
-            preProcessedHTML = "\n# If your data have been preprocessed by ai/" + currentSystem.value + "/transform.py, run: \n\n";
-            cmdImport2es = [pythonPath || "python3", "batch/import_es.py", "-n", repoName, "-i", dataPath, "-a", "--url", apiURL + "/api/es"];
-            preProcessedHTML += cmdImport2es.join(' ') + '\n';
-            cmdImport2repo = [pythonPath || "python3", "batch/import_repo.py", "-n", repoName, "-i", dataPath, "--url", apiURL + "/api/import2repo/"];
-            preProcessedHTML += cmdImport2repo.join(' ') + '\n';
-            codeForImport.innerHTML += preProcessedHTML;
-            hljs.highlightAll();
-        }
-    </script>
 </body>
-
 </html>

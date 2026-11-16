@@ -141,6 +141,9 @@ with Path('engine.log').open('a') as log:
 if args[0] == 'info': print('x86_64')
 elif args[0] == '--version': print('Docker mock')
 elif args[:2] == ['exec', 'elasticsearch']: print('yellow')
+elif args[:2] == ['container', 'inspect']: sys.exit(0 if os.getenv('MOCK_ADMIN_EXISTS', '1') == '1' else 1)
+elif args[:2] == ['rm', '-f']: sys.exit(int(os.getenv('MOCK_REMOVE_FAILURE', '0')))
+elif args[0] == 'compose' and 'rm' in args: sys.exit(2)
 ''')
             engine.chmod(0o755)
             environment = dict(os.environ, MP_READ_ONLY="false", MP_REPO_ACCESS="rw",
@@ -165,9 +168,21 @@ elif args[:2] == ['exec', 'elasticsearch']: print('yellow')
                 self.assertTrue(all(entry["readonly"] == "true" for entry in entries))
             entries = run("--development")
             self.assertIn("MP_READ_ONLY=false", (root / ".env").read_text())
-            self.assertTrue(any(entry["args"] == ["compose", "--profile", "production", "rm", "-sf", "admin"]
+            self.assertTrue(any(entry["args"] == ["rm", "-f", "MineAdmin"]
                                 for entry in entries))
             self.assertFalse(any(entry["args"][:2] == ["exec", "MineAdmin"] for entry in entries))
+            environment['MOCK_ADMIN_EXISTS'] = '0'
+            entries = run("--development")
+            self.assertFalse(any(entry["args"][0] == 'rm' for entry in entries))
+            self.assertTrue(any(entry["args"][:2] == ["compose", "up"] and entry["args"][-1] == 'web'
+                                for entry in entries))
+            environment.update(MOCK_ADMIN_EXISTS='1', MOCK_REMOVE_FAILURE='1')
+            result = subprocess.run(["bash", str(script), "-c", str(engine), "--development"],
+                                    cwd=root, env=environment, capture_output=True, text=True, timeout=20)
+            self.assertNotEqual(result.returncode, 0)
+            entries = [json.loads(line) for line in (root / "engine.log").read_text().splitlines()]
+            self.assertFalse(any(entry["args"][:2] == ["compose", "up"] and entry["args"][-1] == 'web'
+                                 for entry in entries))
             result = subprocess.run(["bash", str(script), "--production", "-p", "8081", "-a", "8081"],
                                     cwd=root, capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)

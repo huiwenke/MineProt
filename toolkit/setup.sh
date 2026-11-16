@@ -274,7 +274,11 @@ if [ "$MP_MODE" = production ]; then
     containers+=(MineAdmin)
 else
     # Profiled services are not treated as orphans when switching modes.
-    "${compose[@]}" --profile production rm -sf admin </dev/null
+    # Some podman-compose versions have no `rm` subcommand. Remove only the
+    # named management container through the engine, without deleting volumes.
+    if "$MP_CE" container inspect MineAdmin >/dev/null 2>&1; then
+        "$MP_CE" rm -f MineAdmin </dev/null
+    fi
 fi
 "${compose[@]}" up -d --no-build --no-deps --remove-orphans "${services[@]}" </dev/null
 for container in "${containers[@]}"; do

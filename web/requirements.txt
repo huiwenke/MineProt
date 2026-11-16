@@ -5,3 +5,5 @@ httpx==0.28.1
 python-multipart==0.0.20
 gemmi==0.7.1
 foldcomp==1.0.0
+requests>=2.31,<3
+biopython>=1.83,<2

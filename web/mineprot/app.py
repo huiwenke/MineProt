@@ -25,7 +25,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.gzip import GZipMiddleware
 
-from . import imports, jobs, pae, search, settings
+from . import imports, import_ui, jobs, pae, search, settings
 from .storage import (atomic_write, b64decode, bounded_gunzip, component, decompress_fcz,
                       inside, protein_names, read_file, repo_file)
 from .structures import cif_to_pdb, pdb_to_alphacif, viewer_cif
@@ -188,7 +188,13 @@ async def home(request: Request):
 
 @app.get("/import.php")
 async def import_page(request: Request):
-    return render(request, "import.html", await context(request))
+    return render(request, "import.html", {**await context(request), "upload_limit": settings.MAX_BODY})
+
+
+@app.post("/import.php")
+async def submit_import(request: Request):
+    async with request.form(max_part_size=settings.MAX_BODY) as form:
+        return await run_in_threadpool(import_ui.process, form)
 
 
 def paginate(items, form):

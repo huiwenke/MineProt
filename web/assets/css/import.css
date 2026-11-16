@@ -1,0 +1,31 @@
+.import-content { width: 100%; min-width: 0; }
+.import-content [hidden] { display: none !important; }
+.import-tabs { display: flex; gap: 10px; margin: 20px 0; }
+.import-tabs [aria-selected="false"] { background: var(--bg-surface); color: var(--text-body); border: 1px solid var(--border); }
+.import-form { display: grid; gap: 18px; margin: 20px 0; }
+.import-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 12px 0; }
+.import-grid > * { min-width: 0; }
+.import-content label:not(.import-check):not(.import-file-button) { display: block; margin-bottom: 8px; font-size: 13px; }
+.import-content .input-import, .import-content select { box-sizing: border-box; width: 100%; margin: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-page); color: var(--text-body); }
+.import-content input:disabled, .import-content select:disabled { opacity: .5; cursor: not-allowed; }
+.import-check { display: flex; align-items: center; gap: 8px; margin: 16px 0; font-size: 13px; }
+.import-content .salign-structure-text { height: 85px; min-height: 85px; }
+.import-file-button { position: relative; overflow: hidden; flex-shrink: 0; cursor: pointer; }
+.import-file-button input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.import-file-button:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+.import-file-status { margin: 0; font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
+.import-form > button { justify-self: start; }
+.import-content fieldset { border: 1px solid var(--border); border-radius: 7px; margin: 20px 0 0; }
+#import-result { margin-top: 20px; overflow-wrap: anywhere; }
+#import-result a { color: var(--link); }
+@media (max-width: 800px) { .import-grid { grid-template-columns: 1fr; } .import-page .main_browse { box-sizing: border-box; width: 100%; padding: 16px; } }
+@media (max-width: 800px) {
+    body.import-page { margin-left: 0; margin-right: 0; }
+    .import-page #aside { display: none !important; }
+    .import-page .main_browse { padding-left: 16px !important; padding-right: 16px !important; }
+    .import-page header { padding: 12px; gap: 8px; flex-wrap: wrap; }
+    .import-page header .parent { margin: 0; }
+    .import-page header .nav_link { padding: 0 4px; }
+    .import-page .salign-input-heading { flex-wrap: wrap; }
+    .import-page .salign-format-tag { overflow-wrap: anywhere; }
+}

@@ -27,6 +27,7 @@ RUN mkdir -p /app/bin /var/www/data /var/cache/mineprot \
     && chown -R 1000:1000 /var/www/data /var/cache/mineprot
 
 COPY LICENSE /app/LICENSE
+COPY toolkit/src /app/toolkit/src
 COPY web /app/web
 USER 1000:1000
 EXPOSE 8000

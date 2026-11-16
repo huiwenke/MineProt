@@ -1,8 +1,11 @@
-# Only application files and the US-align archive enter the Web build context.
+# Only application files, shared toolkit source and the US-align archive enter the Web build context.
 **
 !LICENSE
 !web
 !web/**
+!toolkit
+!toolkit/src
+!toolkit/src/**
 !app
 !app/python
 !app/python/Dockerfile
@@ -11,3 +14,5 @@
 !app/bin/usalign.tar.xz
 web/**/__pycache__
 web/**/*.pyc
+toolkit/src/**/__pycache__
+toolkit/src/**/*.pyc

@@ -46,6 +46,32 @@ uses external annotation services rather than a MineProt URL. See the
 [deployment guide](Deployment-manual.md) for production/development modes and
 [API manual](API-manual.md) for request formats.
 
+## Browser imports
+
+Open `/import.php` on a writable MineProt service to upload files directly.
+The **Single model** tab uses the same preparation rules as `import_single.py`,
+including plain/gzip/FCZ storage, optional JSON/A3M, manual annotations and
+optional pLDDT calculation.
+
+The **Prediction archive** tab accepts a result ZIP from AlphaFold3 or ColabFold,
+including enclosing result directories. AlphaFold3 CIF files are paired with
+merged confidence and summary JSON. ColabFold selects rank 1 predictions;
+**Use relaxed rank 1 results** selects existing relaxed models. It does not run
+relaxation. **Automatic annotation** uses A3M homologs to query UniProt/UniParc
+and stores the matching A3M; otherwise A3M is skipped. Archive imports calculate
+sequence and pLDDT automatically. ZIPs containing other ZIPs should be unpacked
+and repacked with the result files before upload.
+
+Choose the repository and storage compression before importing. Use plain or
+gzip for complexes; FCZ requires a single protein chain without ligands or
+water. Archives are limited to 80 models and the configured request size limit
+(default 100 MiB), which also applies to their expanded contents. Conflicting
+files or metadata require the overwrite checkbox. Results list each model;
+successful writes remain if another model fails.
+
+The Web image includes the shared toolkit source and annotation dependencies.
+Rebuild the image when upgrading from the command-generation page.
+
 ## import_single.py
 
 Import one PDB, CIF or mmCIF structure, optionally gzip-compressed, together

@@ -430,7 +430,8 @@ def validate_config(config, directory):
     return result
 
 
-def execute_config(config, force=False):
+def prepare_config(config):
+    """Build metadata and upload payloads without contacting the server."""
     source_path = logical_path(Path(config["structure"]))
     raw = read_bytes(Path(config["structure"]))
     structure, block = parse_structure(raw, source_path.suffix.lower())
@@ -470,6 +471,11 @@ def execute_config(config, force=False):
         batch.append(file_item(name + ".json", json_data, storage))
     if config["msa"]:
         batch.append(file_item(name + ".a3m", read_bytes(Path(config["msa"])), storage))
+    return document, batch
+
+
+def execute_config(config, force=False):
+    document, batch = prepare_config(config)
     print(f"\nTarget: {config['url']} / {config['repo']}")
     print(
         "Files: "
@@ -477,7 +483,7 @@ def execute_config(config, force=False):
             item["name"] + (".gz" if item["storage"] == "gzip" else "") for item, _ in batch
         )
     )
-    print(f"Score: {score:.6f} ({score_source})")
+    print(f"Score: {document['score']:.6f}")
     print("Annotation: " + json.dumps(document["anno"], ensure_ascii=False))
     try:
         run_import(config["url"], config["repo"], document, batch, force=force)
