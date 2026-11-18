@@ -50,7 +50,7 @@ def execute(module, argv=None):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="MineProt protein curation toolkit")
+    parser = argparse.ArgumentParser(description="MineProt structure curation toolkit")
 
     def add_commands(parent, commands):
         subparsers = parent.add_subparsers(required=True)

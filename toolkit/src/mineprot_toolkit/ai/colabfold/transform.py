@@ -37,7 +37,7 @@ def build_parser():
 def prediction_filename(is_relaxed, file_name):
     """
     Pick out necessary files for curation.
-    :param is_relaxed: Marks if the protein is relaxed, bool
+    :param is_relaxed: Marks if the structure is relaxed, bool
     :param file_name: File name to be checked, str
     :return: Flag of whether the file name is valid, str
     """
@@ -79,7 +79,7 @@ def stage_prediction(is_zip, is_relaxed, file_name, input_dir, output_dir, exist
     """
     Copy files to temporary folder.
     :param is_zip: Marks if the file should be decompressed, bool
-    :param is_relaxed: Marks if the protein is relaxed, bool
+    :param is_relaxed: Marks if the structure is relaxed, bool
     :param input_dir: Copy source directory, str
     :param output_dir: Copy destination directory, str
     :param existing_files: Existing file list for skipping, list

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mineprot-toolkit"
 version = "0.1.0"
-description = "Import, curate and process protein predictions for MineProt"
+description = "Import, curate and process structure predictions for MineProt"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"

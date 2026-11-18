@@ -1,6 +1,6 @@
 # MineProt toolkit
 
-A Python 3.12+ package for preparing predictions and importing protein data.
+A Python 3.12+ package for preparing predictions and importing structure data.
 The complete [toolkit manual](../docs/Toolkit-manual.md) covers single imports,
 ColabFold monomers, AlphaFold3 complexes, batch imports, 3D-Beacons preparation
 and MSA Neff calculation. Server setup is in the

@@ -34,7 +34,7 @@
     <main style="min-height: 100vh;">
         {% include 'form.html' %}
         <section class="main_browse"><div class="import-content text-body">
-            <h1 class="text-primary">Import proteins</h1><hr>
+            <h1 class="text-primary">Import structures</h1><hr>
             <div class="import-tabs" role="tablist" aria-label="Import method">
                 <button class="btn" id="tab-single" type="button" role="tab" aria-selected="true" aria-controls="panel-single" data-tab="single">Single model</button>
                 <button class="btn" id="tab-archive" type="button" role="tab" aria-selected="false" aria-controls="panel-archive" tabindex="-1" data-tab="archive">Prediction archive</button>
@@ -49,7 +49,7 @@
                     <section class="salign-input">
                         {{ common('single') }}
                         <div class="import-grid">
-                            <div><label for="single-name">Protein name</label><input id="single-name" class="input-import" name="name" placeholder="Defaults to structure filename"></div>
+                            <div><label for="single-name">Structure name</label><input id="single-name" class="input-import" name="name" placeholder="Defaults to structure filename"></div>
                             <div><label for="single-homolog">Homolog</label><input id="single-homolog" class="input-import" name="homolog" placeholder="Optional accession"></div>
                             <div><label for="single-database">Database</label><select id="single-database" name="database" disabled><option value="">None</option><option value="afdb">AlphaFold DB</option><option value="uniprotkb">UniProtKB</option><option value="uniparc">UniParc</option></select></div>
                             <div><label for="single-description">Descriptions</label><textarea id="single-description" name="description" class="salign-structure-text" placeholder="Separate entries with semicolons or newlines"></textarea></div>

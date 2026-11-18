@@ -5,7 +5,7 @@ your MineProt base URL. Examples use the local production management service,
 `http://127.0.0.1:8081`. Use your public URL for read operations or the writable
 Web URL in development. Repository files and Elasticsearch metadata are
 managed separately: uploading a structure does not
-create its search document, and indexing a protein does not upload its files.
+create its search document, and indexing a structure does not upload its files.
 
 ## Contents
 
@@ -98,13 +98,13 @@ from pathlib import Path
 response = requests.post(
     BASE + "/api/pdb2alphacif/",
     json={
-        "name": "protein_001",
-        "data": base64.b64encode(Path("protein_001.pdb").read_bytes()).decode(),
+        "name": "structure_001",
+        "data": base64.b64encode(Path("structure_001.pdb").read_bytes()).decode(),
     },
     timeout=120,
 )
 response.raise_for_status()
-Path("protein_001.cif").write_bytes(response.content)
+Path("structure_001.cif").write_bytes(response.content)
 ```
 
 **Response:** HTTP `200`, `text/plain`, containing mmCIF text. The converter
@@ -134,10 +134,10 @@ Upload the FCZ bytes in a file part named **`file`**. This endpoint does not
 accept Base64 JSON or a raw binary request body.
 
 ```python
-with open("protein_001.fcz", "rb") as stream:
+with open("structure_001.fcz", "rb") as stream:
     response = requests.post(
         BASE + "/api/fcz2pdb/",
-        files={"file": ("protein_001.fcz", stream, "application/octet-stream")},
+        files={"file": ("structure_001.fcz", stream, "application/octet-stream")},
         timeout=360,
     )
 response.raise_for_status()
@@ -152,56 +152,56 @@ Python process, with a default timeout of 300 seconds controlled by
 ## 4. Elasticsearch metadata
 
 These endpoints operate on Elasticsearch documents, not repository files.
-Use one Elasticsearch index per repository and the same protein name in both.
+Use one Elasticsearch index per repository and the same structure name in both.
 
 ### 4.1 Document schema and IDs
 
-A typical protein document is:
+A typical structure document is:
 
 ```json
 {
-  "name": "protein_001",
+  "name": "structure_001",
   "seq": "MAVK",
   "score": 92.5,
   "anno": {
     "homolog": "P12345",
     "database": "uniprotkb",
-    "description": ["Example protein annotation", "protein_001"]
+    "description": ["Example structure annotation", "structure_001"]
   }
 }
 ```
 
 | Field | Meaning |
 | --- | --- |
-| `name` | Protein file stem, without `.pdb`, `.cif` or `.fcz`. |
+| `name` | Structure file stem, without `.pdb`, `.cif` or `.fcz`. |
 | `seq` | One-letter amino-acid sequence. |
 | `score` | Mean confidence/pLDDT, or `-1.0` when unavailable. |
 | `anno.homolog` | Homolog identifier; use an empty string when unavailable. |
 | `anno.database` | Database name, such as `uniprotkb` or `afdb`; empty when unavailable. |
-| `anno.description` | Searchable strings. The first entry is the displayed annotation; a second entry can contain the protein name. |
+| `anno.description` | Searchable strings. The first entry is the displayed annotation; a second entry can contain the structure name. |
 
 The proxy forwards valid JSON without enforcing this schema. Clients should
 provide these fields consistently. Search cards display the first description
 as a link. With no homolog, it links to a Bing search for that description;
 otherwise the existing database-specific homolog link is used.
 
-MineProt's toolkit and browse lookup use **Base64 of the UTF-8 protein name**
+MineProt's toolkit and browse lookup use **Base64 of the UTF-8 structure name**
 as the Elasticsearch document ID. Follow the same convention:
 
 ```python
-name = "protein_001"
+name = "structure_001"
 document_id = base64.b64encode(name.encode("utf-8")).decode("ascii")
 encoded_id = quote(document_id, safe="")
 ```
 
-### 4.2 Add or replace a protein document
+### 4.2 Add or replace a structure document
 
 ```http
 POST /api/es/{repo}/add/{document_id}
 Content-Type: application/json
 ```
 
-The body is the complete protein document. An existing document with the same
+The body is the complete structure document. An existing document with the same
 ID is replaced; this is not a partial update.
 
 **Response:** HTTP `200` with an **empty body** on success. Do not call
@@ -227,7 +227,7 @@ response = requests.post(
 response.raise_for_status()
 ```
 
-### 4.3 Get a protein document
+### 4.3 Get a structure document
 
 ```http
 GET /api/es/{repo}/get/{document_id}
@@ -274,13 +274,13 @@ not the full Elasticsearch search response:
     "_id": "cHJvdGVpbl8wMDE=",
     "_score": 1.0,
     "_source": {
-      "name": "protein_001",
+      "name": "structure_001",
       "seq": "MAVK",
       "score": 92.5,
       "anno": {
         "homolog": "",
         "database": "",
-        "description": ["ATP synthase", "protein_001"]
+        "description": ["ATP synthase", "structure_001"]
       }
     }
   }
@@ -303,9 +303,9 @@ HEAD /api/file/{repo}/{name}
 Include the desired extension in `{name}`. For example:
 
 ```text
-/api/file/demo/protein_001.pdb
-/api/file/demo/protein_001.cif?viewer=modern
-/api/file/demo/protein_001.json
+/api/file/demo/structure_001.pdb
+/api/file/demo/structure_001.cif?viewer=modern
+/api/file/demo/structure_001.json
 ```
 
 - A `.pdb` request can use the matching PDB, gzipped PDB, FCZ or CIF structure.
@@ -346,7 +346,7 @@ represents a two-byte JSON file containing `{}`:
   "force": false,
   "files": [
     {
-      "name": "protein_001.json",
+      "name": "structure_001.json",
       "storage": "gzip",
       "encoding": "gzip",
       "size": 2,
@@ -382,8 +382,8 @@ the original PDB.
 
 | Requested storage | Expected server file |
 | --- | --- |
-| `plain` | The exact logical file name, such as `protein_001.pdb`. |
-| `gzip` | The logical file name plus `.gz`, such as `protein_001.pdb.gz`. |
+| `plain` | The exact logical file name, such as `structure_001.pdb`. |
+| `gzip` | The logical file name plus `.gz`, such as `structure_001.pdb.gz`. |
 | `fcz` | The exact `.fcz` file name. |
 
 For a PDB/FCZ structure, the server checks all matching `.pdb`, `.pdb.gz`,
@@ -404,12 +404,12 @@ POST /api/import2repo/batch/check
 Content-Type: application/json
 ```
 
-Send the manifest as the JSON body. The server does not write protein files.
+Send the manifest as the JSON body. The server does not write structure files.
 It returns a result for each entry and its current request limits:
 
 ```json
 {
-  "results": [{"name": "protein_001.json", "status": "upload"}],
+  "results": [{"name": "structure_001.json", "status": "upload"}],
   "max_files": 256,
   "max_body_bytes": 104857600
 }
@@ -450,7 +450,7 @@ import json
 
 content = b"{}"
 entry = {
-    "name": "protein_001.json",
+    "name": "structure_001.json",
     "storage": "gzip",
     "encoding": "gzip",
     "size": len(content),
@@ -489,7 +489,7 @@ and upload flow with the FCZ bytes as `file0`:
 from pathlib import Path
 import foldcomp  # pip install foldcomp==1.0.0
 
-source = Path("protein_001.pdb")
+source = Path("structure_001.pdb")
 fcz_bytes = foldcomp.compress(source.stem, source.read_text(encoding="utf-8"))
 decoded_pdb = foldcomp.decompress(fcz_bytes)[1].encode("utf-8")
 entry = {
@@ -513,8 +513,8 @@ use `error` and an explanatory message:
 ```json
 {
   "results": [
-    {"name": "protein_001.fcz", "status": "imported"},
-    {"name": "protein_002.fcz", "status": "error", "error": "Invalid FCZ file"}
+    {"name": "structure_001.fcz", "status": "imported"},
+    {"name": "structure_002.fcz", "status": "error", "error": "Invalid FCZ file"}
   ]
 }
 ```
@@ -549,7 +549,7 @@ new integrations.
 ### 7.1 Check an existing file
 
 ```http
-GET /api/import2repo/check.php?repo=demo&name=protein_001.pdb&gzip=true
+GET /api/import2repo/check.php?repo=demo&name=structure_001.pdb&gzip=true
 ```
 
 | Query parameter | Required | Meaning |
@@ -576,7 +576,7 @@ form is:
 ```json
 {
   "repo": "demo",
-  "name": "protein_001.pdb",
+  "name": "structure_001.pdb",
   "text": "BASE64_ENCODED_FILE_BYTES",
   "force": false,
   "gzip": true
@@ -594,8 +594,8 @@ from pathlib import Path
 
 body = {
     "repo": "demo",
-    "name": "protein_001.pdb",
-    "text": base64.b64encode(Path("protein_001.pdb").read_bytes()).decode(),
+    "name": "structure_001.pdb",
+    "text": base64.b64encode(Path("structure_001.pdb").read_bytes()).decode(),
     "force": False,
     "gzip": True,
 }
@@ -763,7 +763,7 @@ the current server deployment is supported.
 GET /api/plot/pae.php?data_url={base64-repository-json-url}
 ```
 
-Encode a path such as `/api/file/demo/protein_001.json` using UTF-8 Base64, then
+Encode a path such as `/api/file/demo/structure_001.json` using UTF-8 Base64, then
 percent-encode the value for the query string. A full URL with the same path
 shape is also accepted, but its host is not fetched: the JSON is resolved from
 the local repository.

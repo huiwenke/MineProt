@@ -24,7 +24,7 @@ def structure_name(path):
 
 
 def find_structures(directory):
-    """Choose one source per protein, preferring CIF, then PDB, then FCZ."""
+    """Choose one source per structure, preferring CIF, then PDB, then FCZ."""
     selected = {}
     paths = sorted(directory.iterdir())
     for suffix in STRUCTURE_SUFFIXES:
@@ -43,7 +43,7 @@ def companion(directory, name, suffix):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="Import your proteins into Elasticsearch.")
+    parser = argparse.ArgumentParser(description="Import your structures into Elasticsearch.")
     parser.add_argument(
         "-i", required=True, type=Path, help="Repository of PDB, CIF or FCZ structures"
     )
@@ -56,7 +56,7 @@ def build_parser():
     return parser
 
 
-def import_protein(path, args):
+def import_structure(path, args):
     name = structure_name(path)
     document_id = base64.b64encode(name.encode()).decode()
     response = api.es_get(args.url, args.n, document_id).json()
@@ -104,7 +104,7 @@ def main(argv=None):
         api.es_delete(args.url, args.n)
     failures = 0
     with ThreadPoolExecutor(max_workers=args.t) as pool:
-        futures = {pool.submit(import_protein, path, args): path for path in structures}
+        futures = {pool.submit(import_structure, path, args): path for path in structures}
         for future, path in futures.items():
             try:
                 future.result()

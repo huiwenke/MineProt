@@ -34,7 +34,7 @@
                         <button type="button" class="btn btn-purple-bright" disabled>First</button>
                         <button type="button" class="btn btn-purple" disabled>Previous</button>
                         {% endif %}
-                        <span>{{ total }} proteins · Page {{ page }} / {{ pages }} · {{ page_size|default(100) }} per page</span>
+                        <span>{{ total }} structures · Page {{ page }} / {{ pages }} · {{ page_size|default(100) }} per page</span>
                         {% if page < pages %}
                         <a class="btn btn-purple" href="{{ next_url }}">Next</a>
                         <a class="btn btn-purple-bright" href="{{ last_url }}">Last</a>

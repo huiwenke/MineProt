@@ -7,24 +7,24 @@ from urllib.parse import quote
 from .uploads import session
 
 
-def pdb2cif(data_dir, protein_name, request_url):
+def pdb2cif(data_dir, structure_name, request_url):
     """Convert a local PDB through MineProt, writing only a successful CIF response."""
-    output = Path(data_dir) / (protein_name + ".cif")
+    output = Path(data_dir) / (structure_name + ".cif")
     if output.exists():
-        print(f"Skipping {protein_name}...")
+        print(f"Skipping {structure_name}...")
         return
     data = output.with_suffix(".pdb").read_bytes()
     response = session().post(
         request_url,
         json={
-            "name": protein_name,
+            "name": structure_name,
             "data": base64.b64encode(data).decode(),
         },
         timeout=(10, 300),
     )
     response.raise_for_status()
     if "_entity_poly.pdbx_seq_one_letter_code_can" not in response.text:
-        raise ValueError(f"Invalid CIF response for {protein_name}")
+        raise ValueError(f"Invalid CIF response for {structure_name}")
     output.write_text(response.text)
 
 

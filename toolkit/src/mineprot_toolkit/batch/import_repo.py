@@ -11,7 +11,7 @@ from mineprot_toolkit.common.uploads import prepare, upload_batch
 
 
 def parser():
-    result = argparse.ArgumentParser(description="Import proteins using batch transfers.")
+    result = argparse.ArgumentParser(description="Import structures using batch transfers.")
     result.add_argument("-i", required=True, type=Path, help="Directory of preprocessed files")
     result.add_argument("-n", help="Repository name; defaults to the input directory name")
     result.add_argument(

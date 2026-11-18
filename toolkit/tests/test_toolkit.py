@@ -108,9 +108,9 @@ class DataWorkflowTests(unittest.TestCase):
                 staged, output = Path(directory) / "staged", Path(directory) / "output"
                 staged.mkdir()
                 output.mkdir()
-                (staged / "protein.a3m").write_text("# metadata\n>sequence_id description\nAG\n")
-                (staged / "protein.pdb").write_text("ATOM\n")
-                (staged / "protein.json").write_text(
+                (staged / "structure.a3m").write_text("# metadata\n>sequence_id description\nAG\n")
+                (staged / "structure.pdb").write_text("ATOM\n")
+                (staged / "structure.json").write_text(
                     json.dumps({"plddt": [90, 80], "pae": [[1.4, 2.6]]})
                 )
                 names = move_predictions(staged, output, mode)
@@ -148,7 +148,7 @@ class DataWorkflowTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             source, output = Path(directory) / "input", Path(directory) / "output"
-            prediction = source / "protein"
+            prediction = source / "structure"
             (prediction / "msas").mkdir(parents=True)
             (prediction / "ranking_debug.json").write_text('{"order":["model_1"]}')
             (prediction / "ranked_0.pdb").write_text("ATOM\n")
@@ -252,7 +252,7 @@ class DataWorkflowTests(unittest.TestCase):
             (Path(directory) / "a.pdb").write_text("ATOM\n")
             with (
                 patch(
-                    "mineprot_toolkit.batch.import_es.import_protein",
+                    "mineprot_toolkit.batch.import_es.import_structure",
                     side_effect=ValueError("invalid model"),
                 ),
                 contextlib.redirect_stdout(io.StringIO()),

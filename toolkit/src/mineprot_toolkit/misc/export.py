@@ -33,19 +33,20 @@ def main(argv=None):
         repo_path = os.path.join(output_dir, repo)
         if not os.path.exists(repo_path):
             os.makedirs(repo_path)
-        protein = search_result["_source"]["name"]
+        structure_name = search_result["_source"]["name"]
         for suffix in [".pdb", ".cif", ".json", ".a3m"]:
             response = requests.get(
-                mine_prot_url + "/repo/" + repo + "/" + protein + suffix, timeout=(10, 60)
+                mine_prot_url + "/repo/" + repo + "/" + structure_name + suffix, timeout=(10, 60)
             )
             if response.status_code == 200:
-                with open(os.path.join(repo_path, protein + suffix), "w") as fo:
+                with open(os.path.join(repo_path, structure_name + suffix), "w") as fo:
                     fo.write(response.text)
             response = requests.get(
-                mine_prot_url + "/repo/" + repo + "/" + protein + suffix + ".gz", timeout=(10, 60)
+                mine_prot_url + "/repo/" + repo + "/" + structure_name + suffix + ".gz",
+                timeout=(10, 60),
             )
             if response.status_code == 200:
-                with open(os.path.join(repo_path, protein + suffix), "w") as fo:
+                with open(os.path.join(repo_path, structure_name + suffix), "w") as fo:
                     fo.write(gzip.decompress(response.content).decode())
 
 

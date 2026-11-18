@@ -170,7 +170,7 @@ and 64 MiB shared-memory setting.
 
 ### Browse behavior
 
-Browse shows 1000 proteins per page. Cache rebuilds fetch metadata using
+Browse shows 1000 structures per page. Cache rebuilds fetch metadata using
 ES `_mget` batches of 500 and retain both name and pLDDT orderings. API writes
 invalidate the writing process's cache. Repository directory changes are
 noticed immediately; direct replacement of existing files and ES-only changes

@@ -2,13 +2,13 @@
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_GA_2.png"/></div>
 
-## Making protein server accessible to all!
+## Making structure servers accessible to all!
 
 MineProt provides solution for curating high-throughput structuring data from AI systems such as [AlphaFold](https://github.com/deepmind/alphafold), [ColabFold](https://github.com/sokrypton/ColabFold), etc. 
 
 By the aid of MineProt toolkit, you can:
 
-- Deploy your own protein server in simple steps
+- Deploy your own structure server in simple steps
 - Take advantage of most information provided by AI systems to curate your data
 - Visualize, browse or search your data via user-friendly online interface
 - Utilize plugins to extend the functionality of your server
@@ -50,6 +50,13 @@ Setup retains supported options in `.env` for subsequent runs. Elasticsearch and
 
 ### Import data
 
+Open `/import.php` on a writable MineProt service to upload a single PDB/CIF/mmCIF
+structure with optional JSON/A3M files, or a result ZIP.
+Choose a repository and storage compression, then import directly in the browser.
+See [browser imports](docs/Toolkit-manual.md#browser-imports) for options and limits.
+
+For command-line imports, use the toolkit below.
+
 Use Python 3.12+ and install the toolkit package from the project root:
 
 ```bash
@@ -75,9 +82,7 @@ AlphaFold3 complexes or a single structure, see the [toolkit manual](docs/Toolki
 Run this on the production server or through an SSH tunnel. In development mode,
 set `--url` to the writable Web address, for example `http://127.0.0.1:8080`.
 
-> The **import page** is designed to generate commands for importing, especially useful when you are new to MineProt scripting.
-
-> During the import process, PDB structure files are converted into CIF format, which can be visualized by [Mol*](https://github.com/molstar/molstar) in the style of AlphaFold DB, while MSAs (A3M files) are used for UniProt annotation and added as keywords in [Elasticsearch](https://github.com/elastic/elasticsearch) index. Model scores such as pLDDT and PAE are stored in JSON format.
+> Structures are visualized with [Mol*](https://github.com/molstar/molstar). Confidence data such as pLDDT and PAE are stored in JSON; optional MSA-based annotations are indexed in [Elasticsearch](https://github.com/elastic/elasticsearch).
 
 ### Experiencing MineProt
 
@@ -101,7 +106,7 @@ MineProt interface provides final users with following functions:
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_salign.gif"></div>
 
 ****
-For server administrators, MineProt interface can generate scripts for data importing with simple clicking and copy-pasting in a few steps.
+Server administrators can import structures and prediction archives directly through the import page on a writable service.
 
 <div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_import.png"></div>
 
