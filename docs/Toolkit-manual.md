@@ -526,12 +526,24 @@ To use another compatible AlphaFill deployment, change the URL passed to
 ### MineProt to Foldseek
 
 The plugin downloads the hit's PDB through MineProt, submits it to the
-configured Foldseek service, and opens the result page. Use
+configured Foldseek service, and opens the queue or completed result page. Use
 `mineprot2foldseek.js` with either installation method above. Change the URL
-passed to `MineProt2Foldseek()` for another compatible deployment. Its database
-selection is configured in `AddSeek()`; check those identifiers against your
-target Foldseek installation. Cross-origin uploads require the destination
-service to accept the browser request.
+passed to `MineProt2Foldseek()` for another compatible deployment.
+
+The plugin counts protein C-alpha chains in the first PDB model: one chain uses
+monomer search (`3diaa`), and multiple chains use multimer search
+(`complex-3diaa`). Ligand and nucleic-acid chains do not count; multiple models
+are not treated as separate subunits. Classification uses the downloaded
+coordinates, without expanding biological assemblies. Both search forms submit
+to `/api/ticket`; the mode and databases select the search type, rather than
+posting to `/search` or `/multimer`.
+
+Database identifiers are fetched from `/api/databases/all` on each submission.
+The plugin selects ready default databases using the search forms' filters;
+multimer search additionally requires complex-capable databases. It reports an
+error if no matching defaults are ready. Cross-origin downloads of the database
+list and task submissions require the destination service to accept the browser
+requests.
 
 ## SequenceServer to MineProt
 
