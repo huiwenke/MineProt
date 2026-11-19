@@ -103,7 +103,7 @@ MineProt interface provides final users with following functions:
 
 - **Salign:** Structure search engine powered by [US-align](https://zhanggroup.org/US-align/).
 
-<div align="center"><img width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_salign.gif"></div>
+<div align="center"><video width=75% src="https://raw.githubusercontent.com/huiwenke/imgbed/master/mineprot_salign.mp4"></video></div>
 
 ****
 Server administrators can import structures and prediction archives directly through the import page on a writable service.
