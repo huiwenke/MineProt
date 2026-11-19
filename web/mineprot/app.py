@@ -216,9 +216,19 @@ def decorate_search(hit):
     annotation_url = (homolog_url(annotation) if annotation.get("homolog") else
                       "https://www.bing.com/search?" + urlencode({"q": description}))
     path = "/api/file/" + quote(hit["_index"], safe="") + "/" + quote(source["name"], safe="")
+    json_available = False
+    try:
+        json_name = source["name"] + ".json"
+        json_available = (repo_file(hit["_index"], json_name).is_file()
+                          or repo_file(hit["_index"], json_name + ".gz").is_file())
+        pae.plot_data(json.loads(read_file(hit["_index"], json_name)))
+        pae_available = True
+    except (OSError, ValueError, EOFError):
+        pae_available = False
     hit["_view"] = {
         "annotation": annotation, "annotation_description": description, "homolog_url": annotation_url,
-        "b64_Data_URL": token(path + ".json"),
+        "b64_Data_URL": token(path + ".json"), "pae_available": pae_available,
+        "json_available": json_available,
         "Search_Result_Viewer": "MP_" + hashlib.md5((hit["_index"] + "/" + source["name"]).encode()).hexdigest(),
         "Search_Result_Path": path + ".cif?viewer=modern"}
     return hit
@@ -236,8 +246,9 @@ async def search_page(request: Request):
             hits[0], hits[index] = hits[index], hits[0]
             break
     displayed, info = paginate(hits, await request.form(max_part_size=settings.MAX_BODY) if request.method == "POST" else {})
+    decorated = await run_in_threadpool(lambda: [decorate_search(hit) for hit in displayed])
     values.update(search_term=term, search_json=raw, Search_Result_Num=len(hits),
-                  displayed=[decorate_search(hit) for hit in displayed], Page_Info=info)
+                  displayed=decorated, Page_Info=info)
     return render(request, "search.html", values)
 
 
@@ -425,27 +436,8 @@ def pae_page(request: Request, data_url: str):
         raise ValueError("PAE data must reference a repository JSON file")
     repo, filename = unquote(parts[3]), unquote(parts[4])
     data = json.loads(read_file(repo, filename))
-    matrix = data["pae"]
-    if not isinstance(matrix, list) or not matrix:
-        raise ValueError("No PAE matrix is available for this model")
+    matrix, maximum = pae.plot_data(data)
     length = len(matrix)
-    if any(not isinstance(row, list) or len(row) != length for row in matrix):
-        raise ValueError("PAE matrix must be square")
-    for row in matrix:
-        for i, value in enumerate(row):
-            try:
-                value = float(value)
-            except (TypeError, ValueError, OverflowError) as exc:
-                raise ValueError("PAE values must be finite and non-negative") from exc
-            if not math.isfinite(value) or value < 0:
-                raise ValueError("PAE values must be finite and non-negative")
-            row[i] = value
-    try:
-        maximum = float(data.get("max_pae", 31.75))
-    except (TypeError, ValueError, OverflowError) as exc:
-        raise ValueError("Maximum PAE must be finite and positive") from exc
-    if not math.isfinite(maximum) or maximum <= 0:
-        raise ValueError("Maximum PAE must be finite and positive")
     title = Path(filename).stem
     file_url = "/api/file/" + quote(repo, safe="") + "/" + quote(title, safe="")
     residues, warning = [], ""

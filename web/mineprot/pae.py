@@ -1,7 +1,36 @@
 """Map PAE tokens to polymer residues or non-polymer atoms for Mol*."""
 from collections import defaultdict
+import math
 
 import gemmi
+
+
+def plot_data(data):
+    """Validate and normalize the matrix and scale used by the PAE viewer."""
+    if not isinstance(data, dict):
+        raise ValueError("PAE data must be a JSON object")
+    matrix = data.get("pae")
+    if not isinstance(matrix, list) or not matrix:
+        raise ValueError("No PAE matrix is available for this model")
+    length = len(matrix)
+    if any(not isinstance(row, list) or len(row) != length for row in matrix):
+        raise ValueError("PAE matrix must be square")
+    for row in matrix:
+        for i, value in enumerate(row):
+            try:
+                value = float(value)
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise ValueError("PAE values must be finite and non-negative") from exc
+            if not math.isfinite(value) or value < 0:
+                raise ValueError("PAE values must be finite and non-negative")
+            row[i] = value
+    try:
+        maximum = float(data.get("max_pae", 31.75))
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError("Maximum PAE must be finite and positive") from exc
+    if not math.isfinite(maximum) or maximum <= 0:
+        raise ValueError("Maximum PAE must be finite and positive")
+    return matrix, maximum
 
 
 def _cell(table, key, index, default=""):
