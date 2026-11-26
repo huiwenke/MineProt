@@ -438,7 +438,7 @@ embedded installation for each integration; loading both duplicates its buttons.
 | --- | --- | --- |
 | `sequenceserver.js` | SequenceServer results | Link BLAST hits to MineProt search. |
 | `alphafill.js` | MineProt search | Upload the displayed structure as CIF to AlphaFill. |
-| `foldseek2mineprot.js` | Foldseek-App results | Link Foldseek hits to MineProt search. |
+| `foldseek2mineprot.js` | Foldseek-App results | Link hits to MineProt search and realign query/target structures with Salign. |
 | `mineprot2foldseek.js` | MineProt search | Upload the displayed structure as PDB to Foldseek. |
 
 The scripts are in `toolkit/plugins/`. MineProt still serves `/search.php` as a
@@ -604,6 +604,32 @@ MineProt search. The Foldseek database label must match the MineProt repository
 name. Structure names are derived from the hit titles after removing recognized
 structure-file suffixes; ensure the same names are searchable in MineProt.
 
+The plugin also adds a **Realign in MineProt Salign** icon button beside the
+existing button in each hit's **Alignment** column:
+
+1. Click the realign icon and enter a **hinge** value from **0 to 9** in the
+   popup (default: **0**). Canceling the popup leaves the result page unchanged.
+2. The plugin downloads the original query structure (PDB or CIF) from the
+   Foldseek job and submits it to MineProt Salign. The target ID, with recognized
+   structure-file suffixes removed, becomes the search keyword; the Foldseek
+   database label selects the MineProt repository. The **TM-score threshold is
+   fixed at 0**.
+3. Salign opens in a new tab. Allow popups for the Foldseek site if the browser
+   blocks the tab. Hinge applies only to single-chain pairs; Salign automatically
+   uses complex alignment when either structure has multiple polymer chains.
+
+The target is resolved through MineProt's keyword search, so the selected ID
+must identify the intended structure in that repository; multiple matching
+targets may be aligned. The Foldseek job must still have its query structure
+available. See the [Salign API](API-manual.md#8-structure-alignment-salign) for
+submission details.
+
+<div align="center"><video src="https://github.com/user-attachments/assets/8edfb9a5-06ad-470e-aa24-e860c8628268" width="75%" controls></video></div>
+
+The realign SVG is embedded in the script and needs no separate image URL or
+asset deployment. Buttons are added automatically when Foldseek updates its
+result rows, including after paging or switching display modes.
+
 ### Tampermonkey
 
 Set the Foldseek-App page pattern:
@@ -641,4 +667,5 @@ Replace the existing startup call with your MineProt base URL:
 This script runs in Foldseek-App, not MineProt. Changing only MineProt's
 `web/templates/search.html` will not alter external Foldseek result links.
 Both external-result plugins depend on their host application's HTML structure;
-verify the links after upgrading SequenceServer or Foldseek-App.
+verify the links and the Foldseek Salign buttons after upgrading SequenceServer
+or Foldseek-App.
